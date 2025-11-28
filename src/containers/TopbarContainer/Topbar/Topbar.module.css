@@ -130,6 +130,8 @@
 
 .desktop {
   display: none;
+  background-color: var(--colorWhite);
+  border-bottom: 1px solid var(--colorGrey100);
 
   @media (--viewportLarge) {
     display: block;

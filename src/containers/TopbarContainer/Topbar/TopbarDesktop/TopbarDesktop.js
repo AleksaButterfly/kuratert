@@ -12,40 +12,67 @@ import {
   MenuContent,
   MenuItem,
   NamedLink,
+  IconCart,
+  IconFavorites,
+  IconSearch,
+  IconUser,
 } from '../../../../components';
 
-import TopbarSearchForm from '../TopbarSearchForm/TopbarSearchForm';
-import CustomLinksMenu from './CustomLinksMenu/CustomLinksMenu';
+import CategoryLinks from './CategoryLinks/CategoryLinks';
 
 import css from './TopbarDesktop.module.css';
 
-const SignupLink = () => {
+const SearchLink = ({ intl }) => {
   return (
-    <NamedLink name="SignupPage" className={css.topbarLink}>
+    <NamedLink
+      name="SearchPage"
+      className={css.topbarLink}
+      aria-label={intl.formatMessage({ id: 'TopbarDesktop.search' })}
+    >
       <span className={css.topbarLinkLabel}>
-        <FormattedMessage id="TopbarDesktop.signup" />
+        <IconSearch />
       </span>
     </NamedLink>
   );
 };
 
-const LoginLink = () => {
+const FavoritesLink = ({ intl }) => {
   return (
-    <NamedLink name="LoginPage" className={css.topbarLink}>
+    <NamedLink
+      name="LandingPage"
+      className={css.topbarLink}
+      aria-label={intl.formatMessage({ id: 'TopbarDesktop.favorites' })}
+    >
       <span className={css.topbarLinkLabel}>
-        <FormattedMessage id="TopbarDesktop.login" />
+        <IconFavorites />
       </span>
     </NamedLink>
   );
 };
 
-const InboxLink = ({ notificationCount, inboxTab }) => {
-  const notificationDot = notificationCount > 0 ? <div className={css.notificationDot} /> : null;
+const CartLink = ({ intl }) => {
   return (
-    <NamedLink className={css.topbarLink} name="InboxPage" params={{ tab: inboxTab }}>
+    <NamedLink
+      name="LandingPage"
+      className={css.topbarLink}
+      aria-label={intl.formatMessage({ id: 'TopbarDesktop.cart' })}
+    >
       <span className={css.topbarLinkLabel}>
-        <FormattedMessage id="TopbarDesktop.inbox" />
-        {notificationDot}
+        <IconCart />
+      </span>
+    </NamedLink>
+  );
+};
+
+const SignupLink = ({ intl }) => {
+  return (
+    <NamedLink
+      name="SignupPage"
+      className={css.topbarLink}
+      aria-label={intl.formatMessage({ id: 'TopbarDesktop.signup' })}
+    >
+      <span className={css.topbarLinkLabel}>
+        <IconUser />
       </span>
     </NamedLink>
   );
@@ -116,32 +143,23 @@ const ProfileMenu = ({ currentPage, currentUser, onLogout, showManageListingsLin
  * @param {boolean} props.isAuthenticated
  * @param {number} props.notificationCount
  * @param {Function} props.onLogout
- * @param {Function} props.onSearchSubmit
- * @param {Object?} props.initialSearchFormValues
  * @param {Object} props.intl
  * @param {Object} props.config
- * @param {boolean} props.showSearchForm
  * @param {boolean} props.showCreateListingsLink
  * @param {string} props.inboxTab
- * @returns {JSX.Element} search icon
+ * @returns {JSX.Element} topbar desktop component
  */
 const TopbarDesktop = props => {
   const {
     className,
     config,
-    customLinks,
     currentUser,
     currentPage,
     rootClassName,
-    notificationCount = 0,
     intl,
     isAuthenticated,
     onLogout,
-    onSearchSubmit,
-    initialSearchFormValues = {},
-    showSearchForm,
     showCreateListingsLink,
-    inboxTab,
   } = props;
   const [mounted, setMounted] = useState(false);
 
@@ -153,12 +171,12 @@ const TopbarDesktop = props => {
   const authenticatedOnClientSide = mounted && isAuthenticated;
   const isAuthenticatedOrJustHydrated = isAuthenticated || !mounted;
 
-  const giveSpaceForSearch = customLinks == null || customLinks?.length === 0;
   const classes = classNames(rootClassName || css.root, className);
 
-  const inboxLinkMaybe = authenticatedOnClientSide ? (
-    <InboxLink notificationCount={notificationCount} inboxTab={inboxTab} />
-  ) : null;
+  // These links are always shown
+  const searchLink = <SearchLink intl={intl} />;
+  const favoritesLink = <FavoritesLink intl={intl} />;
+  const cartLink = <CartLink intl={intl} />;
 
   const profileMenuMaybe = authenticatedOnClientSide ? (
     <ProfileMenu
@@ -170,24 +188,7 @@ const TopbarDesktop = props => {
     />
   ) : null;
 
-  const signupLinkMaybe = isAuthenticatedOrJustHydrated ? null : <SignupLink />;
-  const loginLinkMaybe = isAuthenticatedOrJustHydrated ? null : <LoginLink />;
-
-  const searchFormMaybe = showSearchForm ? (
-    <TopbarSearchForm
-      className={classNames(css.searchLink, { [css.takeAvailableSpace]: giveSpaceForSearch })}
-      desktopInputRoot={css.topbarSearchWithLeftPadding}
-      onSubmit={onSearchSubmit}
-      initialValues={initialSearchFormValues}
-      appConfig={config}
-    />
-  ) : (
-    <div
-      className={classNames(css.spacer, css.topbarSearchWithLeftPadding, {
-        [css.takeAvailableSpace]: giveSpaceForSearch,
-      })}
-    />
-  );
+  const signupLinkMaybe = isAuthenticatedOrJustHydrated ? null : <SignupLink intl={intl} />;
 
   return (
     <nav
@@ -196,24 +197,21 @@ const TopbarDesktop = props => {
     >
       <LinkedLogo
         className={css.logoLink}
+        logoClassName={css.logo}
         layout="desktop"
         alt={intl.formatMessage({ id: 'TopbarDesktop.logo' }, { marketplaceName })}
         linkToExternalSite={config?.topbar?.logoLink}
       />
-      {searchFormMaybe}
 
-      <CustomLinksMenu
-        currentPage={currentPage}
-        customLinks={customLinks}
-        intl={intl}
-        hasClientSideContentReady={authenticatedOnClientSide || !isAuthenticatedOrJustHydrated}
-        showCreateListingsLink={showCreateListingsLink}
-      />
+      <CategoryLinks className={css.categoryLinks} />
 
-      {inboxLinkMaybe}
-      {profileMenuMaybe}
-      {signupLinkMaybe}
-      {loginLinkMaybe}
+      <div className={css.navItems}>
+        {searchLink}
+        {favoritesLink}
+        {profileMenuMaybe}
+        {signupLinkMaybe}
+        {cartLink}
+      </div>
     </nav>
   );
 };

@@ -83,8 +83,9 @@
   --colorStatusFinalState: var(--colorGrey600);
 
   /* ================ Font ================ */
-  --fontFamily: -apple-system, BlinkMacSystemFont, 'Inter', Helvetica, Arial, sans-serif,
+  --fontFamily: 'Amen Display', -apple-system, BlinkMacSystemFont, 'Inter', Helvetica, Arial, sans-serif,
     'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+  --fontFamilyHeading: 'ABC Monument Grotesk Mono', -apple-system, BlinkMacSystemFont, 'Inter', Helvetica, Arial, monospace;
 
   --fontWeightRegular: 400;
   --fontWeightMedium: 500;
@@ -101,7 +102,7 @@
    * Note: changing --contentMaxWidth does not affect layouts with LayoutSideNavigation or search pages.
    */
   --contentMaxWidth: 1056px;
-  --contentMaxWidthPages: 1120px; /* calc(Global width (1056px) + (Horizontal padding (32px) * 2) */
+  --contentMaxWidthPages: 1440px;
 
   /* Multiples of mobile and desktop spacing units should be used with margins and paddings. */
   --spacingUnit: 6px;
@@ -266,9 +267,10 @@ a:hover {
 }
 
 h1 {
+  font-family: var(--fontFamilyHeading);
   font-size: 24px;
   line-height: 24px;
-  font-weight: var(--fontWeightBlack);
+  font-weight: var(--fontWeightRegular);
   padding: 3px 0 3px 0;
   /* margin-top + n * line-height + margin-bottom => x * 6px */
   margin-top: 18px;
@@ -285,9 +287,10 @@ h1 {
 }
 
 h2 {
+  font-family: var(--fontFamilyHeading);
   font-size: 21px;
   line-height: 24px;
-  font-weight: var(--fontWeightBold);
+  font-weight: var(--fontWeightRegular);
 
   padding: 4px 0 2px 0;
   /* x * 6px */
@@ -305,7 +308,8 @@ h2 {
 }
 
 h3 {
-  font-weight: var(--fontWeightBold);
+  font-family: var(--fontFamilyHeading);
+  font-weight: var(--fontWeightRegular);
   font-size: 18px;
   line-height: 24px;
   /* x * 6px */
@@ -323,7 +327,8 @@ h3 {
 }
 
 h4 {
-  font-weight: var(--fontWeightBold);
+  font-family: var(--fontFamilyHeading);
+  font-weight: var(--fontWeightRegular);
   font-size: 21px;
   line-height: 30px;
   padding: 1px 0 5px 0;
@@ -341,7 +346,8 @@ h4 {
 }
 
 h5 {
-  font-weight: var(--fontWeightMedium);
+  font-family: var(--fontFamilyHeading);
+  font-weight: var(--fontWeightRegular);
   font-size: 14px;
   line-height: 18px;
   /* x * 6px */
@@ -359,7 +365,8 @@ h5 {
 }
 
 h6 {
-  font-weight: var(--fontWeightBold);
+  font-family: var(--fontFamilyHeading);
+  font-weight: var(--fontWeightRegular);
   font-size: 12px;
   line-height: 18px;
   text-transform: uppercase;
@@ -624,7 +631,8 @@ textarea {
 }
 
 .h1 {
-  font-weight: var(--fontWeightBlack);
+  font-family: var(--fontFamilyHeading);
+  font-weight: var(--fontWeightRegular);
   font-size: 24px;
   line-height: 24px;
 
@@ -644,7 +652,8 @@ textarea {
 }
 
 .h2 {
-  font-weight: var(--fontWeightBold);
+  font-family: var(--fontFamilyHeading);
+  font-weight: var(--fontWeightRegular);
   font-size: 21px;
   line-height: 24px;
 
@@ -664,7 +673,8 @@ textarea {
 }
 
 .h3 {
-  font-weight: var(--fontWeightBold);
+  font-family: var(--fontFamilyHeading);
+  font-weight: var(--fontWeightRegular);
   font-size: 18px;
   line-height: 24px;
   /* x * 6px */
@@ -682,7 +692,8 @@ textarea {
 }
 
 .h4 {
-  font-weight: var(--fontWeightBold);
+  font-family: var(--fontFamilyHeading);
+  font-weight: var(--fontWeightRegular);
   font-size: 21px;
   line-height: 30px;
   padding: 1px 0 5px 0;
@@ -700,7 +711,8 @@ textarea {
 }
 
 .h5 {
-  font-weight: var(--fontWeightMedium);
+  font-family: var(--fontFamilyHeading);
+  font-weight: var(--fontWeightRegular);
   font-size: 14px;
   line-height: 18px;
   /* x * 6px */
@@ -718,7 +730,8 @@ textarea {
 }
 
 .h6 {
-  font-weight: var(--fontWeightBold);
+  font-family: var(--fontFamilyHeading);
+  font-weight: var(--fontWeightRegular);
   font-size: 12px;
   line-height: 18px;
   text-transform: uppercase;

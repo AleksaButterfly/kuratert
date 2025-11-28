@@ -17,6 +17,8 @@
 }
 
 .accountLinksWrapper,
+.categoryLinksWrapper,
+.navLinksWrapper,
 .customLinksWrapper {
   display: flex;
   flex-direction: column;
@@ -24,6 +26,12 @@
 }
 .accountLinksWrapper {
   margin-bottom: 36px;
+}
+.categoryLinksWrapper {
+  margin-bottom: 24px;
+}
+.navLinksWrapper {
+  margin-bottom: 24px;
 }
 
 .footer {
@@ -44,7 +52,8 @@
 
 .greeting {
   /* Font */
-  font-weight: var(--fontWeightBlack);
+  font-family: var(--fontFamilyHeading);
+  font-weight: var(--fontWeightRegular);
   font-size: 24px;
   line-height: 24px;
 

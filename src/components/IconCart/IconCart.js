@@ -1,10 +1,10 @@
 import React from 'react';
 import classNames from 'classnames';
 
-import css from './IconSearch.module.css';
+import css from './IconCart.module.css';
 
 /**
- * Magnifier/Search icon.
+ * Shopping cart/bag icon.
  *
  * @component
  * @param {Object} props
@@ -12,7 +12,7 @@ import css from './IconSearch.module.css';
  * @param {string?} props.rootClassName overwrite components own css.root
  * @returns {JSX.Element} SVG icon
  */
-const IconSearch = props => {
+const IconCart = props => {
   const { rootClassName, className } = props;
   const classes = classNames(rootClassName || css.root, className);
   return (
@@ -29,10 +29,17 @@ const IconSearch = props => {
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth={1.667}
-        d="m17.5 17.5-3.617-3.617M9.167 15.833a6.667 6.667 0 1 0 0-13.333 6.667 6.667 0 0 0 0 13.333Z"
+        d="M13.333 8.333a3.334 3.334 0 0 1-6.666 0M2.586 5.028h14.828"
+      />
+      <path
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.667}
+        d="M2.833 4.556c-.216.288-.333.64-.333 1v11.11a1.667 1.667 0 0 0 1.667 1.667h11.666a1.667 1.667 0 0 0 1.667-1.666V5.556c0-.36-.117-.712-.333-1L15.5 2.333a1.667 1.667 0 0 0-1.333-.666H5.833a1.667 1.667 0 0 0-1.333.666L2.833 4.556Z"
       />
     </svg>
   );
 };
 
-export default IconSearch;
+export default IconCart;

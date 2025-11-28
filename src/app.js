@@ -31,44 +31,16 @@ import Routes from './routing/Routes';
 // Sharetribe Web Template uses English translations as default translations.
 import defaultMessages from './translations/en.json';
 
-// If you want to change the language of default (fallback) translations,
-// change the imports to match the wanted locale:
-//
-//   1) Change the language in the config.js file!
-//   2) Import correct locale rules for Moment library
-//   3) Use the `messagesInLocale` import to add the correct translation file.
-//   4) (optionally) To support older browsers you need add the intl-relativetimeformat npm packages
-//      and take it into use in `util/polyfills.js`
+// Norwegian translations as the primary locale
+import messagesInLocale from './translations/no.json';
+
+// Import Norwegian locale for Moment library
+import 'moment/locale/nb';
+const hardCodedLocale = process.env.NODE_ENV === 'test' ? 'en' : 'nb';
 
 // Note that there is also translations in './translations/countryCodes.js' file
 // This file contains ISO 3166-1 alpha-2 country codes, country names and their translations in our default languages
 // This used to collect billing address in StripePaymentAddress on CheckoutPage
-
-// Step 2:
-// If you are using a non-english locale with moment library,
-// you should also import time specific formatting rules for that locale
-// There are 2 ways to do it:
-// - you can add your preferred locale to MomentLocaleLoader or
-// - stop using MomentLocaleLoader component and directly import the locale here.
-// E.g. for French:
-// import 'moment/locale/fr';
-// const hardCodedLocale = process.env.NODE_ENV === 'test' ? 'en' : 'fr';
-
-// Step 3:
-// The "./translations/en.json" has generic English translations
-// that should work as a default translation if some translation keys are missing
-// from the hosted translation.json (which can be edited in Console). The other files
-// (e.g. en.json) in that directory has Biketribe themed translations.
-//
-// If you are using a non-english locale, point `messagesInLocale` to correct <lang>.json file.
-// That way the priority order would be:
-//   1. hosted translation.json
-//   2. <lang>.json
-//   3. en.json
-//
-// I.e. remove "const messagesInLocale" and add import for the correct locale:
-// import messagesInLocale from './translations/fr.json';
-const messagesInLocale = {};
 
 // If translation key is missing from `messagesInLocale` (e.g. fr.json),
 // corresponding key will be added to messages from `defaultMessages` (en.json)

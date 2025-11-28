@@ -17,6 +17,8 @@ import {
   NotificationBadge,
 } from '../../../../components';
 
+import { TOPBAR_CATEGORIES } from '../../../../util/topbarCategories';
+
 import css from './TopbarMobileMenu.module.css';
 
 const CustomLinkComponent = ({ linkConfig, currentPage }) => {
@@ -97,6 +99,33 @@ const TopbarMobileMenu = props => {
     </NamedLink>
   ) : null;
 
+  // Category links - shown for both authenticated and unauthenticated users
+  const categoryLinks = TOPBAR_CATEGORIES.map(category => (
+    <NamedLink
+      key={category.key}
+      name="SearchPage"
+      to={{ search: `?pub_category=${category.key}` }}
+      className={css.navigationLink}
+    >
+      <FormattedMessage id={category.labelKey} />
+    </NamedLink>
+  ));
+
+  // Navigation links - shown for both authenticated and unauthenticated users
+  const navLinks = (
+    <>
+      <NamedLink name="SearchPage" className={css.navigationLink}>
+        <FormattedMessage id="TopbarMobileMenu.searchLink" />
+      </NamedLink>
+      <NamedLink name="LandingPage" className={css.navigationLink}>
+        <FormattedMessage id="TopbarMobileMenu.favoritesLink" />
+      </NamedLink>
+      <NamedLink name="LandingPage" className={css.navigationLink}>
+        <FormattedMessage id="TopbarMobileMenu.cartLink" />
+      </NamedLink>
+    </>
+  );
+
   if (!isAuthenticated) {
     const signup = (
       <NamedLink name="SignupPage" className={css.signupLink}>
@@ -127,6 +156,10 @@ const TopbarMobileMenu = props => {
               values={{ lineBreak: <br />, signupOrLogin }}
             />
           </div>
+
+          <div className={css.categoryLinksWrapper}>{categoryLinks}</div>
+
+          <div className={css.navLinksWrapper}>{navLinks}</div>
 
           <div className={css.customLinksWrapper}>{extraLinks}</div>
 
@@ -193,6 +226,11 @@ const TopbarMobileMenu = props => {
             <FormattedMessage id="TopbarMobileMenu.accountSettingsLink" />
           </NamedLink>
         </div>
+
+        <div className={css.categoryLinksWrapper}>{categoryLinks}</div>
+
+        <div className={css.navLinksWrapper}>{navLinks}</div>
+
         <div className={css.customLinksWrapper}>{extraLinks}</div>
         <div className={css.spacer} />
       </div>

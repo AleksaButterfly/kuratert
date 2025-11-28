@@ -1,10 +1,10 @@
 import React from 'react';
 import classNames from 'classnames';
 
-import css from './IconSearch.module.css';
+import css from './IconInbox.module.css';
 
 /**
- * Magnifier/Search icon.
+ * Inbox/Mail icon.
  *
  * @component
  * @param {Object} props
@@ -12,27 +12,31 @@ import css from './IconSearch.module.css';
  * @param {string?} props.rootClassName overwrite components own css.root
  * @returns {JSX.Element} SVG icon
  */
-const IconSearch = props => {
+const IconInbox = props => {
   const { rootClassName, className } = props;
   const classes = classNames(rootClassName || css.root, className);
   return (
     <svg
       className={classes}
       xmlns="http://www.w3.org/2000/svg"
-      width={20}
-      height={20}
+      width={24}
+      height={24}
       fill="none"
-      viewBox="0 0 20 20"
+      viewBox="0 0 24 24"
     >
       <path
         stroke="currentColor"
+        strokeWidth={1.5}
+        d="M2 12c0-3.771 0-5.657 1.172-6.828C4.343 4 6.229 4 10 4h4c3.771 0 5.657 0 6.828 1.172C22 6.343 22 8.229 22 12c0 3.771 0 5.657-1.172 6.828C19.657 20 17.771 20 14 20h-4c-3.771 0-5.657 0-6.828-1.172C2 17.657 2 15.771 2 12Z"
+      />
+      <path
+        stroke="currentColor"
         strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={1.667}
-        d="m17.5 17.5-3.617-3.617M9.167 15.833a6.667 6.667 0 1 0 0-13.333 6.667 6.667 0 0 0 0 13.333Z"
+        strokeWidth={1.5}
+        d="m6 8 2.159 1.8c1.837 1.53 2.755 2.295 3.841 2.295 1.086 0 2.005-.765 3.841-2.296L18 8"
       />
     </svg>
   );
 };
 
-export default IconSearch;
+export default IconInbox;

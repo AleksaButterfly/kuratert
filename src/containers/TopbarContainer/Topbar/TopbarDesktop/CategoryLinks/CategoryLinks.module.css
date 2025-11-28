@@ -1,0 +1,28 @@
+@import '../../../../../styles/customMediaQueries.css';
+
+.root {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+
+  @media (--viewportLarge) {
+    gap: 32px;
+  }
+}
+
+.categoryLink {
+  font-family: var(--fontFamilyHeading);
+  font-weight: var(--fontWeightRegular);
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--colorGrey700);
+  text-decoration: none;
+  transition: var(--transitionStyleButton);
+
+  &:hover {
+    color: var(--colorBlack);
+    text-decoration: none;
+  }
+}

@@ -72,7 +72,7 @@ const defaultConfig = {
   // Note: The localization comes from localization asset nowadays by default.
   //       To use this built-in configuration, you need to remove the overwrite from configHelper.js (mergeLocalizations func)
   localization: {
-    locale: 'en-US',
+    locale: 'nb-NO',
     // First day of week
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/getWeekInfo#return_value
     // 1: Monday
