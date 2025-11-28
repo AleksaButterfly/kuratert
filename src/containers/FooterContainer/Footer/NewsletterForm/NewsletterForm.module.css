@@ -46,5 +46,8 @@
   line-height: 18px;
   border-radius: 4px;
   white-space: nowrap;
-  max-width: 120px;
+
+  @media (--viewportMedium) {
+    max-width: 120px;
+  }
 }
