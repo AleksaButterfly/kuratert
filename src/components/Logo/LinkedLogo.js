@@ -28,6 +28,7 @@ const LinkedLogo = props => {
     logoImageClassName,
     layout = 'desktop',
     linkToExternalSite,
+    variant,
     alt,
     ...rest
   } = props;
@@ -39,6 +40,7 @@ const LinkedLogo = props => {
         layout={layout}
         className={logoClassName}
         logoImageClassName={logoImageClassName}
+        variant={variant}
         alt={alt}
       />
     </ExternalLink>
@@ -48,6 +50,7 @@ const LinkedLogo = props => {
         layout={layout}
         className={logoClassName}
         logoImageClassName={logoImageClassName}
+        variant={variant}
         alt={alt}
       />
     </NamedLink>

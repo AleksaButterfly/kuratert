@@ -5,23 +5,24 @@
   /* Size */
   width: 100%;
   height: var(--topbarHeightDesktop);
-
-  /* Layout for child components */
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
   max-width: var(--contentMaxWidthPages);
   margin: 0 auto;
   padding: 0 24px;
+
+  /* Grid layout - all items on same row, CategoryLinks spans full width */
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
 }
 
 /* Logo */
 .logoLink {
+  grid-column: 1;
+  grid-row: 1;
   height: 100%;
   display: flex;
   align-items: center;
-  flex-shrink: 0;
+  z-index: 1;
 
   &:hover {
     text-decoration: none;
@@ -32,20 +33,26 @@
   width: auto !important;
 }
 
-/* Category links - centered using flex */
+/* Category links - spans full width, truly centered */
 .categoryLinks {
-  flex: 1 1 auto;
+  grid-column: 1 / -1;
+  grid-row: 1;
+  justify-self: center;
   display: flex;
   justify-content: center;
+  z-index: 0;
+  pointer-events: auto;
 }
 
 /* Navigation items container - right-aligned */
 .navItems {
+  grid-column: 3;
+  grid-row: 1;
   display: flex;
   flex-direction: row;
   align-items: center;
-  flex-shrink: 0;
   gap: 24px;
+  z-index: 1;
 }
 
 /* These are used with Inbox, Sign up icons */

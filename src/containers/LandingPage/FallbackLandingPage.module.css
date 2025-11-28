@@ -1,0 +1,20 @@
+@import '../../styles/customMediaQueries.css';
+
+.root {
+  /* Empty for now */
+}
+
+.content {
+  width: 100%;
+  max-width: var(--contentMaxWidthPages);
+  margin: 0 auto;
+  padding: 24px;
+
+  @media (--viewportMedium) {
+    padding: 48px 24px;
+  }
+
+  @media (--viewportLarge) {
+    padding: 64px 24px;
+  }
+}

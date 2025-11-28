@@ -4,6 +4,7 @@ import classNames from 'classnames';
 import { useConfiguration } from '../../context/configurationContext';
 import { ResponsiveImage } from '../../components/';
 
+import LogoWhite from '../../assets/logo-white.png';
 import css from './Logo.module.css';
 
 const HEIGHT_24 = 24;
@@ -43,6 +44,7 @@ export const LogoComponent = props => {
     logoImageDesktop,
     logoImageMobile,
     logoSettings,
+    variant,
     ...rest
   } = props;
 
@@ -52,6 +54,15 @@ export const LogoComponent = props => {
     logoImageClassName || css.logo,
     getHeightClassName(logoSettings?.height)
   );
+
+  // Use white logo variant for footer
+  if (variant === 'white') {
+    return (
+      <div className={logoClasses}>
+        <img className={logoImageClasses} src={LogoWhite} alt={marketplaceName} {...rest} />
+      </div>
+    );
+  }
 
   // Logo from hosted asset
   if (isImageAsset(logoImageDesktop) && hasValidLogoSettings && layout === 'desktop') {
@@ -122,7 +133,7 @@ export const LogoComponent = props => {
  */
 const Logo = props => {
   const config = useConfiguration();
-  const { layout = 'desktop', ...rest } = props;
+  const { layout = 'desktop', variant, ...rest } = props;
   // NOTE: logo images are set in hosted branding.json asset or src/config/brandingConfig.js
   const { logoImageDesktop, logoImageMobile, logoSettings } = config.branding;
 
@@ -130,6 +141,7 @@ const Logo = props => {
     <LogoComponent
       {...rest}
       layout={layout}
+      variant={variant}
       logoImageDesktop={logoImageDesktop}
       logoImageMobile={logoImageMobile}
       logoSettings={logoSettings}

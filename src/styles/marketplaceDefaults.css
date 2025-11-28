@@ -68,12 +68,17 @@
   --colorPrimaryButtonDark: #0d542a;
   --colorPrimaryButtonLight: #1aad57;
 
-  /** 
+  /**
    * The fill color used by <SecondaryButton>
    */
   --colorSecondaryButton: var(--colorWhite);
   --colorSecondaryButtonDark: var(--colorWhite);
   --colorSecondaryButtonLight: var(--colorWhite);
+
+  /**
+   * Secondary accent color for backgrounds, footer, etc.
+   */
+  --colorSecondary: #1A1A1A;
 
   /**
    * Colors used for the user inbox item status

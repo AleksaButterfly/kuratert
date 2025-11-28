@@ -1,0 +1,250 @@
+@import '../../../styles/customMediaQueries.css';
+
+.root {
+  background-color: var(--colorSecondary);
+}
+
+.container {
+  max-width: var(--contentMaxWidthPages);
+  margin: 0 auto;
+  padding: 48px 24px 24px;
+
+  @media (--viewportMedium) {
+    padding: 64px 24px 24px;
+  }
+}
+
+/* Top Section - Logo/Slogan/Social on left, Columns on right */
+.topSection {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  padding-bottom: 48px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+  @media (--viewportLarge) {
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 48px;
+  }
+}
+
+/* Brand Section - Logo, Slogan, Social Icons */
+.brandSection {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+  flex-shrink: 0;
+
+  @media (--viewportLarge) {
+    width: 500px;
+  }
+}
+
+.logoLink {
+  display: inline-block;
+  padding: 0;
+
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+.logo {
+  max-width: 200px;
+}
+
+.logoImage {
+  height: auto;
+  width: auto;
+  max-width: 100%;
+  max-height: 40px;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.slogan {
+  font-family: var(--fontFamily);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--colorGrey300);
+  margin: 0;
+  padding: 0;
+  max-width: 300px;
+}
+
+.socialLinks {
+  display: flex;
+  gap: 16px;
+}
+
+.socialLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--colorWhite);
+  transition: var(--transitionStyleButton);
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: var(--colorWhite);
+  }
+}
+
+.socialIcon {
+  fill: none;
+  width: 16px;
+  height: 16px;
+}
+
+/* Columns Section - Right side */
+.columnsSection {
+  display: grid;
+  gap: 32px;
+  flex-grow: 1;
+
+  @media (--viewportMedium) {
+    gap: 48px;
+  }
+}
+
+
+.gridCol1 {
+  grid-template-columns: 1fr;
+}
+
+.gridCol2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.gridCol3 {
+  grid-template-columns: repeat(2, 1fr);
+
+  @media (--viewportMedium) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.gridCol4 {
+  grid-template-columns: repeat(2, 1fr);
+
+  @media (--viewportMedium) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.columnTitle {
+  font-family: var(--fontFamilyHeading);
+  font-weight: var(--fontWeightMedium);
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--colorBlack);
+  margin: 0;
+}
+
+.columnLinks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.columnLink {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--colorGrey700);
+  text-decoration: none;
+  transition: var(--transitionStyleButton);
+
+  &:hover {
+    color: var(--colorBlack);
+  }
+}
+
+/* Newsletter Section */
+.newsletterSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 48px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.newsletterContent {
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.newsletterTitle {
+  font-size: 24px;
+  line-height: 30px;
+  color: var(--colorWhite);
+  margin: 0 0 8px 0;
+  padding: 0;
+}
+
+.newsletterText {
+  color: var(--colorGrey300);
+  margin: 0;
+  padding: 0;
+}
+
+.newsletterForm {
+  flex: 1;
+  max-width: 500px;
+}
+
+/* Bottom Section - Copyright left, Links right */
+.bottomSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 24px;
+
+  @media (--viewportMedium) {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.copyright {
+  font-size: 14px;
+  line-height: 18px;
+  color: var(--colorGrey300);
+}
+
+.bottomLinks {
+  display: flex;
+  gap: 24px;
+}
+
+.bottomLink {
+  font-size: 14px;
+  line-height: 18px;
+  color: var(--colorGrey300);
+  text-decoration: none;
+  transition: var(--transitionStyleButton);
+
+  &:hover {
+    color: var(--colorWhite);
+    text-decoration: none;
+  }
+}

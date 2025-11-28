@@ -30,16 +30,17 @@ import css from './BlockFooter.module.css';
  * @returns {JSX.Element} component that renders block type: 'footerBlock'
  */
 const BlockFooter = props => {
-  const { blockId, className, rootClassName, textClassName, text, options } = props;
+  const { blockId, blockName, className, rootClassName, textClassName, text, options } = props;
   const classes = classNames(rootClassName || css.root, className);
   const hasTextComponentFields = hasDataInFields([text], options);
 
   return (
     <BlockContainer id={blockId} className={classes}>
+      {blockName && <h3 className={css.title}>{blockName}</h3>}
       {hasTextComponentFields ? (
         <nav
           className={classNames(textClassName, css.text)}
-          aria-label={blockId || 'Footer navigation'}
+          aria-label={blockName || blockId || 'Footer navigation'}
         >
           <Field data={text} options={options} />
         </nav>
