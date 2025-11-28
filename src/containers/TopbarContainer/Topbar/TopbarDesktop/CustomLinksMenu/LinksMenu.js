@@ -16,9 +16,6 @@ import css from './LinksMenu.module.css';
 
 /**
  * Link components to be shown inside the dropdown.
- *
- * @param {*} props contain keys: linkConfig, currentPage
- * @returns NamedLink or ExternalLink
  */
 const LinkComponent = ({ linkConfig, currentPage }) => {
   const { text, type, href, route } = linkConfig;
@@ -32,10 +29,7 @@ const LinkComponent = ({ linkConfig, currentPage }) => {
       : null;
   };
 
-  // Note: if the config contains 'route' keyword,
-  // then in-app linking config has been resolved already.
   if (type === 'internal' && route) {
-    // Internal link
     const { name, params, to } = route || {};
     const className = classNames(css.menuLink, getCurrentPageClass(name));
     return (
@@ -54,10 +48,7 @@ const LinkComponent = ({ linkConfig, currentPage }) => {
 };
 
 /**
- * When the links menu shows "More" label (instead of "Menu"), the label width needs to be measured.
- *
- * @param {*} props containing: width, setWidth, label
- * @returns div with same styles as the real "More" label or null if width is known.
+ * When the links menu shows "More" label, the label width needs to be measured.
  */
 const MeasureMoreMenu = props => {
   const moreMenuRef = useRef(null);
@@ -74,7 +65,6 @@ const MeasureMoreMenu = props => {
     }
   }, [mounted, moreMenuRef, width]);
 
-  // Component is measured outside of the viewport
   const styleWrapper = !!width
     ? {}
     : {
@@ -82,7 +72,7 @@ const MeasureMoreMenu = props => {
           position: 'absolute',
           top: '-2000px',
           left: '-2000px',
-          width: 'auto', // The content defines width
+          width: 'auto',
           height: 'var(--topbarHeightDesktop)',
           display: 'flex',
           flexDirection: 'row',
@@ -105,10 +95,7 @@ const MeasureMoreMenu = props => {
 };
 
 /**
- * Menu label has text (Menu vs More) and arrow up vs down
- *
- * @param {*} props contain keys: showMoreLabel, isOpen, intl
- * @returns span containing menu label text and IconArrowHead
+ * Menu label has text (Menu vs More) and arrow
  */
 const MenuLabelContent = ({ showMoreLabel, isOpen, intl }) => {
   const menuLabel = showMoreLabel
@@ -129,10 +116,6 @@ const MenuLabelContent = ({ showMoreLabel, isOpen, intl }) => {
 
 /**
  * Menu that shows custom links with label showing either "Menu" or "More".
- * The component also measures the width of the "More" label.
- *
- * @param {*} props contain: id, currentPage, links, showMoreLabel, moreLabelWidth, setMoreLabelWidth, intl
- * @returns menu component
  */
 const LinksMenu = props => {
   const [isOpen, setIsOpen] = useState(false);

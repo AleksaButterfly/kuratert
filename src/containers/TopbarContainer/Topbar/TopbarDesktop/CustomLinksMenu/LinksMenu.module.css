@@ -2,70 +2,42 @@
 
 .currentPage {
   color: var(--colorBlack);
-  position: relative;
-
-  & .menuItemBorder {
-    width: 6px;
-    background-color: var(--colorBlack);
-  }
-
-  &:hover {
-    & .menuItemBorder {
-      background-color: var(--colorBlack);
-    }
-  }
 }
 
 .linkMenuLabelWrapper {
   display: inline-flex;
   flex-direction: row;
-  align-items: baseline;
-  margin: 27px 0;
-  text-decoration: inherit;
+  align-items: center;
 }
 
 .linkMenuLabel {
-  flex-shrink: 0;
-
-  border-bottom: 0px solid;
-  transition: var(--transitionStyleButton);
-
-  font-weight: var(--fontWeightMedium);
-  font-size: 14px;
-  line-height: 18px;
-  letter-spacing: 0;
+  font-family: var(--fontFamilyHeading);
+  font-weight: var(--fontWeightRegular);
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
   color: var(--colorGrey700);
-
-  display: inline;
-  height: 100%;
+  transition: var(--transitionStyleButton);
+  padding: 0;
   margin: 0;
-  padding: 0 12px 0 12px;
 
   &:hover {
-    border-bottom: 4px solid var(--marketplaceColor);
-    border-radius: 0;
-    text-decoration: none;
     color: var(--colorBlack);
-  }
-
-  &:active {
-    border-bottom: 0;
+    text-decoration: none;
   }
 }
 
 .linkMenuIsOpen {
-  &:hover {
-    border-bottom: 0;
-  }
 }
 
 .arrowIcon {
-  margin-left: 8px;
+  margin-left: 4px;
 }
 
 .linkMenuContent {
-  min-width: 276px;
-  padding: 20px 0;
+  min-width: 200px;
+  padding: 12px 0;
 }
 
 /* left animated "border" like hover element */
@@ -79,17 +51,19 @@
 }
 
 .menuLink {
-  composes: textSmall from global;
   position: relative;
   display: block;
-
-  /* Dimensions */
   width: 100%;
-  min-width: 276px;
+  min-width: 200px;
   margin: 0;
-  padding: 4px 24px;
+  padding: 8px 16px;
 
-  /* Layout details */
+  font-family: var(--fontFamilyHeading);
+  font-weight: var(--fontWeightRegular);
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
   color: var(--colorGrey700);
   text-align: left;
   transition: var(--transitionStyleButton);
@@ -99,12 +73,8 @@
     text-decoration: none;
 
     & .menuItemBorder {
-      width: 6px;
+      width: 4px;
       background-color: var(--marketplaceColor);
     }
-  }
-
-  @media (--viewportMedium) {
-    margin: 0;
   }
 }

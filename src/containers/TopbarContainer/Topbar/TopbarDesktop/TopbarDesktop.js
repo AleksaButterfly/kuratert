@@ -19,6 +19,7 @@ import {
 } from '../../../../components';
 
 import CategoryLinks from './CategoryLinks/CategoryLinks';
+import CustomLinksMenu from './CustomLinksMenu/CustomLinksMenu';
 
 import css from './TopbarDesktop.module.css';
 
@@ -145,6 +146,8 @@ const ProfileMenu = ({ currentPage, currentUser, onLogout, showManageListingsLin
  * @param {Function} props.onLogout
  * @param {Object} props.intl
  * @param {Object} props.config
+ * @param {Array<Object>} props.customLinks
+ * @param {boolean} props.showSearchForm
  * @param {boolean} props.showCreateListingsLink
  * @param {string} props.inboxTab
  * @returns {JSX.Element} topbar desktop component
@@ -153,6 +156,7 @@ const TopbarDesktop = props => {
   const {
     className,
     config,
+    customLinks,
     currentUser,
     currentPage,
     rootClassName,
@@ -160,6 +164,7 @@ const TopbarDesktop = props => {
     isAuthenticated,
     onLogout,
     showCreateListingsLink,
+    showSearchForm,
   } = props;
   const [mounted, setMounted] = useState(false);
 
@@ -173,8 +178,8 @@ const TopbarDesktop = props => {
 
   const classes = classNames(rootClassName || css.root, className);
 
-  // These links are always shown
-  const searchLink = <SearchLink intl={intl} />;
+  // Search link is conditionally shown based on Console settings
+  const searchLink = showSearchForm ? <SearchLink intl={intl} /> : null;
   const favoritesLink = <FavoritesLink intl={intl} />;
   const cartLink = <CartLink intl={intl} />;
 
@@ -206,6 +211,13 @@ const TopbarDesktop = props => {
       <CategoryLinks className={css.categoryLinks} />
 
       <div className={css.navItems}>
+        <CustomLinksMenu
+          currentPage={currentPage}
+          customLinks={customLinks}
+          intl={intl}
+          hasClientSideContentReady={authenticatedOnClientSide || !isAuthenticatedOrJustHydrated}
+          showCreateListingsLink={showCreateListingsLink}
+        />
         {searchLink}
         {favoritesLink}
         {profileMenuMaybe}

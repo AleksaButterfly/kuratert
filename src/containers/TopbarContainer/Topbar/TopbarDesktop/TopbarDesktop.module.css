@@ -14,9 +14,6 @@
   max-width: var(--contentMaxWidthPages);
   margin: 0 auto;
   padding: 0 24px;
-
-  /* For absolute positioning of centered category links */
-  position: relative;
 }
 
 /* Logo */
@@ -35,11 +32,11 @@
   width: auto !important;
 }
 
-/* Category links - centered */
+/* Category links - centered using flex */
 .categoryLinks {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+  flex: 1 1 auto;
+  display: flex;
+  justify-content: center;
 }
 
 /* Navigation items container - right-aligned */
@@ -47,7 +44,7 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  margin-left: auto;
+  flex-shrink: 0;
   gap: 24px;
 }
 

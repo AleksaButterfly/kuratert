@@ -1,11 +1,10 @@
 .customLinksMenu {
-  flex-grow: 1;
   display: flex;
-  justify-content: right;
-  height: 100%;
+  align-items: center;
+  gap: 24px;
 }
+
 .createListingLinkOnly {
   display: flex;
-  justify-content: right;
-  height: 100%;
+  align-items: center;
 }
