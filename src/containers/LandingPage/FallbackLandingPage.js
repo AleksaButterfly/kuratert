@@ -7,6 +7,7 @@ import TopbarContainer from '../../containers/TopbarContainer/TopbarContainer';
 import FooterContainer from '../../containers/FooterContainer/FooterContainer';
 
 import SectionHero from './SectionHero/SectionHero';
+import SectionCategories from './SectionCategories/SectionCategories';
 import SectionEditorial from './SectionEditorial/SectionEditorial';
 import SectionSeller from './SectionSeller/SectionSeller';
 import css from './FallbackLandingPage.module.css';
@@ -52,6 +53,7 @@ const FallbackLandingPage = props => {
       >
         <div className={css.content}>
           <SectionHero />
+          <SectionCategories />
           <SectionEditorial />
           <SectionSeller />
         </div>
