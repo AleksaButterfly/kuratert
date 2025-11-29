@@ -10,7 +10,7 @@ import css from './SectionCategories.module.css';
 
 const getCategoryImage = categoryId => {
   try {
-    return require(`./images/${categoryId}.jpg`);
+    return require(`./images/${categoryId}.avif`);
   } catch (e) {
     return null;
   }

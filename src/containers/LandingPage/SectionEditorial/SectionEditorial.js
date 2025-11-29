@@ -6,10 +6,9 @@ import { useIntl } from '../../../util/reactIntl';
 
 import css from './SectionEditorial.module.css';
 
-// Placeholder images - replace with actual images
-import editorial1 from './images/editorial-1.jpg';
-import editorial2 from './images/editorial-2.jpg';
-import editorial3 from './images/editorial-3.jpg';
+import editorial1 from './images/editorial-1.avif';
+import editorial2 from './images/editorial-2.avif';
+import editorial3 from './images/editorial-3.avif';
 
 const IconClock = () => (
   <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
