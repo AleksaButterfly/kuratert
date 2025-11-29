@@ -79,7 +79,7 @@
   transition: color 0.2s ease;
 
   &:hover {
-    color: var(--colorPrimary);
+    color: var(--marketplaceColor);
   }
 
   & svg {
@@ -179,10 +179,6 @@
   gap: 12px;
 }
 
-.articleCardLarge .cardContent {
-  bottom: 0;
-}
-
 .cardMeta {
   display: flex;
   align-items: center;
@@ -199,8 +195,8 @@
 
 .cardDot {
   font-family: var(--fontFamily);
-  font-size: 16px;
-  line-height: 26px;
+  font-size: 12px;
+  line-height: 17px;
   color: var(--colorGrey300);
 }
 
