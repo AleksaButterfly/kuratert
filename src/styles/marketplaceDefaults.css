@@ -497,7 +497,7 @@ select {
   background-color: #fff;
 
   /* Borders */
-  border-radius: 6px;
+  border-radius: 0;
   border: 1px solid #d8dce6;
   outline: none;
 
@@ -558,7 +558,7 @@ textarea {
   background-color: #fff;
 
   /* Borders */
-  border-radius: 6px;
+  border-radius: 0;
   border: 1px solid #d8dce6;
   outline: none;
 
@@ -914,7 +914,7 @@ textarea {
   background-color: #fff;
 
   /* Borders */
-  border-radius: 6px;
+  border-radius: 0;
   border: 1px solid #d8dce6;
   outline: none;
 
@@ -1027,7 +1027,7 @@ textarea {
   /* Button borders */
   /* Default button has no borders */
   border: none;
-  border-radius: var(--borderRadiusMedium);
+  border-radius: 0;
 
   /* Button colors */
   /* Default button uses marketplace color */
@@ -1078,7 +1078,7 @@ textarea {
   /* Button borders */
   /* Primary button has no borders */
   border: none;
-  border-radius: var(--borderRadiusMedium);
+  border-radius: 0;
 
   /* Button colors */
   /* Primary button uses success color */
@@ -1128,7 +1128,7 @@ textarea {
 
   /* Button borders */
   border: none;
-  border-radius: var(--borderRadiusMedium);
+  border-radius: 0;
 
   background-color: var(--colorPrimaryButton);
   color: var(--colorWhite);
@@ -1183,7 +1183,7 @@ textarea {
   border-width: 1px;
   border-style: solid;
   border-color: var(--colorGrey100);
-  border-radius: var(--borderRadiusMedium);
+  border-radius: 0;
 
   /* Button colors: secondary */
   background-color: var(--colorSecondaryButton);
@@ -1246,7 +1246,7 @@ textarea {
   border-width: 1px;
   border-style: solid;
   border-color: var(--colorGrey100);
-  border-radius: var(--borderRadiusMedium);
+  border-radius: 0;
 
   /* Button colors: secondary */
   background-color: var(--colorSecondaryButton);

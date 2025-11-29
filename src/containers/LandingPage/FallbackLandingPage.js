@@ -1,28 +1,40 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { useIntl } from '../../util/reactIntl';
 import { useConfiguration } from '../../context/configurationContext';
+import { getMarketplaceEntities } from '../../ducks/marketplaceData.duck';
 
 import { Page, LayoutSingleColumn } from '../../components';
 import TopbarContainer from '../../containers/TopbarContainer/TopbarContainer';
 import FooterContainer from '../../containers/FooterContainer/FooterContainer';
 
+import { queryListings } from './LandingPage.duck';
 import SectionHero from './SectionHero/SectionHero';
+import SectionListings from './SectionListings/SectionListings';
 import SectionCategories from './SectionCategories/SectionCategories';
 import SectionEditorial from './SectionEditorial/SectionEditorial';
 import SectionSeller from './SectionSeller/SectionSeller';
 import css from './FallbackLandingPage.module.css';
 
-/**
- * Fallback Landing Page component
- * Used when REACT_APP_USE_HOSTED_LANDING_PAGE is not set to 'true'
- * or when hosted landing page fails to load.
- *
- * TODO: Add custom sections here (e.g., Hero, Featured Listings, etc.)
- */
 const FallbackLandingPage = props => {
   const intl = useIntl();
   const config = useConfiguration();
+  const dispatch = useDispatch();
   const { scrollingDisabled } = props;
+
+  const [currentPerPage, setCurrentPerPage] = useState(8);
+
+  const { listingRefs, queryListingsInProgress, totalItems } = useSelector(
+    state => state.LandingPage
+  );
+
+  const listings = useSelector(state => getMarketplaceEntities(state, listingRefs));
+
+  const handleLoadMore = () => {
+    const newPerPage = currentPerPage + 8;
+    setCurrentPerPage(newPerPage);
+    dispatch(queryListings(config, newPerPage));
+  };
 
   const marketplaceName = config.marketplaceName;
   const schemaTitle = intl.formatMessage(
@@ -53,6 +65,12 @@ const FallbackLandingPage = props => {
       >
         <div className={css.content}>
           <SectionHero />
+          <SectionListings
+            listings={listings}
+            isLoading={queryListingsInProgress}
+            totalItems={totalItems}
+            onLoadMore={handleLoadMore}
+          />
           <SectionCategories />
           <SectionEditorial />
           <SectionSeller />

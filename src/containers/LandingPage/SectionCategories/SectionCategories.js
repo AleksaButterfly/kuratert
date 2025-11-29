@@ -8,12 +8,10 @@ import { NamedLink } from '../../../components';
 
 import css from './SectionCategories.module.css';
 
-// Function to get category image by ID
 const getCategoryImage = categoryId => {
   try {
     return require(`./images/${categoryId}.jpg`);
   } catch (e) {
-    // Return a placeholder or null if image doesn't exist
     return null;
   }
 };
@@ -28,7 +26,6 @@ const CategoryCard = ({ category, intl }) => {
   const { id, name } = category;
   const categoryImage = getCategoryImage(id);
 
-  // Hardcoded pieces count for now - can be made dynamic later
   const piecesCount = intl.formatMessage(
     { id: 'SectionCategories.piecesCount' },
     { count: Math.floor(Math.random() * 2000) + 500 }
@@ -62,10 +59,7 @@ const SectionCategories = props => {
   const { rootClassName, className } = props;
   const classes = classNames(rootClassName || css.root, className);
 
-  // Get categories from configuration
   const categories = config?.categoryConfiguration?.categories || [];
-
-  // Only show top-level categories (those without subcategories or first level)
   const topLevelCategories = categories.filter(cat => !cat.parentId);
 
   const sectionTitle = intl.formatMessage({ id: 'SectionCategories.title' });

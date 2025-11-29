@@ -1,0 +1,109 @@
+@import '../../../styles/customMediaQueries.css';
+
+.root {
+  background-color: var(--colorWhite);
+  padding: 64px 0;
+
+  @media (--viewportMedium) {
+    padding: 96px 0;
+  }
+}
+
+.sectionContent {
+  width: 100%;
+  max-width: var(--contentMaxWidthPages);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.sectionHeader {
+  text-align: center;
+  margin-bottom: 48px;
+
+  @media (--viewportMedium) {
+    margin-bottom: 64px;
+  }
+}
+
+.sectionTitle {
+  font-family: var(--fontFamilyHeading);
+  font-size: 28px;
+  line-height: 34px;
+  font-weight: 400;
+  color: var(--colorGrey900);
+  margin: 0 0 16px 0;
+  padding: 0;
+  letter-spacing: -0.01em;
+
+  @media (--viewportMedium) {
+    font-size: 36px;
+    line-height: 43px;
+    margin: 0 0 24px 0;
+  }
+}
+
+.sectionSubtitle {
+  font-family: var(--fontFamily);
+  font-size: 16px;
+  line-height: 26px;
+  color: var(--colorGrey500);
+  margin: 0;
+  padding: 0;
+}
+
+.listingsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+
+  @media (--viewportSmall) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+
+  @media (--viewportMedium) {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+
+  @media (--viewportLarge) {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 40px;
+  }
+}
+
+.listingCard {
+  width: 100%;
+}
+
+.loadMoreWrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 48px;
+
+  @media (--viewportMedium) {
+    margin-top: 64px;
+  }
+}
+
+.loadMoreButton {
+  background-color: var(--colorWhite);
+  border: 2px solid var(--colorGrey900);
+  color: var(--colorGrey900);
+  font-family: var(--fontFamily);
+  font-size: 14px;
+  line-height: 21px;
+  padding: 16px 32px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: var(--colorGrey900);
+    color: var(--colorWhite);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}

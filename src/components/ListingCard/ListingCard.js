@@ -220,13 +220,6 @@ export const ListingCard = props => {
         showListingImage={showListingImage}
       />
       <div className={css.info}>
-        <PriceMaybe
-          price={price}
-          publicData={publicData}
-          config={config}
-          intl={intl}
-          listingTypeConfig={foundListingTypeConfig}
-        />
         <div className={css.mainInfo}>
           {showListingImage && (
             <div className={css.title}>
@@ -242,6 +235,13 @@ export const ListingCard = props => {
             </div>
           ) : null}
         </div>
+        <PriceMaybe
+          price={price}
+          publicData={publicData}
+          config={config}
+          intl={intl}
+          listingTypeConfig={foundListingTypeConfig}
+        />
       </div>
     </NamedLink>
   );

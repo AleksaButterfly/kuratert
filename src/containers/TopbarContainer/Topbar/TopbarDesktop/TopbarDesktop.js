@@ -220,9 +220,9 @@ const TopbarDesktop = props => {
         />
         {searchLink}
         {favoritesLink}
+        {cartLink}
         {profileMenuMaybe}
         {signupLinkMaybe}
-        {cartLink}
       </div>
     </nav>
   );
