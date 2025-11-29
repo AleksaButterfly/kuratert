@@ -6,6 +6,7 @@ import { Page, LayoutSingleColumn } from '../../components';
 import TopbarContainer from '../../containers/TopbarContainer/TopbarContainer';
 import FooterContainer from '../../containers/FooterContainer/FooterContainer';
 
+import SectionHero from './SectionHero';
 import css from './FallbackLandingPage.module.css';
 
 /**
@@ -48,7 +49,7 @@ const FallbackLandingPage = props => {
         footer={<FooterContainer />}
       >
         <div className={css.content}>
-          {/* TODO: Add custom sections here */}
+          <SectionHero />
         </div>
       </LayoutSingleColumn>
     </Page>
