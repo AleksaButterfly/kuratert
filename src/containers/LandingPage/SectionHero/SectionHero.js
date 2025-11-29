@@ -8,7 +8,7 @@ import { useIntl } from '../../../util/reactIntl';
 import { createResourceLocatorString } from '../../../util/routes';
 import { getSearchPageResourceLocatorStringParams } from '../../SearchPage/SearchPage.shared';
 
-import HeroSearchForm from './HeroSearchForm';
+import HeroSearchForm from './HeroSearchForm/HeroSearchForm';
 
 import css from './SectionHero.module.css';
 

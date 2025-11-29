@@ -6,7 +6,8 @@ import { Page, LayoutSingleColumn } from '../../components';
 import TopbarContainer from '../../containers/TopbarContainer/TopbarContainer';
 import FooterContainer from '../../containers/FooterContainer/FooterContainer';
 
-import SectionHero from './SectionHero';
+import SectionHero from './SectionHero/SectionHero';
+import SectionEditorial from './SectionEditorial/SectionEditorial';
 import css from './FallbackLandingPage.module.css';
 
 /**
@@ -50,6 +51,7 @@ const FallbackLandingPage = props => {
       >
         <div className={css.content}>
           <SectionHero />
+          <SectionEditorial />
         </div>
       </LayoutSingleColumn>
     </Page>
