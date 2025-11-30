@@ -18,6 +18,10 @@
   &:focus-within {
     border-color: var(--colorGrey300);
   }
+
+  &:has(.predictions) {
+    border-bottom-color: transparent;
+  }
 }
 
 .searchIcon {
@@ -85,6 +89,7 @@
 }
 
 .locationInputRoot {
+  position: static;
   width: 100%;
 }
 
@@ -116,15 +121,14 @@
 .predictions {
   position: absolute;
   top: 100%;
-  left: 0;
-  right: 0;
+  left: -1px;
+  right: -1px;
   background-color: var(--colorWhite);
-  border: 1px solid var(--colorGrey100);
+  border: 1px solid var(--colorGrey300);
   border-top: none;
   z-index: 10;
   max-height: 300px;
   overflow-y: auto;
-  box-shadow: var(--boxShadowPopup);
 
   & ul {
     margin: 0;

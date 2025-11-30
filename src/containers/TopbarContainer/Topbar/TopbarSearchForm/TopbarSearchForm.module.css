@@ -126,9 +126,9 @@
   /* searchContainer margin-top (94px) + mobileInput height (50px) = 144px */
   min-height: calc(100vh - 144px);
   width: 100%;
-  background-color: var(--marketplaceColor);
-  border-bottom-left-radius: var(--borderRadius);
-  border-bottom-right-radius: var(--borderRadius);
+  background-color: var(--colorWhite);
+  border: 1px solid var(--colorGrey100);
+  border-top: none;
   box-shadow: var(--boxShadowPopup);
   z-index: calc(var(--zIndexPopup) + 1);
 
@@ -153,9 +153,9 @@
   width: 100%;
   top: var(--topbarHeightDesktop);
   left: 0;
-  background-color: var(--marketplaceColor);
-  border-bottom-left-radius: var(--borderRadius);
-  border-bottom-right-radius: var(--borderRadius);
+  background-color: var(--colorWhite);
+  border: 1px solid var(--colorGrey100);
+  border-top: none;
   box-shadow: var(--boxShadowPopup);
   z-index: calc(var(--zIndexPopup) + 1);
 
