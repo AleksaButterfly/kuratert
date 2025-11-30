@@ -44,6 +44,18 @@
   pointer-events: auto;
 }
 
+/* Search form - spans the middle area */
+.searchForm {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 500px;
+  justify-self: center;
+}
+
 /* Navigation items container - right-aligned */
 .navItems {
   grid-column: 3;
@@ -68,6 +80,10 @@
 
   height: 100%;
   margin: 0;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
 
   &:hover {
     color: var(--colorBlack);

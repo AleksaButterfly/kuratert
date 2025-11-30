@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import classNames from 'classnames';
+import { useHistory, useLocation } from 'react-router-dom';
 
+import { useRouteConfiguration } from '../../../../context/routeConfigurationContext';
 import { FormattedMessage } from '../../../../util/reactIntl';
 import { ACCOUNT_SETTINGS_PAGES } from '../../../../routing/routeConfiguration';
+import { createResourceLocatorString } from '../../../../util/routes';
+import { isMainSearchTypeKeywords } from '../../../../util/search';
+import { getSearchPageResourceLocatorStringParams } from '../../../SearchPage/SearchPage.shared';
 import {
   Avatar,
   InlineTextButton,
@@ -20,20 +25,27 @@ import {
 
 import CategoryLinks from './CategoryLinks/CategoryLinks';
 import CustomLinksMenu from './CustomLinksMenu/CustomLinksMenu';
+import TopbarDesktopSearchForm from './TopbarDesktopSearchForm/TopbarDesktopSearchForm';
 
 import css from './TopbarDesktop.module.css';
 
-const SearchLink = ({ intl }) => {
+const IconClose = () => (
+  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M4 4L14 14M14 4L4 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+  </svg>
+);
+
+const SearchButton = ({ intl, isSearchOpen, onClick }) => {
   return (
-    <NamedLink
-      name="SearchPage"
+    <button
       className={css.topbarLink}
+      onClick={onClick}
       aria-label={intl.formatMessage({ id: 'TopbarDesktop.search' })}
     >
       <span className={css.topbarLinkLabel}>
-        <IconSearch />
+        {isSearchOpen ? <IconClose /> : <IconSearch />}
       </span>
-    </NamedLink>
+    </button>
   );
 };
 
@@ -167,10 +179,45 @@ const TopbarDesktop = props => {
     showSearchForm,
   } = props;
   const [mounted, setMounted] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  const history = useHistory();
+  const location = useLocation();
+  const routeConfiguration = useRouteConfiguration();
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const handleSearchSubmit = values => {
+    const isKeywordsSearch = isMainSearchTypeKeywords(config);
+    const { routeName, pathParams } = getSearchPageResourceLocatorStringParams(
+      routeConfiguration,
+      location
+    );
+
+    let searchParams = {};
+    if (isKeywordsSearch) {
+      searchParams = { keywords: values?.keywords };
+    } else {
+      const { search, selectedPlace } = values?.location || {};
+      const { origin, bounds } = selectedPlace || {};
+      searchParams = {
+        ...(search ? { address: search } : {}),
+        ...(origin ? { origin: `${origin.lat},${origin.lng}` } : {}),
+        ...(bounds ? { bounds: `${bounds.ne.lat},${bounds.ne.lng},${bounds.sw.lat},${bounds.sw.lng}` } : {}),
+      };
+    }
+
+    history.push(
+      createResourceLocatorString(routeName, routeConfiguration, pathParams, searchParams)
+    );
+    setIsSearchOpen(false);
+  };
+
+  const toggleSearch = () => {
+    setIsSearchOpen(!isSearchOpen);
+  };
 
   const marketplaceName = config.marketplaceName;
   const authenticatedOnClientSide = mounted && isAuthenticated;
@@ -178,8 +225,10 @@ const TopbarDesktop = props => {
 
   const classes = classNames(rootClassName || css.root, className);
 
-  // Search link is conditionally shown based on Console settings
-  const searchLink = showSearchForm ? <SearchLink intl={intl} /> : null;
+  // Search button is conditionally shown based on Console settings
+  const searchButton = showSearchForm ? (
+    <SearchButton intl={intl} isSearchOpen={isSearchOpen} onClick={toggleSearch} />
+  ) : null;
   const favoritesLink = <FavoritesLink intl={intl} />;
   const cartLink = <CartLink intl={intl} />;
 
@@ -208,7 +257,15 @@ const TopbarDesktop = props => {
         linkToExternalSite={config?.topbar?.logoLink}
       />
 
-      <CategoryLinks className={css.categoryLinks} />
+      {isSearchOpen ? (
+        <TopbarDesktopSearchForm
+          className={css.searchForm}
+          onSubmit={handleSearchSubmit}
+          appConfig={config}
+        />
+      ) : (
+        <CategoryLinks className={css.categoryLinks} />
+      )}
 
       <div className={css.navItems}>
         <CustomLinksMenu
@@ -218,7 +275,7 @@ const TopbarDesktop = props => {
           hasClientSideContentReady={authenticatedOnClientSide || !isAuthenticatedOrJustHydrated}
           showCreateListingsLink={showCreateListingsLink}
         />
-        {searchLink}
+        {searchButton}
         {favoritesLink}
         {cartLink}
         {profileMenuMaybe}
