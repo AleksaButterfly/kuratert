@@ -3,9 +3,11 @@ import { string } from 'prop-types';
 import classNames from 'classnames';
 import { useHistory, useLocation } from 'react-router-dom';
 
+import { useConfiguration } from '../../../context/configurationContext';
 import { useRouteConfiguration } from '../../../context/routeConfigurationContext';
 import { useIntl } from '../../../util/reactIntl';
 import { createResourceLocatorString } from '../../../util/routes';
+import { isMainSearchTypeKeywords } from '../../../util/search';
 import { getSearchPageResourceLocatorStringParams } from '../../SearchPage/SearchPage.shared';
 
 import HeroSearchForm from './HeroSearchForm/HeroSearchForm';
@@ -16,6 +18,7 @@ const SectionHero = props => {
   const intl = useIntl();
   const history = useHistory();
   const location = useLocation();
+  const config = useConfiguration();
   const routeConfiguration = useRouteConfiguration();
 
   const { rootClassName, className } = props;
@@ -25,11 +28,24 @@ const SectionHero = props => {
   const subtitle = intl.formatMessage({ id: 'SectionHero.subtitle' });
 
   const handleSearchSubmit = values => {
-    const searchParams = { keywords: values?.keywords };
+    const isKeywordsSearch = isMainSearchTypeKeywords(config);
     const { routeName, pathParams } = getSearchPageResourceLocatorStringParams(
       routeConfiguration,
       location
     );
+
+    let searchParams = {};
+    if (isKeywordsSearch) {
+      searchParams = { keywords: values?.keywords };
+    } else {
+      const { search, selectedPlace } = values?.location || {};
+      const { origin, bounds } = selectedPlace || {};
+      searchParams = {
+        ...(search ? { address: search } : {}),
+        ...(origin ? { origin: `${origin.lat},${origin.lng}` } : {}),
+        ...(bounds ? { bounds: `${bounds.ne.lat},${bounds.ne.lng},${bounds.sw.lat},${bounds.sw.lng}` } : {}),
+      };
+    }
 
     history.push(
       createResourceLocatorString(routeName, routeConfiguration, pathParams, searchParams)
@@ -45,6 +61,7 @@ const SectionHero = props => {
         <HeroSearchForm
           className={css.searchForm}
           onSubmit={handleSearchSubmit}
+          appConfig={config}
         />
       </div>
       <div className={css.scrollIndicator}>

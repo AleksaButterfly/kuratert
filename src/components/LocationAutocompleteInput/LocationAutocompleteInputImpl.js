@@ -463,6 +463,7 @@ class LocationAutocompleteInputImplementation extends Component {
       id,
       submitButton: SubmitButton,
       ariaLabel,
+      hideIcon = false,
     } = this.props;
     const { name, onFocus } = input;
     const { search } = currentValue(this.props);
@@ -505,23 +506,25 @@ class LocationAutocompleteInputImplementation extends Component {
         ? { ref: inputRef }
         : {};
 
+    const renderIcon = () => {
+      if (hideIcon) return null;
+      if (this.state.fetchingPlaceDetails) return <IconSpinner className={css.iconSpinner} />;
+      if (CustomIcon) return <CustomIcon />;
+      if (SubmitButton) return <SubmitButton />;
+      return (
+        <IconLookingGlass
+          ariaLabel={intl.formatMessage({
+            id: 'LocationAutocompleteInput.screenreader.search',
+          })}
+        />
+      );
+    };
+
+    const iconElement = renderIcon();
+
     return (
       <div className={rootClass}>
-        <div className={iconClass}>
-          {this.state.fetchingPlaceDetails ? (
-            <IconSpinner className={css.iconSpinner} />
-          ) : CustomIcon ? (
-            <CustomIcon />
-          ) : SubmitButton ? (
-            <SubmitButton />
-          ) : (
-            <IconLookingGlass
-              ariaLabel={intl.formatMessage({
-                id: 'LocationAutocompleteInput.screenreader.search',
-              })}
-            />
-          )}
-        </div>
+        {iconElement && <div className={iconClass}>{iconElement}</div>}
         <input
           className={inputClass}
           type="search"

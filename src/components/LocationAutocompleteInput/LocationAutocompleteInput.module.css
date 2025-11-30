@@ -60,9 +60,9 @@ size and position, etc.
   width: 100%;
   top: 50px;
   left: 0;
-  background-color: var(--marketplaceColor);
-  border-bottom-left-radius: var(--borderRadius);
-  border-bottom-right-radius: var(--borderRadius);
+  background-color: var(--colorWhite);
+  border: 1px solid var(--colorGrey100);
+  border-top: none;
   box-shadow: var(--boxShadowPopup);
   z-index: calc(var(--zIndexPopup) + 1);
 }
@@ -102,47 +102,44 @@ bottom of the container.
   composes: marketplaceBodyFontStyles from global;
 
   margin: 0;
-  padding: 14px 0;
+  padding: 8px 0;
+  list-style: none;
 
   & li {
-    transition: var(--transitionStyleButton);
-    margin: 0; /* Remove the double white space */
+    margin: 0;
     line-height: 24px;
-    /* keep horizontal space stable when hovering */
     border-left: 6px solid transparent;
-
-    /* Assign enough vertical padding to make the element at least 44px high */
-    padding: 9px 24px;
+    padding: 12px 16px;
+    cursor: pointer;
 
     @media (--viewportMedium) {
-      padding: 10px 36px;
-      margin: 0;
+      padding: 12px 24px;
     }
 
     &:hover,
     &.highlighted {
-      cursor: pointer;
-      border-top-right-radius: 20px;
-      border-bottom-right-radius: 20px;
+      background-color: transparent;
+      border-radius: 0;
     }
   }
+
   .listItemBlackText {
-    color: var(--colorGrey700);
+    color: var(--colorGrey900);
+
     &:hover,
     &.highlighted {
       border-left: 6px solid var(--colorGrey900);
-      color: var(--colorBlack);
+      color: var(--colorGrey900);
     }
   }
+
   .listItemWhiteText {
-    color: var(--colorWhite);
-    @media (--viewportMedium) {
-      color: var(--colorLightTransparent);
-    }
+    color: var(--colorGrey900);
+
     &:hover,
     &.highlighted {
-      border-left: 6px solid var(--colorWhite);
-      color: var(--colorWhite);
+      border-left: 6px solid var(--colorGrey900);
+      color: var(--colorGrey900);
     }
   }
 }
