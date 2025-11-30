@@ -1,0 +1,109 @@
+@import '../../../styles/customMediaQueries.css';
+
+.root {
+  width: 100%;
+  background-color: var(--colorWhite);
+  padding: 64px 24px;
+
+  @media (--viewportMedium) {
+    padding: 96px 24px;
+  }
+}
+
+.container {
+  max-width: var(--contentMaxWidthPages);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+}
+
+.label {
+  font-family: var(--fontFamily);
+  font-size: 16px;
+  line-height: 26px;
+  color: var(--colorGrey900);
+  margin: 0;
+}
+
+.title {
+  font-family: var(--fontFamilyHeading);
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 400;
+  color: var(--colorGrey900);
+  margin: 0;
+  letter-spacing: -0.01em;
+
+  @media (--viewportMedium) {
+    font-size: 28px;
+    line-height: 36px;
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
+
+  @media (--viewportMedium) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (--viewportLarge) {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.imagePlaceholder {
+  width: 80px;
+  height: 80px;
+  background-color: var(--colorGrey100);
+}
+
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.sellerName {
+  font-family: var(--fontFamilyHeading);
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 400;
+  color: var(--colorGrey900);
+  margin: 0;
+  text-align: center;
+
+  @media (--viewportMedium) {
+    font-size: 24px;
+    line-height: 32px;
+  }
+}
+
+.sellerType {
+  font-family: var(--fontFamily);
+  font-size: 10px;
+  line-height: 16px;
+  color: var(--colorGrey900);
+  margin: 0;
+  text-align: center;
+}

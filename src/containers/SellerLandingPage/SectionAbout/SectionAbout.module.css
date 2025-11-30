@@ -1,0 +1,107 @@
+@import '../../../styles/customMediaQueries.css';
+
+.root {
+  width: 100%;
+  background-color: var(--colorWhite);
+  padding: 64px 24px 64px 24px;
+
+  @media (--viewportMedium) {
+    padding: 96px 24px 96px 24px;
+  }
+
+  @media (--viewportLarge) {
+    padding: 144px 24px 96px 24px;
+  }
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+  margin-bottom: 48px;
+
+  @media (--viewportMedium) {
+    margin-bottom: 64px;
+  }
+}
+
+.title {
+  font-family: var(--fontFamilyHeading);
+  font-size: 28px;
+  line-height: 34px;
+  font-weight: 400;
+  color: var(--colorGrey900);
+  margin: 0;
+  letter-spacing: -0.01em;
+
+  @media (--viewportMedium) {
+    font-size: 36px;
+    line-height: 44px;
+  }
+}
+
+.subtitle {
+  font-family: var(--fontFamily);
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--colorGrey900);
+  margin: 0;
+  max-width: 600px;
+
+  @media (--viewportMedium) {
+    font-size: 18px;
+    line-height: 28px;
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+  max-width: var(--contentMaxWidthPages);
+  margin: 0 auto;
+
+  @media (--viewportMedium) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (--viewportLarge) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.card {
+  padding: 32px;
+}
+
+.iconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background-color: rgba(201, 169, 97, 0.1);
+  border-radius: 50%;
+  margin-bottom: 24px;
+  color: var(--marketplaceColor);
+}
+
+.cardTitle {
+  font-family: var(--fontFamilyHeading);
+  font-size: 18px;
+  line-height: 28px;
+  font-weight: 400;
+  color: var(--colorGrey900);
+  margin: 0 0 12px 0;
+  letter-spacing: -0.01em;
+}
+
+.cardDescription {
+  font-family: var(--fontFamily);
+  font-size: 14px;
+  line-height: 21px;
+  color: var(--colorGrey900);
+  margin: 0;
+}
