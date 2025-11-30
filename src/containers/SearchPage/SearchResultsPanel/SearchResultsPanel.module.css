@@ -43,16 +43,29 @@
     grid-template-columns: repeat(3, 1fr);
   }
 
-  @media (min-width: 1440px) {
+  @media (--viewportXLarge) {
     grid-template-columns: repeat(4, 1fr);
   }
+}
 
-  @media (--viewportXLarge) {
-    grid-template-columns: repeat(5, 1fr);
+.listingCardsList {
+  padding: 0 0 72px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+
+  @media (--viewportMedium) {
+    padding: 0 0 96px 0;
+    gap: 24px;
   }
 }
 
 .listingCard {
+  width: 100%;
+}
+
+.listingCardHorizontal {
   width: 100%;
 }
 

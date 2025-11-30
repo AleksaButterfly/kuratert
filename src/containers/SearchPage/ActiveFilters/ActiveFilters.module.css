@@ -1,0 +1,61 @@
+.root {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.label {
+  font-family: var(--fontFamily);
+  font-size: 12px;
+  line-height: 17px;
+  letter-spacing: 0.24px;
+  color: var(--colorGrey600);
+  white-space: nowrap;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 13px;
+  background-color: var(--colorWhite);
+  border: 1px solid var(--colorGrey100);
+  border-radius: 100px;
+}
+
+.tagText {
+  font-family: var(--fontFamily);
+  font-size: 12px;
+  line-height: 17px;
+  letter-spacing: 0.24px;
+  color: var(--colorGrey900);
+  white-space: nowrap;
+}
+
+.removeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  margin: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--colorGrey600);
+  border-radius: 50%;
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: var(--colorGrey900);
+  }
+}

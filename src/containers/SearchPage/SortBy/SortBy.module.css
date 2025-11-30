@@ -35,14 +35,14 @@
 
   /* Button borders */
   border: 1px solid var(--colorGrey100);
-  border-radius: var(--borderRadiusMedium);
+  border-radius: 0;
 
   background-color: var(--colorWhite);
 
   &:focus,
   &:hover {
     outline: none;
-    box-shadow: var(--boxShadowFilterButton);
+    box-shadow: none;
     text-decoration: none;
     border-color: var(--colorGrey300);
   }
@@ -54,9 +54,9 @@
 
   @media (--viewportMedium) {
     gap: 36px;
-    height: auto;
-    min-height: 0;
-    padding: var(--marketplaceButtonSmallDesktopPadding);
+    height: 44px;
+    min-height: 44px;
+    padding: 0 18px;
     margin: 0;
 
     font-weight: var(--fontWeightMedium);
@@ -65,7 +65,7 @@
 
     &:hover,
     &:focus {
-      border-color: transparent;
+      border-color: var(--colorGrey300);
     }
   }
 }

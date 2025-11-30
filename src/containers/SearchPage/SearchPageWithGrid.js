@@ -75,6 +75,7 @@ export class SearchPageComponent extends Component {
     this.state = {
       isMobileModalOpen: false,
       currentQueryParams: validUrlQueryParamsFromProps(props),
+      viewMode: 'grid',
     };
 
     this.onOpenMobileModal = this.onOpenMobileModal.bind(this);
@@ -86,6 +87,12 @@ export class SearchPageComponent extends Component {
 
     // SortBy
     this.handleSortBy = this.handleSortBy.bind(this);
+
+    // Remove single filter
+    this.handleRemoveFilter = this.handleRemoveFilter.bind(this);
+
+    // View mode toggle
+    this.handleViewModeChange = this.handleViewModeChange.bind(this);
   }
 
   // Invoked when a modal is opened from a child component,
@@ -219,6 +226,34 @@ export class SearchPageComponent extends Component {
     if (e && e.currentTarget) {
       e.currentTarget.blur();
     }
+  }
+
+  // Remove a single filter by its query param key
+  handleRemoveFilter(filterKey) {
+    const { history, routeConfiguration, location } = this.props;
+    const urlQueryParams = validUrlQueryParamsFromProps(this.props);
+
+    // Remove the filter from query params
+    const queryParams = omit(urlQueryParams, filterKey);
+
+    // Update state
+    this.setState(prevState => ({
+      currentQueryParams: omit(prevState.currentQueryParams, filterKey),
+    }));
+
+    const { routeName, pathParams } = getSearchPageResourceLocatorStringParams(
+      routeConfiguration,
+      location
+    );
+
+    history.push(
+      createResourceLocatorString(routeName, routeConfiguration, pathParams, queryParams)
+    );
+  }
+
+  // Change view mode (grid or list)
+  handleViewModeChange(viewMode) {
+    this.setState({ viewMode });
   }
 
   render() {
@@ -468,6 +503,14 @@ export class SearchPageComponent extends Component {
                 searchInProgress={searchInProgress}
                 searchListingsError={searchListingsError}
                 noResultsInfo={noResultsInfo}
+                urlQueryParams={validQueryParams}
+                filterConfigs={availableFilters}
+                marketplaceCurrency={marketplaceCurrency}
+                listingCategories={listingCategories}
+                listingTypes={config?.listing?.listingTypes}
+                onRemoveFilter={this.handleRemoveFilter}
+                viewMode={this.state.viewMode}
+                onViewModeChange={this.handleViewModeChange}
               />
               <div
                 className={classNames(css.listingsForGridVariant, {
@@ -492,6 +535,7 @@ export class SearchPageComponent extends Component {
                   isMapVariant={false}
                   listingTypeParam={listingTypePathParam}
                   intl={intl}
+                  viewMode={this.state.viewMode}
                 />
               </div>
             </div>

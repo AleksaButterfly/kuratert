@@ -117,6 +117,9 @@ export class SearchPageComponent extends Component {
 
     // SortBy
     this.handleSortBy = this.handleSortBy.bind(this);
+
+    // Remove single filter
+    this.handleRemoveFilter = this.handleRemoveFilter.bind(this);
   }
 
   // Callback to determine if new search is needed
@@ -323,6 +326,29 @@ export class SearchPageComponent extends Component {
     const queryParams = values
       ? { ...urlQueryParams, [urlParam]: values }
       : omit(urlQueryParams, urlParam);
+
+    const { routeName, pathParams } = getSearchPageResourceLocatorStringParams(
+      routeConfiguration,
+      location
+    );
+
+    history.push(
+      createResourceLocatorString(routeName, routeConfiguration, pathParams, queryParams)
+    );
+  }
+
+  // Remove a single filter by its query param key
+  handleRemoveFilter(filterKey) {
+    const { history, routeConfiguration, location } = this.props;
+    const urlQueryParams = validUrlQueryParamsFromProps(this.props);
+
+    // Remove the filter from query params
+    const queryParams = omit(urlQueryParams, filterKey);
+
+    // Update state
+    this.setState(prevState => ({
+      currentQueryParams: omit(prevState.currentQueryParams, filterKey),
+    }));
 
     const { routeName, pathParams } = getSearchPageResourceLocatorStringParams(
       routeConfiguration,
@@ -583,6 +609,11 @@ export class SearchPageComponent extends Component {
               searchInProgress={searchInProgress}
               searchListingsError={searchListingsError}
               noResultsInfo={noResultsInfo}
+              urlQueryParams={validQueryParams}
+              filterConfigs={availableFilters}
+              marketplaceCurrency={marketplaceCurrency}
+              listingCategories={listingCategories}
+              onRemoveFilter={this.handleRemoveFilter}
             >
               <SearchFiltersPrimary {...propsForSecondaryFiltersToggle}>
                 {availablePrimaryFilters.map(filterConfig => {

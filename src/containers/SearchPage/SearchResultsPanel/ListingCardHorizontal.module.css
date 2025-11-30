@@ -1,0 +1,159 @@
+@import '../../../styles/customMediaQueries.css';
+
+.root {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  text-decoration: none;
+  border: 1px solid var(--colorGrey100);
+  background-color: var(--colorWhite);
+  transition: box-shadow 0.15s ease;
+
+  &:hover {
+    text-decoration: none;
+    box-shadow: var(--boxShadowListingCard);
+  }
+
+  @media (--viewportMedium) {
+    flex-direction: row;
+  }
+}
+
+.imageWrapper {
+  flex-shrink: 0;
+  width: 100%;
+
+  @media (--viewportMedium) {
+    width: 200px;
+  }
+
+  @media (--viewportLarge) {
+    width: 240px;
+  }
+}
+
+.aspectWrapper {
+  background-color: var(--colorGrey100);
+}
+
+.rootForImage {
+  width: 100%;
+  height: 100%;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex-grow: 1;
+  padding: 16px;
+
+  @media (--viewportMedium) {
+    flex-direction: row;
+    align-items: center;
+    padding: 24px;
+  }
+}
+
+.mainInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.title {
+  font-family: var(--fontFamilyHeading);
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 400;
+  color: var(--colorGrey900);
+  margin: 0;
+  letter-spacing: -0.01em;
+
+  /* Prevent long titles from breaking layout */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  @media (--viewportMedium) {
+    font-size: 28px;
+    line-height: 36px;
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+}
+
+.longWord {
+  word-break: break-word;
+  hyphens: auto;
+}
+
+.authorName {
+  font-family: var(--fontFamily);
+  font-size: 14px;
+  line-height: 21px;
+  font-weight: 400;
+  color: var(--colorGrey500);
+  margin: 0;
+}
+
+.description {
+  font-family: var(--fontFamily);
+  font-size: 14px;
+  line-height: 21px;
+  color: var(--colorGrey700);
+  margin: 8px 0 0 0;
+  display: none;
+
+  @media (--viewportMedium) {
+    display: block;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+.priceWrapper {
+  display: flex;
+  align-items: center;
+  margin-top: 12px;
+
+  @media (--viewportMedium) {
+    margin-top: 0;
+    margin-left: 24px;
+    flex-shrink: 0;
+  }
+}
+
+.price {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.priceValue {
+  font-family: var(--fontFamilyHeading);
+  font-size: 16px;
+  line-height: 26px;
+  font-weight: 400;
+  color: var(--colorGrey900);
+  letter-spacing: -0.025em;
+  margin: 0;
+}
+
+.perUnit {
+  font-family: var(--fontFamily);
+  font-size: 16px;
+  line-height: 26px;
+  font-weight: 400;
+  color: var(--colorGrey900);
+  margin: 0;
+}

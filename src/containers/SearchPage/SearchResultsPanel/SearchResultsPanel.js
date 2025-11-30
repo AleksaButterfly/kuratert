@@ -3,6 +3,7 @@ import classNames from 'classnames';
 
 import { propTypes } from '../../../util/types';
 import { ListingCard, PaginationLinks } from '../../../components';
+import ListingCardHorizontal from './ListingCardHorizontal';
 
 import css from './SearchResultsPanel.module.css';
 
@@ -18,6 +19,7 @@ import css from './SearchResultsPanel.module.css';
  * @param {Object} props.search - The search
  * @param {Function} props.setActiveListing - The function to handle the active listing
  * @param {boolean} [props.isMapVariant] - Whether the map variant is enabled
+ * @param {string} [props.viewMode] - The view mode ('grid' or 'list')
  * @returns {JSX.Element}
  */
 const SearchResultsPanel = props => {
@@ -31,6 +33,7 @@ const SearchResultsPanel = props => {
     isMapVariant = true,
     listingTypeParam,
     intl,
+    viewMode = 'grid',
   } = props;
   const classes = classNames(rootClassName || css.root, className);
   const pageName = listingTypeParam ? 'SearchPageWithListingType' : 'SearchPage';
@@ -72,17 +75,41 @@ const SearchResultsPanel = props => {
     }
   };
 
+  const listRenderSizes = [
+    '(max-width: 767px) 100vw',
+    '200px',
+  ].join(', ');
+
+  const isListView = viewMode === 'list' && !isMapVariant;
+
+  const getListingCardsClass = () => {
+    if (isListView) {
+      return css.listingCardsList;
+    }
+    return isMapVariant ? css.listingCardsMapVariant : css.listingCards;
+  };
+
   return (
     <div className={classes}>
-      <div className={isMapVariant ? css.listingCardsMapVariant : css.listingCards}>
+      <div className={getListingCardsClass()}>
         {listings.map(l => (
-          <ListingCard
-            className={css.listingCard}
-            key={l.id.uuid}
-            listing={l}
-            renderSizes={cardRenderSizes(isMapVariant)}
-            setActiveListing={setActiveListing}
-          />
+          isListView ? (
+            <ListingCardHorizontal
+              className={css.listingCardHorizontal}
+              key={l.id.uuid}
+              listing={l}
+              renderSizes={listRenderSizes}
+              intl={intl}
+            />
+          ) : (
+            <ListingCard
+              className={css.listingCard}
+              key={l.id.uuid}
+              listing={l}
+              renderSizes={cardRenderSizes(isMapVariant)}
+              setActiveListing={setActiveListing}
+            />
+          )
         ))}
         {props.children}
       </div>
