@@ -8,6 +8,7 @@ import classNames from 'classnames';
 import { ACCOUNT_SETTINGS_PAGES } from '../../../../routing/routeConfiguration';
 import { FormattedMessage } from '../../../../util/reactIntl';
 import { ensureCurrentUser } from '../../../../util/data';
+import { useConfiguration } from '../../../../context/configurationContext';
 
 import {
   AvatarLarge,
@@ -16,8 +17,6 @@ import {
   NamedLink,
   NotificationBadge,
 } from '../../../../components';
-
-import { TOPBAR_CATEGORIES } from '../../../../util/topbarCategories';
 
 import css from './TopbarMobileMenu.module.css';
 
@@ -81,7 +80,12 @@ const TopbarMobileMenu = props => {
     showCreateListingsLink,
   } = props;
 
+  const config = useConfiguration();
   const user = ensureCurrentUser(currentUser);
+
+  // Get categories from hosted configuration
+  const categories = config?.categoryConfiguration?.categories || [];
+  const topLevelCategories = categories.filter(cat => !cat.parentId);
 
   const extraLinks = customLinks.map((linkConfig, index) => {
     return (
@@ -100,14 +104,14 @@ const TopbarMobileMenu = props => {
   ) : null;
 
   // Category links - shown for both authenticated and unauthenticated users
-  const categoryLinks = TOPBAR_CATEGORIES.map(category => (
+  const categoryLinks = topLevelCategories.map(category => (
     <NamedLink
-      key={category.key}
+      key={category.id}
       name="SearchPage"
-      to={{ search: `?pub_category=${category.key}` }}
+      to={{ search: `?pub_categoryLevel1=${category.id}` }}
       className={css.navigationLink}
     >
-      <FormattedMessage id={category.labelKey} />
+      {category.name}
     </NamedLink>
   ));
 

@@ -60,7 +60,7 @@ const SectionCategories = props => {
   const classes = classNames(rootClassName || css.root, className);
 
   const categories = config?.categoryConfiguration?.categories || [];
-  const topLevelCategories = categories.filter(cat => !cat.parentId);
+  const topLevelCategories = categories.filter(cat => !cat.parentId).slice(0, 4);
 
   const sectionTitle = intl.formatMessage({ id: 'SectionCategories.title' });
   const sectionSubtitle = intl.formatMessage({ id: 'SectionCategories.subtitle' });
