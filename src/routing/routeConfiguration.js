@@ -22,6 +22,9 @@ const InboxPage = loadable(() => import(/* webpackChunkName: "InboxPage" */ '../
 const MakeOfferPage = loadable(() => import(/* webpackChunkName: "MakeOfferPage" */ '../containers/MakeOfferPage/MakeOfferPage'));
 const LandingPage = loadable(() => import(/* webpackChunkName: "LandingPage" */ '../containers/LandingPage/LandingPage'));
 const SellerLandingPage = loadable(() => import(/* webpackChunkName: "SellerLandingPage" */ '../containers/SellerLandingPage/SellerLandingPage'));
+const AboutPage = loadable(() => import(/* webpackChunkName: "AboutPage" */ '../containers/AboutPage/AboutPage'));
+const ContactPage = loadable(() => import(/* webpackChunkName: "ContactPage" */ '../containers/ContactPage/ContactPage'));
+const FAQPage = loadable(() => import(/* webpackChunkName: "FAQPage" */ '../containers/FAQPage/FAQPage'));
 const ListingPageCoverPhoto = loadable(() => import(/* webpackChunkName: "ListingPageCoverPhoto" */ /* webpackPrefetch: true */ '../containers/ListingPage/ListingPageCoverPhoto'));
 const ListingPageCarousel = loadable(() => import(/* webpackChunkName: "ListingPageCarousel" */ /* webpackPrefetch: true */ '../containers/ListingPage/ListingPageCarousel'));
 const ManageListingsPage = loadable(() => import(/* webpackChunkName: "ManageListingsPage" */ '../containers/ManageListingsPage/ManageListingsPage'));
@@ -88,6 +91,21 @@ const routeConfiguration = (layoutConfig, accessControlConfig) => {
       path: '/sell',
       name: 'SellerLandingPage',
       component: SellerLandingPage,
+    },
+    {
+      path: '/about',
+      name: 'AboutPage',
+      component: AboutPage,
+    },
+    {
+      path: '/contact',
+      name: 'ContactPage',
+      component: ContactPage,
+    },
+    {
+      path: '/faq',
+      name: 'FAQPage',
+      component: FAQPage,
     },
     {
       path: '/p/:pageId',

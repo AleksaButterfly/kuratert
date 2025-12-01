@@ -1,0 +1,196 @@
+@import '../../styles/customMediaQueries.css';
+
+.root {
+}
+
+.content {
+  width: 100%;
+}
+
+/* Section Vision */
+.sectionVision {
+  width: 100%;
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--colorGrey50);
+  padding: 60px 24px;
+
+  @media (--viewportMedium) {
+    min-height: 70vh;
+    padding: 80px 24px;
+  }
+
+  @media (--viewportLarge) {
+    padding: 100px 24px;
+  }
+}
+
+.sectionContent {
+  width: 100%;
+  max-width: var(--contentMaxWidthPages);
+  margin: 0 auto;
+  text-align: center;
+}
+
+.visionTitle {
+  font-family: var(--fontFamilyHeading);
+  font-size: 36px;
+  line-height: 42px;
+  font-weight: 300;
+  color: var(--colorGrey900);
+  margin: 0 0 24px 0;
+  letter-spacing: -0.02em;
+
+  @media (--viewportMedium) {
+    font-size: 56px;
+    line-height: 64px;
+    margin: 0 0 32px 0;
+  }
+
+  @media (--viewportLarge) {
+    font-size: 72px;
+    line-height: 80px;
+  }
+}
+
+.visionSubtitle {
+  font-family: var(--fontFamily);
+  font-size: 18px;
+  line-height: 28px;
+  font-weight: 400;
+  color: var(--colorGrey700);
+  margin: 0 auto;
+  max-width: 800px;
+
+  @media (--viewportMedium) {
+    font-size: 20px;
+    line-height: 32px;
+  }
+}
+
+/* Section Who We Are */
+.sectionWhoWeAre {
+  width: 100%;
+  padding: 60px 24px;
+  background-color: var(--colorWhite);
+
+  @media (--viewportMedium) {
+    padding: 80px 24px;
+  }
+
+  @media (--viewportLarge) {
+    padding: 100px 24px;
+  }
+}
+
+.whoWeAreTitle {
+  font-family: var(--fontFamilyHeading);
+  font-size: 32px;
+  line-height: 40px;
+  font-weight: 300;
+  color: var(--colorGrey900);
+  margin: 0 0 24px 0;
+  letter-spacing: -0.02em;
+
+  @media (--viewportMedium) {
+    font-size: 48px;
+    line-height: 56px;
+    margin: 0 0 32px 0;
+  }
+}
+
+.whoWeAreSubtitle {
+  font-family: var(--fontFamily);
+  font-size: 16px;
+  line-height: 26px;
+  font-weight: 400;
+  color: var(--colorGrey700);
+  margin: 0 auto 48px auto;
+  max-width: 800px;
+
+  @media (--viewportMedium) {
+    font-size: 18px;
+    line-height: 28px;
+    margin: 0 auto 64px auto;
+  }
+}
+
+/* Team Grid */
+.teamGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+
+  @media (--viewportMedium) {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+
+  @media (--viewportLarge) {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 40px;
+  }
+}
+
+.teamMember {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.teamImageWrapper {
+  width: 100%;
+  max-width: 200px;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  margin-bottom: 16px;
+  background-color: var(--colorGrey100);
+
+  @media (--viewportMedium) {
+    max-width: 240px;
+    margin-bottom: 20px;
+  }
+}
+
+.teamImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.teamImagePlaceholder {
+  width: 100%;
+  height: 100%;
+  background-color: var(--colorGrey100);
+}
+
+.teamName {
+  font-family: var(--fontFamilyHeading);
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 400;
+  color: var(--colorGrey900);
+  margin: 0 0 4px 0;
+
+  @media (--viewportMedium) {
+    font-size: 20px;
+    line-height: 28px;
+  }
+}
+
+.teamRole {
+  font-family: var(--fontFamily);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  color: var(--colorGrey600);
+  margin: 0;
+
+  @media (--viewportMedium) {
+    font-size: 16px;
+    line-height: 24px;
+  }
+}
