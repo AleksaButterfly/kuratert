@@ -502,13 +502,13 @@ export class SearchPageComponent extends Component {
                 resultsCount={totalItems}
                 searchInProgress={searchInProgress}
                 searchListingsError={searchListingsError}
-                noResultsInfo={noResultsInfo}
                 urlQueryParams={validQueryParams}
                 filterConfigs={availableFilters}
                 marketplaceCurrency={marketplaceCurrency}
                 listingCategories={listingCategories}
                 listingTypes={config?.listing?.listingTypes}
                 onRemoveFilter={this.handleRemoveFilter}
+                onResetAll={this.resetAll}
                 viewMode={this.state.viewMode}
                 onViewModeChange={this.handleViewModeChange}
               />

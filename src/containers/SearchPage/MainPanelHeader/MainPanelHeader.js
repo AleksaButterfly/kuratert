@@ -66,11 +66,13 @@ const MainPanelHeader = props => {
     listingCategories,
     listingTypes,
     onRemoveFilter,
+    onResetAll,
     viewMode = 'grid',
     onViewModeChange,
   } = props;
 
   const classes = classNames(rootClassName || css.root, className);
+  const hasNoResults = listingsAreLoaded && resultsCount === 0;
 
   return (
     <div className={classes}>
@@ -80,53 +82,70 @@ const MainPanelHeader = props => {
 
       <div className={css.headerRow}>
         <div className={css.titleSection}>
-          <h1 className={css.pageTitle}>
-            <FormattedMessage id="MainPanelHeader.pageTitle" />
-          </h1>
-          <p className={css.resultsCount}>
-            {searchInProgress ? (
-              <FormattedMessage id="MainPanelHeader.loadingResults" />
-            ) : (
-              <FormattedMessage
-                id="MainPanelHeader.foundResults"
-                values={{ count: resultsCount }}
-              />
-            )}
-          </p>
+          {hasNoResults ? (
+            <>
+              <p className={css.noResultsText}>
+                <FormattedMessage id="SearchPage.noResults" />
+              </p>
+              {onResetAll ? (
+                <button className={css.resetFiltersButton} onClick={onResetAll}>
+                  <FormattedMessage id="SearchPage.resetAllFilters" />
+                </button>
+              ) : null}
+            </>
+          ) : (
+            <>
+              <h1 className={css.pageTitle}>
+                <FormattedMessage id="MainPanelHeader.pageTitle" />
+              </h1>
+              <p className={css.resultsCount}>
+                {searchInProgress ? (
+                  <FormattedMessage id="MainPanelHeader.loadingResults" />
+                ) : (
+                  <FormattedMessage
+                    id="MainPanelHeader.foundResults"
+                    values={{ count: resultsCount }}
+                  />
+                )}
+              </p>
+            </>
+          )}
         </div>
 
-        <div className={css.controlsSection}>
-          {isSortByActive ? (
-            <div className={css.sortByWrapper}>
-              {sortByComponent}
-            </div>
-          ) : null}
+        {!hasNoResults ? (
+          <div className={css.controlsSection}>
+            {isSortByActive ? (
+              <div className={css.sortByWrapper}>
+                {sortByComponent}
+              </div>
+            ) : null}
 
-          {onViewModeChange ? (
-            <div className={css.viewToggle}>
-              <button
-                type="button"
-                className={classNames(css.viewButton, {
-                  [css.viewButtonActive]: viewMode === 'grid',
-                })}
-                onClick={() => onViewModeChange('grid')}
-                aria-label="Grid view"
-              >
-                <IconGrid />
-              </button>
-              <button
-                type="button"
-                className={classNames(css.viewButton, {
-                  [css.viewButtonActive]: viewMode === 'list',
-                })}
-                onClick={() => onViewModeChange('list')}
-                aria-label="List view"
-              >
-                <IconList />
-              </button>
-            </div>
-          ) : null}
-        </div>
+            {onViewModeChange ? (
+              <div className={css.viewToggle}>
+                <button
+                  type="button"
+                  className={classNames(css.viewButton, {
+                    [css.viewButtonActive]: viewMode === 'grid',
+                  })}
+                  onClick={() => onViewModeChange('grid')}
+                  aria-label="Grid view"
+                >
+                  <IconGrid />
+                </button>
+                <button
+                  type="button"
+                  className={classNames(css.viewButton, {
+                    [css.viewButtonActive]: viewMode === 'list',
+                  })}
+                  onClick={() => onViewModeChange('list')}
+                  aria-label="List view"
+                >
+                  <IconList />
+                </button>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
       </div>
 
       {filterConfigs && onRemoveFilter ? (
@@ -141,8 +160,6 @@ const MainPanelHeader = props => {
       ) : null}
 
       {children}
-
-      {noResultsInfo ? noResultsInfo : null}
     </div>
   );
 };

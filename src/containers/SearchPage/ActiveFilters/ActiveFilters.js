@@ -15,6 +15,24 @@ const IconClose = () => (
 );
 
 /**
+ * Find category/subcategory label from categories tree
+ */
+const findCategoryLabel = (categories, categoryId) => {
+  if (!categories || !Array.isArray(categories)) return null;
+
+  for (const cat of categories) {
+    if (cat.id === categoryId) {
+      return cat.name;
+    }
+    if (cat.subcategories) {
+      const found = findCategoryLabel(cat.subcategories, categoryId);
+      if (found) return found;
+    }
+  }
+  return null;
+};
+
+/**
  * Get the display label for a filter value
  */
 const getFilterLabel = (filterConfig, value, intl, marketplaceCurrency, listingCategories, listingTypes) => {
@@ -39,19 +57,8 @@ const getFilterLabel = (filterConfig, value, intl, marketplaceCurrency, listingC
 
   // Handle category filter
   if (schemaType === 'category') {
-    const findCategoryLabel = (categories, categoryId) => {
-      for (const cat of categories) {
-        if (cat.id === categoryId) {
-          return cat.name;
-        }
-        if (cat.subcategories) {
-          const found = findCategoryLabel(cat.subcategories, categoryId);
-          if (found) return found;
-        }
-      }
-      return categoryId;
-    };
-    return findCategoryLabel(listingCategories || [], value);
+    const categoryLabel = findCategoryLabel(listingCategories || [], value);
+    return categoryLabel || value;
   }
 
   // Handle enum/multi-enum filters
@@ -73,6 +80,13 @@ const getFilterLabel = (filterConfig, value, intl, marketplaceCurrency, listingC
   // Handle keywords
   if (key === 'keywords') {
     return `"${value}"`;
+  }
+
+  // Try to find if value matches a category/subcategory in the tree
+  // This handles cases where filters use category IDs but aren't explicitly category type
+  const categoryLabel = findCategoryLabel(listingCategories || [], value);
+  if (categoryLabel) {
+    return categoryLabel;
   }
 
   // Default: return the value as-is

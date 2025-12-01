@@ -25,7 +25,6 @@
 .titleSection {
   display: flex;
   flex-direction: column;
-  gap: 4px;
 }
 
 .pageTitle {
@@ -49,6 +48,38 @@
   line-height: 21px;
   color: var(--colorGrey600);
   margin: 0;
+}
+
+.noResultsText {
+  font-family: var(--fontFamily);
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--colorGrey700);
+  margin: 0 0 12px 0;
+  padding: 0;
+
+  @media (--viewportMedium) {
+    font-size: 18px;
+    line-height: 26px;
+  }
+}
+
+.resetFiltersButton {
+  font-family: var(--fontFamily);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  color: var(--marketplaceColor);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  width: fit-content;
+
+  &:hover {
+    color: var(--marketplaceColorDark);
+  }
 }
 
 .controlsSection {
