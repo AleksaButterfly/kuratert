@@ -151,3 +151,11 @@ export const createUserWithIdp = body => {
 export const deleteUserAccount = body => {
   return post('/api/delete-account', body);
 };
+
+// Query users for keyword search predictions.
+// Uses the Integration API on the server side to search for users.
+export const queryUsers = keywords => {
+  return request(`/api/users-query?keywords=${encodeURIComponent(keywords)}`, {
+    method: methods.GET,
+  });
+};

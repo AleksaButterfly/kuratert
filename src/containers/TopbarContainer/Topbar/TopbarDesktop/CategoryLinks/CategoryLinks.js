@@ -11,9 +11,9 @@ const CategoryLinks = props => {
   const classes = classNames(rootClassName || css.root, className);
   const config = useConfiguration();
 
-  // Get categories from hosted configuration
+  // Get categories from hosted configuration (limit to 6 for desktop topbar)
   const categories = config?.categoryConfiguration?.categories || [];
-  const topLevelCategories = categories.filter(cat => !cat.parentId);
+  const topLevelCategories = categories.filter(cat => !cat.parentId).slice(0, 6);
 
   if (topLevelCategories.length === 0) {
     return null;

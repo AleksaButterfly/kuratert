@@ -24,6 +24,10 @@
   }
 }
 
+.inputWrapperWithPredictions {
+  border-bottom-color: transparent;
+}
+
 .searchIcon {
   position: absolute;
   left: 12px;

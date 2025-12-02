@@ -2,21 +2,32 @@ import React, { useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import classNames from 'classnames';
 
-import { FormattedMessage } from '../../../../../util/reactIntl';
+import { useIntl } from '../../../../../util/reactIntl';
 import { ExternalLink, NamedLink } from '../../../../../components';
 
 import css from './PriorityLinks.module.css';
+
+const IconPlus = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M10 4V16M4 10H16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+  </svg>
+);
 
 /**
  * Create component that shows only a single "Post a new listing" link.
  */
 export const CreateListingMenuLink = props => {
+  const intl = useIntl();
+  const createListingLabel = intl.formatMessage({ id: 'TopbarDesktop.createListing' });
+
   return (
     <div className={props.customLinksMenuClass}>
-      <NamedLink name="NewListingPage" className={classNames(css.priorityLink, css.highlight)}>
-        <span className={css.priorityLinkLabel}>
-          <FormattedMessage id="TopbarDesktop.createListing" />
-        </span>
+      <NamedLink
+        name="NewListingPage"
+        className={css.createListingLink}
+        title={createListingLabel}
+      >
+        <IconPlus />
       </NamedLink>
     </div>
   );

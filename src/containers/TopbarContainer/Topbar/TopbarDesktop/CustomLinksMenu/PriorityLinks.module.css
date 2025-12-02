@@ -37,3 +37,15 @@
   display: inline-block;
   text-decoration: inherit;
 }
+
+.createListingLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--colorGrey700);
+  transition: var(--transitionStyleButton);
+
+  &:hover {
+    color: var(--colorBlack);
+  }
+}
