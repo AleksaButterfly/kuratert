@@ -37,8 +37,10 @@ module.exports = (req, res) => {
   // Query users with keywords
   // Note: Integration API doesn't support keywords search directly,
   // so we fetch a reasonable number and filter client-side by display name
+  // Only fetch users with userType "seller" in their public data
   integrationSdk.users
     .query({
+      pub_userType: 'seller',
       perPage: 100,
     })
     .then(response => {
