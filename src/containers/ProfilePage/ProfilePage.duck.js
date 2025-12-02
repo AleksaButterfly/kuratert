@@ -6,6 +6,7 @@ import { PROFILE_PAGE_PENDING_APPROVAL_VARIANT } from '../../util/urlHelpers';
 import { denormalisedResponseEntities } from '../../util/data';
 import { storableError } from '../../util/errors';
 import { hasPermissionToViewData, isUserAuthorized } from '../../util/userHelpers';
+import { fetchUserStats as fetchUserStatsApi } from '../../util/api';
 
 const { UUID } = sdkTypes;
 
@@ -125,6 +126,31 @@ export const queryUserReviews = userId => dispatch => {
   return dispatch(queryUserReviewsThunk({ userId }));
 };
 
+//////////////////////
+// Fetch User Stats //
+//////////////////////
+const fetchUserStatsPayloadCreator = ({ userId }, { rejectWithValue }) => {
+  return fetchUserStatsApi(userId)
+    .then(response => {
+      return response.data;
+    })
+    .catch(e => {
+      // Don't fail the whole page if stats fail to load
+      console.error('Failed to fetch user stats:', e);
+      return rejectWithValue(storableError(e));
+    });
+};
+
+export const fetchUserStatsThunk = createAsyncThunk(
+  'ProfilePage/fetchUserStats',
+  fetchUserStatsPayloadCreator
+);
+
+// Backward compatible wrapper for the thunk
+export const fetchUserStats = userId => dispatch => {
+  return dispatch(fetchUserStatsThunk({ userId }));
+};
+
 // ================ Slice ================ //
 
 const initialState = {
@@ -134,6 +160,8 @@ const initialState = {
   queryListingsError: null,
   reviews: [],
   queryReviewsError: null,
+  userStats: null,
+  userStatsError: null,
 };
 
 const profilePageSlice = createSlice({
@@ -182,6 +210,17 @@ const profilePageSlice = createSlice({
       .addCase(queryUserReviewsThunk.rejected, (state, action) => {
         state.reviews = [];
         state.queryReviewsError = action.payload;
+      })
+      // fetchUserStats cases
+      .addCase(fetchUserStatsThunk.pending, state => {
+        state.userStatsError = null;
+      })
+      .addCase(fetchUserStatsThunk.fulfilled, (state, action) => {
+        state.userStats = action.payload;
+      })
+      .addCase(fetchUserStatsThunk.rejected, (state, action) => {
+        state.userStats = null;
+        state.userStatsError = action.payload;
       });
   },
 });
@@ -256,5 +295,6 @@ export const loadData = (params, search, config) => (dispatch, getState, sdk) =>
     dispatch(showUser(userId, config)),
     dispatch(queryUserListings(userId, config)),
     dispatch(queryUserReviews(userId)),
+    dispatch(fetchUserStats(userId.uuid)),
   ]);
 };

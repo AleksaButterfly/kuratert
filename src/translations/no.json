@@ -885,6 +885,7 @@
   "ProfileHero.responseRate": "Response Rate",
   "ProfileHero.responseTime": "Response Time",
   "ProfileHero.responseTimeValue": "Within 2 hours",
+  "ProfileHero.noResponseTime": "N/A",
   "ProfileHero.reviews": "{count} Reviews",
   "ProfileHero.sales": "Sales",
   "ProfileHero.share": "Share",

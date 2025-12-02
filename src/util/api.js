@@ -159,3 +159,11 @@ export const queryUsers = keywords => {
     method: methods.GET,
   });
 };
+
+// Fetch user statistics (sales count, response rate, response time).
+// Uses the Integration API on the server side to calculate stats from transactions.
+export const fetchUserStats = userId => {
+  return request(`/api/user-stats?userId=${encodeURIComponent(userId)}`, {
+    method: methods.GET,
+  });
+};

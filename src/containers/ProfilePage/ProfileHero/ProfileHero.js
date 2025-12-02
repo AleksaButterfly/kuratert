@@ -144,6 +144,7 @@ const ProfileHero = props => {
     reviews = [],
     onManageDisableScrolling,
     isSeller = true,
+    userStats,
   } = props;
 
   const intl = useIntl();
@@ -172,13 +173,24 @@ const ProfileHero = props => {
       })
     : null;
 
-  // Stats - hardcoded for now, will be dynamic later
+  // Stats - calculated dynamically
   const activeListings = listings.length || 0;
-  const totalSales = 156; // Hardcoded
+  const totalSales = userStats?.salesCount ?? 0;
   const reviewCount = reviews.length || 0;
-  const averageRating = 4.9; // Hardcoded
-  const responseRate = '98%'; // Hardcoded
-  const responseTime = intl.formatMessage({ id: 'ProfileHero.responseTimeValue' }); // "Within 2 hours"
+
+  // Calculate average rating from reviews
+  const calculateAverageRating = () => {
+    if (!reviews || reviews.length === 0) return null;
+    const totalRating = reviews.reduce((sum, review) => {
+      return sum + (review.attributes?.rating || 0);
+    }, 0);
+    return (totalRating / reviews.length).toFixed(1);
+  };
+  const averageRating = calculateAverageRating();
+
+  // Response rate and time from server stats
+  const responseRate = userStats?.responseRate != null ? `${userStats.responseRate}%` : null;
+  const responseTime = userStats?.responseTime || null;
 
   // Get the current page URL for sharing
   const getShareUrl = () => {
@@ -323,7 +335,7 @@ const ProfileHero = props => {
               <div className={css.statItem}>
                 <div className={css.statValueWithIcon}>
                   <IconStar />
-                  <span className={css.statValue}>{averageRating}</span>
+                  <span className={css.statValue}>{averageRating || '0'}</span>
                 </div>
                 <span className={css.statLabel}>
                   <FormattedMessage id="ProfileHero.reviews" values={{ count: reviewCount }} />
@@ -331,7 +343,7 @@ const ProfileHero = props => {
               </div>
 
               <div className={css.statItem}>
-                <span className={css.statValue}>{responseRate}</span>
+                <span className={css.statValue}>{responseRate || '0%'}</span>
                 <span className={css.statLabel}>
                   <FormattedMessage id="ProfileHero.responseRate" />
                 </span>
@@ -340,7 +352,9 @@ const ProfileHero = props => {
               <div className={css.statItem}>
                 <div className={css.statValueWithIcon}>
                   <IconClock />
-                  <span className={css.statValue}>{responseTime}</span>
+                  <span className={css.statValue}>
+                    {responseTime || intl.formatMessage({ id: 'ProfileHero.noResponseTime' })}
+                  </span>
                 </div>
                 <span className={css.statLabel}>
                   <FormattedMessage id="ProfileHero.responseTime" />

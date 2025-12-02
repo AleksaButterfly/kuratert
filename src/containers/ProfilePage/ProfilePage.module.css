@@ -111,6 +111,24 @@
   max-width: 800px;
 }
 
+/* Buyer Reviews Section (no tabs) */
+.buyerReviewsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sectionTitle {
+  font-family: var(--fontFamily);
+  font-size: 16px;
+  line-height: 25.6px;
+  font-weight: var(--fontWeightRegular);
+  color: var(--colorGrey900);
+  margin: 0;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--colorGrey100);
+}
+
 /* No Content Message */
 .noContent {
   font-family: var(--fontFamily);

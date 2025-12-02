@@ -75,6 +75,7 @@ export const MainContent = props => {
     userTypeRoles,
     isCurrentUser,
     onManageDisableScrolling,
+    userStats,
   } = props;
 
   const { provider: isSeller } = userTypeRoles;
@@ -131,84 +132,92 @@ export const MainContent = props => {
         reviews={reviews}
         onManageDisableScrolling={onManageDisableScrolling}
         isSeller={isSeller}
+        userStats={userStats}
       />
 
-      {/* Tabs Section */}
-      <div className={css.tabsSection}>
-        {/* Tab Navigation */}
-        <div className={css.tabsNav}>
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              className={classNames(css.tab, { [css.tabActive]: activeTab === tab.id })}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              {tab.label}
-            </button>
-          ))}
+      {/* Tabs Section for Sellers */}
+      {isSeller && (
+        <div className={css.tabsSection}>
+          {/* Tab Navigation */}
+          <div className={css.tabsNav}>
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                className={classNames(css.tab, { [css.tabActive]: activeTab === tab.id })}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Tab Content */}
+          <div className={css.tabContent}>
+            {/* Active Listings Tab */}
+            {activeTab === TAB_LISTINGS && (
+              <ul className={css.listings}>
+                {listings.map(l => (
+                  <li className={css.listing} key={l.id.uuid}>
+                    <ListingCard listing={l} showAuthorInfo={false} />
+                  </li>
+                ))}
+                {listings.length === 0 && (
+                  <p className={css.noContent}>
+                    <FormattedMessage id="ProfilePage.noListings" />
+                  </p>
+                )}
+              </ul>
+            )}
+
+            {/* Reviews as Seller Tab */}
+            {activeTab === TAB_REVIEWS_SELLER && !hideReviews && (
+              <div className={css.reviewsContent}>
+                <ReviewsErrorMaybe queryReviewsError={queryReviewsError} />
+                {reviewsOfProvider.length > 0 ? (
+                  <Reviews reviews={reviewsOfProvider} />
+                ) : (
+                  <p className={css.noContent}>
+                    <FormattedMessage id="ProfilePage.noReviewsAsSeller" />
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Reviews as Buyer Tab */}
+            {activeTab === TAB_REVIEWS_BUYER && !hideReviews && (
+              <div className={css.reviewsContent}>
+                <ReviewsErrorMaybe queryReviewsError={queryReviewsError} />
+                {reviewsOfCustomer.length > 0 ? (
+                  <Reviews reviews={reviewsOfCustomer} />
+                ) : (
+                  <p className={css.noContent}>
+                    <FormattedMessage id="ProfilePage.noReviewsAsBuyer" />
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
         </div>
+      )}
 
-        {/* Tab Content */}
-        <div className={css.tabContent}>
-          {/* Active Listings Tab */}
-          {activeTab === TAB_LISTINGS && (
-            <ul className={css.listings}>
-              {listings.map(l => (
-                <li className={css.listing} key={l.id.uuid}>
-                  <ListingCard listing={l} showAuthorInfo={false} />
-                </li>
-              ))}
-              {listings.length === 0 && (
-                <p className={css.noContent}>
-                  <FormattedMessage id="ProfilePage.noListings" />
-                </p>
-              )}
-            </ul>
-          )}
-
-          {/* Reviews as Seller Tab */}
-          {activeTab === TAB_REVIEWS_SELLER && !hideReviews && (
-            <div className={css.reviewsContent}>
-              <ReviewsErrorMaybe queryReviewsError={queryReviewsError} />
-              {reviewsOfProvider.length > 0 ? (
-                <Reviews reviews={reviewsOfProvider} />
-              ) : (
-                <p className={css.noContent}>
-                  <FormattedMessage id="ProfilePage.noReviewsAsSeller" />
-                </p>
-              )}
-            </div>
-          )}
-
-          {/* Reviews as Buyer Tab */}
-          {activeTab === TAB_REVIEWS_BUYER && !hideReviews && (
-            <div className={css.reviewsContent}>
-              <ReviewsErrorMaybe queryReviewsError={queryReviewsError} />
-              {reviewsOfCustomer.length > 0 ? (
-                <Reviews reviews={reviewsOfCustomer} />
-              ) : (
-                <p className={css.noContent}>
-                  <FormattedMessage id="ProfilePage.noReviewsAsBuyer" />
-                </p>
-              )}
-            </div>
-          )}
-
-          {/* Reviews Tab (for buyers only) */}
-          {activeTab === TAB_REVIEWS && !hideReviews && (
-            <div className={css.reviewsContent}>
-              <ReviewsErrorMaybe queryReviewsError={queryReviewsError} />
-              {reviewsOfCustomer.length > 0 ? (
-                <Reviews reviews={reviewsOfCustomer} />
-              ) : (
-                <p className={css.noContent}>
-                  <FormattedMessage id="ProfilePage.noReviews" />
-                </p>
-              )}
-            </div>
-          )}
+      {/* Reviews Section for Buyers (no tabs, just section title) */}
+      {!isSeller && !hideReviews && (
+        <div className={css.buyerReviewsSection}>
+          <h2 className={css.sectionTitle}>
+            <FormattedMessage id="ProfilePage.tabReviews" values={{ count: reviewsOfCustomer.length }} />
+          </h2>
+          <div className={css.reviewsContent}>
+            <ReviewsErrorMaybe queryReviewsError={queryReviewsError} />
+            {reviewsOfCustomer.length > 0 ? (
+              <Reviews reviews={reviewsOfCustomer} />
+            ) : (
+              <p className={css.noContent}>
+                <FormattedMessage id="ProfilePage.noReviews" />
+              </p>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
@@ -347,6 +356,7 @@ const mapStateToProps = state => {
     userListingRefs,
     reviews = [],
     queryReviewsError,
+    userStats,
   } = state.ProfilePage;
   const userMatches = getMarketplaceEntities(state, [{ type: 'user', id: userId }]);
   const user = userMatches.length === 1 ? userMatches[0] : null;
@@ -365,6 +375,7 @@ const mapStateToProps = state => {
     listings: getMarketplaceEntities(state, userListingRefs),
     reviews,
     queryReviewsError,
+    userStats,
   };
 };
 
