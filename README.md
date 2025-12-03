@@ -1,73 +1,114 @@
-# Sharetribe Web Template
+# Kuratert
 
-[![CircleCI](https://circleci.com/gh/sharetribe/web-template.svg?style=svg)](https://circleci.com/gh/sharetribe/web-template)
+A curated marketplace for art, design, and antiques built on [Sharetribe](https://www.sharetribe.com/).
 
-This is a template web application for Sharetribe marketplaces. You could create your own unique
-marketplace web app by cloning this repository and then extending and customizing it to your needs.
-This template is bootstrapped with
-[create-react-app](https://github.com/facebookincubator/create-react-app) with some additions,
-namely server side rendering, code-splitting, and a custom CSS setup.
+## About
 
-## Quick start
+Kuratert connects art collectors, design enthusiasts, and sellers of exceptional pieces. The platform
+is built on the Sharetribe Web Template with extensive customizations for the art and design market.
 
-### Setup localhost
+## Custom Features
 
-If you just want to get the app running quickly to test it out, first install
-[Node.js](https://nodejs.org/) and [Yarn](https://yarnpkg.com/), and follow along:
+### Design System
+
+- Custom landing page with hero section, categories grid, and featured listings
+- Redesigned profile pages with seller stats, tabs for listings/reviews, and share functionality
+- Custom search experience with keyword predictions for categories, listings, and sellers
+- Responsive design optimized for showcasing visual content
+
+### Editorial Content (Sanity CMS)
+
+The editorial section on the landing page is powered by [Sanity](https://www.sanity.io/), a headless CMS
+that allows content editors to manage articles without code changes.
+
+**Sanity Studio:** [kuratert.sanity.studio](https://kuratert.sanity.studio)
+
+**Features:**
+- Article management with rich text content
+- Category organization
+- Featured articles with customizable positions on the landing page
+- Image optimization via Sanity CDN
+
+**Related routes:**
+- `/articles` - Browse all articles
+- `/articles/:slug` - Individual article page
+
+### Integration API Extensions
+
+- User statistics (sales count, response rate, response time)
+- Keyword search predictions across categories, listings, and sellers
+
+## Quick Start
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (v18+)
+- [Yarn](https://yarnpkg.com/)
+
+### Setup
 
 ```sh
-git clone git@github.com:sharetribe/web-template.git  # clone this repository
-cd web-template/                                      # change to the cloned directory
-yarn install                                          # install dependencies
-yarn run config                                       # add the mandatory env vars to your local config
-yarn run dev                                          # start the dev server, this will open a browser in localhost:3000
+git clone git@github.com:AleksaButterfly/kuratert.git
+cd kuratert/
+yarn install
+yarn run config    # configure environment variables
+yarn run dev       # start dev server at localhost:3000
 ```
 
-You can also follow along the
-[Getting started with Sharetribe Web Template](https://www.sharetribe.com/docs/introduction/getting-started-with-web-template/)
-tutorial in the [Sharetribe Developer Docs](https://www.sharetribe.com/docs/).
+### Environment Variables
 
-For more information of the configuration, see the
-[Environment configuration variables](https://www.sharetribe.com/docs/template/template-env/)
-reference in Sharetribe Developer Docs.
+In addition to standard Sharetribe variables, the following are required:
 
-### For Windows users
+```sh
+# Sanity CMS
+SANITY_PROJECT_ID=your_project_id
+SANITY_DATASET=production
+SANITY_API_VERSION=2024-01-01
+SANITY_API_TOKEN=your_api_token
 
-We strongly recommend installing
-[Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/about), if you are
-developing on Windows. These templates are made for Unix-like web services which is the most common
-environment type on host-services for web apps. Also, the Developer Docs use Unix-like commands in
-articles instead of DOS commands.
+# Integration API (for user stats and search)
+SHARETRIBE_INTEGRATION_API_CLIENT_ID=your_client_id
+SHARETRIBE_INTEGRATION_API_CLIENT_SECRET=your_client_secret
+```
 
-## Getting started with your own customization
+See [Environment configuration variables](https://www.sharetribe.com/docs/template/template-env/)
+for the complete list of Sharetribe environment variables.
 
-If you want to build your own Sharetribe marketplace by customizing the template application, see
-the
-[How to Customize the Template](https://www.sharetribe.com/docs/template/how-to-customize-template/)
-guide in Developer Docs.
+## Project Structure
 
-## Deploying to Heroku
+```
+kuratert/
+├── server/
+│   └── api/
+│       ├── articles.js       # Sanity CMS endpoints
+│       ├── user-stats.js     # User statistics endpoint
+│       └── users-query.js    # User search endpoint
+├── src/
+│   ├── containers/
+│   │   ├── ArticlePage/      # Single article view
+│   │   ├── ArticlesPage/     # Articles listing
+│   │   ├── LandingPage/      # Custom landing page
+│   │   └── ProfilePage/      # Redesigned profile
+│   └── translations/
+│       └── no.json           # English translations
+└── sanity-schemas/           # Reference schemas for Sanity Studio
+```
 
-**Note:** Remember to fork the repository before deploying the application. Connecting your own
-Github repository to Heroku will make manual deploys easier.
+## Related Repositories
 
-See the
-[How to deploy this template to production](https://www.sharetribe.com/docs/template/how-to-deploy-template-to-production/)
-guide in Developer Docs for more information.
+- **Sanity Studio:** [github.com/AleksaButterfly/studio-kuratert](https://github.com/AleksaButterfly/studio-kuratert)
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+## Deployment
+
+The application can be deployed to Heroku or any Node.js hosting platform.
+
+See [How to deploy this template to production](https://www.sharetribe.com/docs/template/how-to-deploy-template-to-production/)
+for deployment instructions.
 
 ## Documentation
 
-See the Sharetribe Developer Docs: [sharetribe.com/docs/](https://www.sharetribe.com/docs/)
-
-## Get help – join Sharetribe Developer Slack channel
-
-If you have any questions about development, the best place to ask them is the Developer Slack
-channel at https://www.sharetribe.com/dev-slack
-
-If you need help with development, you can hire a verified software developer with Sharetribe
-experience from the [Expert Network](https://www.sharetribe.com/experts/).
+- [Sharetribe Developer Docs](https://www.sharetribe.com/docs/)
+- [Sanity Documentation](https://www.sanity.io/docs)
 
 ## License
 
