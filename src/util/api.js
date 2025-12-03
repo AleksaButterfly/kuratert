@@ -167,3 +167,31 @@ export const fetchUserStats = userId => {
     method: methods.GET,
   });
 };
+
+// ================ Articles API (Sanity CMS) ================ //
+
+// Fetch featured articles for landing page editorial section.
+export const fetchFeaturedArticles = () => {
+  return request('/api/articles/featured', {
+    method: methods.GET,
+  });
+};
+
+// Fetch all articles with optional category filter and pagination.
+export const fetchArticles = ({ category, page = 1, perPage = 12 } = {}) => {
+  const params = new URLSearchParams();
+  if (category) params.append('category', category);
+  params.append('page', page);
+  params.append('perPage', perPage);
+
+  return request(`/api/articles?${params.toString()}`, {
+    method: methods.GET,
+  });
+};
+
+// Fetch single article by slug.
+export const fetchArticleBySlug = slug => {
+  return request(`/api/articles/${encodeURIComponent(slug)}`, {
+    method: methods.GET,
+  });
+};

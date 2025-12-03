@@ -24,9 +24,13 @@ const FallbackLandingPage = props => {
 
   const [currentPerPage, setCurrentPerPage] = useState(8);
 
-  const { listingRefs, queryListingsInProgress, totalItems } = useSelector(
-    state => state.LandingPage
-  );
+  const {
+    listingRefs,
+    queryListingsInProgress,
+    totalItems,
+    featuredArticles,
+    featuredArticlesInProgress,
+  } = useSelector(state => state.LandingPage);
 
   const listings = useSelector(state => getMarketplaceEntities(state, listingRefs));
 
@@ -72,7 +76,10 @@ const FallbackLandingPage = props => {
             onLoadMore={handleLoadMore}
           />
           <SectionCategories />
-          <SectionEditorial />
+          <SectionEditorial
+            articles={featuredArticles}
+            isLoading={featuredArticlesInProgress}
+          />
           <SectionSeller />
         </div>
       </LayoutSingleColumn>

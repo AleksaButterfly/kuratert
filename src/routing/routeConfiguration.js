@@ -12,6 +12,8 @@ import { NamedRedirect } from '../components';
 
 const pageDataLoadingAPI = getPageDataLoadingAPI();
 
+const ArticlePage = loadable(() => import(/* webpackChunkName: "ArticlePage" */ '../containers/ArticlePage/ArticlePage'));
+const ArticlesPage = loadable(() => import(/* webpackChunkName: "ArticlesPage" */ '../containers/ArticlesPage/ArticlesPage'));
 const AuthenticationPage = loadable(() => import(/* webpackChunkName: "AuthenticationPage" */ '../containers/AuthenticationPage/AuthenticationPage'));
 const CheckoutPage = loadable(() => import(/* webpackChunkName: "CheckoutPage" */ '../containers/CheckoutPage/CheckoutPage'));
 const CMSPage = loadable(() => import(/* webpackChunkName: "CMSPage" */ '../containers/CMSPage/CMSPage'));
@@ -106,6 +108,18 @@ const routeConfiguration = (layoutConfig, accessControlConfig) => {
       path: '/faq',
       name: 'FAQPage',
       component: FAQPage,
+    },
+    {
+      path: '/articles',
+      name: 'ArticlesPage',
+      component: ArticlesPage,
+      loadData: pageDataLoadingAPI.ArticlesPage.loadData,
+    },
+    {
+      path: '/articles/:slug',
+      name: 'ArticlePage',
+      component: ArticlePage,
+      loadData: pageDataLoadingAPI.ArticlePage.loadData,
     },
     {
       path: '/p/:pageId',

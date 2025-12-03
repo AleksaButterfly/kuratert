@@ -1,11 +1,13 @@
 import React from 'react';
-import { string } from 'prop-types';
+import { string, array, bool } from 'prop-types';
 import classNames from 'classnames';
 
 import { useIntl } from '../../../util/reactIntl';
+import { NamedLink } from '../../../components';
 
 import css from './SectionEditorial.module.css';
 
+// Fallback images for when no articles from CMS
 import editorial1 from './images/editorial-1.avif';
 import editorial2 from './images/editorial-2.avif';
 import editorial3 from './images/editorial-3.avif';
@@ -23,44 +25,53 @@ const IconArrowRight = () => (
   </svg>
 );
 
-const ArticleCard = ({ image, category, readTime, title, description, isLarge }) => {
+const ArticleCard = ({ image, category, readTime, title, description, isLarge, slug, intl }) => {
   const cardClasses = classNames(css.articleCard, {
     [css.articleCardLarge]: isLarge,
   });
 
+  const readTimeText = typeof readTime === 'number'
+    ? intl.formatMessage({ id: 'SectionEditorial.readTime' }, { minutes: readTime })
+    : readTime;
+
+  const CardWrapper = slug ? NamedLink : 'div';
+  const cardProps = slug ? { name: 'ArticlePage', params: { slug }, className: cardClasses } : { className: cardClasses };
+
   return (
-    <article className={cardClasses}>
-      <div className={css.cardImageWrapper}>
-        <img src={image} alt={title} className={css.cardImage} />
-        <div className={css.cardOverlay} />
-        <div className={css.cardContent}>
-          <div className={css.cardMeta}>
-            <span className={css.cardCategory}>{category}</span>
-            <span className={css.cardDot}>•</span>
-            <span className={css.cardReadTime}>
-              <IconClock />
-              {readTime}
-            </span>
+    <CardWrapper {...cardProps}>
+      <article className={slug ? undefined : cardClasses}>
+        <div className={css.cardImageWrapper}>
+          <img src={image} alt={title} className={css.cardImage} />
+          <div className={css.cardOverlay} />
+          <div className={css.cardContent}>
+            <div className={css.cardMeta}>
+              <span className={css.cardCategory}>{category}</span>
+              <span className={css.cardDot}>•</span>
+              <span className={css.cardReadTime}>
+                <IconClock />
+                {readTimeText}
+              </span>
+            </div>
+            <h3 className={css.cardTitle}>{title}</h3>
+            <p className={css.cardDescription}>{description}</p>
           </div>
-          <h3 className={css.cardTitle}>{title}</h3>
-          <p className={css.cardDescription}>{description}</p>
         </div>
-      </div>
-    </article>
+      </article>
+    </CardWrapper>
   );
 };
 
 const SectionEditorial = props => {
   const intl = useIntl();
-  const { rootClassName, className } = props;
+  const { rootClassName, className, articles: apiArticles = [], isLoading = false } = props;
   const classes = classNames(rootClassName || css.root, className);
 
   const sectionTitle = intl.formatMessage({ id: 'SectionEditorial.title' });
   const sectionSubtitle = intl.formatMessage({ id: 'SectionEditorial.subtitle' });
   const allArticlesText = intl.formatMessage({ id: 'SectionEditorial.allArticles' });
 
-  // Article data - this could come from props or an API in the future
-  const articles = [
+  // Fallback article data when no articles from CMS
+  const fallbackArticles = [
     {
       id: 1,
       image: editorial1,
@@ -90,6 +101,30 @@ const SectionEditorial = props => {
     },
   ];
 
+  // Use API articles if available, otherwise use fallback
+  // Map API articles to the format expected by ArticleCard
+  const articles = apiArticles.length > 0
+    ? apiArticles.map((article, index) => ({
+        id: article.id,
+        image: article.image,
+        category: article.category,
+        readTime: article.readTime,
+        title: article.title,
+        description: article.excerpt,
+        slug: article.slug,
+        isLarge: article.featuredPosition === 1 || index === 0,
+      }))
+    : fallbackArticles;
+
+  // Get articles for display (main + 2 side)
+  const mainArticle = articles[0];
+  const sideArticles = articles.slice(1, 3);
+
+  // Don't render if loading or no articles
+  if (isLoading) {
+    return null;
+  }
+
   return (
     <section className={classes}>
       <div className={css.sectionContent}>
@@ -98,20 +133,25 @@ const SectionEditorial = props => {
             <h2 className={css.sectionTitle}>{sectionTitle}</h2>
             <p className={css.sectionSubtitle}>{sectionSubtitle}</p>
           </div>
-          <a href="/articles" className={css.allArticlesLink}>
+          <NamedLink name="ArticlesPage" className={css.allArticlesLink}>
             <span>{allArticlesText}</span>
             <IconArrowRight />
-          </a>
+          </NamedLink>
         </div>
 
         <div className={css.articlesGrid}>
-          <div className={css.mainArticle}>
-            <ArticleCard {...articles[0]} />
-          </div>
-          <div className={css.sideArticles}>
-            <ArticleCard {...articles[1]} />
-            <ArticleCard {...articles[2]} />
-          </div>
+          {mainArticle && (
+            <div className={css.mainArticle}>
+              <ArticleCard {...mainArticle} intl={intl} />
+            </div>
+          )}
+          {sideArticles.length > 0 && (
+            <div className={css.sideArticles}>
+              {sideArticles.map(article => (
+                <ArticleCard key={article.id} {...article} intl={intl} />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </section>
@@ -121,6 +161,8 @@ const SectionEditorial = props => {
 SectionEditorial.propTypes = {
   rootClassName: string,
   className: string,
+  articles: array,
+  isLoading: bool,
 };
 
 export default SectionEditorial;
