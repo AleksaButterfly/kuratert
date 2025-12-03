@@ -147,9 +147,12 @@ exports.csp = (reportUri, reportOnly) => {
   // const { imgSrc = [self] } = defaultDirectives;
   // const exampleImgSrc = imgSrc.concat('my-custom-domain.example.com');
 
+  // Add Sanity CDN for article images
+  const { imgSrc = [self] } = defaultDirectives;
+  const customImgSrc = imgSrc.concat('cdn.sanity.io');
+
   const customDirectives = {
-    // Example: Add custom directive override
-    // imgSrc: exampleImgSrc,
+    imgSrc: customImgSrc,
   };
 
   // ================ END CUSTOM CSP URLs ================ //
