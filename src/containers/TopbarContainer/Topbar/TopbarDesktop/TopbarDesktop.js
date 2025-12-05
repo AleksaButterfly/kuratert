@@ -22,6 +22,7 @@ import {
   IconSearch,
   IconUser,
 } from '../../../../components';
+import { getFavoriteListingIds } from '../../../../util/userHelpers';
 
 import CategoryLinks from './CategoryLinks/CategoryLinks';
 import CustomLinksMenu from './CustomLinksMenu/CustomLinksMenu';
@@ -49,7 +50,7 @@ const SearchButton = ({ intl, isSearchOpen, onClick }) => {
   );
 };
 
-const FavoritesLink = ({ intl }) => {
+const FavoritesLink = ({ intl, count }) => {
   return (
     <NamedLink
       name="FavoritesPage"
@@ -58,6 +59,7 @@ const FavoritesLink = ({ intl }) => {
     >
       <span className={css.topbarLinkLabel}>
         <IconFavorites />
+        {count > 0 && <span className={css.favoritesBadge}>{count}</span>}
       </span>
     </NamedLink>
   );
@@ -225,11 +227,14 @@ const TopbarDesktop = props => {
 
   const classes = classNames(rootClassName || css.root, className);
 
+  // Get favorites count from currentUser
+  const favoritesCount = getFavoriteListingIds(currentUser).length;
+
   // Search button is conditionally shown based on Console settings
   const searchButton = showSearchForm ? (
     <SearchButton intl={intl} isSearchOpen={isSearchOpen} onClick={toggleSearch} />
   ) : null;
-  const favoritesLink = <FavoritesLink intl={intl} />;
+  const favoritesLink = <FavoritesLink intl={intl} count={favoritesCount} />;
   const cartLink = <CartLink intl={intl} />;
 
   const profileMenuMaybe = authenticatedOnClientSide ? (
