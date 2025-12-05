@@ -30,7 +30,7 @@ const SectionSellers = props => {
           {sellers.map((seller, index) => {
             const { id, attributes, profileImage } = seller;
             const { profile } = attributes || {};
-            const { displayName, publicData } = profile || {};
+            const { displayName, abbreviatedName, publicData } = profile || {};
             const { userType } = publicData || {};
 
             // Create a user-like object for Avatar component
@@ -40,7 +40,7 @@ const SectionSellers = props => {
               attributes: {
                 profile: {
                   displayName,
-                  abbreviatedName: displayName?.charAt(0) || '?',
+                  abbreviatedName: abbreviatedName || displayName?.charAt(0) || '?',
                 },
               },
               profileImage,
