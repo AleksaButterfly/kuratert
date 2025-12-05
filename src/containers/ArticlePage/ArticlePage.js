@@ -69,6 +69,7 @@ export const ArticlePageComponent = props => {
     content,
     image,
     category,
+    categorySlug,
     readTime,
     publishedAt,
   } = article;
@@ -118,7 +119,13 @@ export const ArticlePageComponent = props => {
           {/* Article header */}
           <header className={css.header}>
             <div className={css.meta}>
-              <span className={css.category}>{category}</span>
+              <NamedLink
+                name="ArticlesPage"
+                to={{ search: `?category=${categorySlug}` }}
+                className={css.category}
+              >
+                {category}
+              </NamedLink>
               <span className={css.dot}>•</span>
               <span className={css.readTime}>
                 <IconClock />

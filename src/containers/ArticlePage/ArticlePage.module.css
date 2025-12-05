@@ -60,6 +60,13 @@
 .category {
   color: var(--marketplaceColor);
   font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.category:hover {
+  color: var(--marketplaceColorDark);
+  text-decoration: none;
 }
 
 .dot {
