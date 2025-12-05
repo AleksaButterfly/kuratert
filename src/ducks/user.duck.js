@@ -325,7 +325,14 @@ const addListingToFavoritesPayloadCreator = (listingId, thunkAPI) => {
 
 export const addListingToFavoritesThunk = createAsyncThunk(
   'user/addListingToFavorites',
-  addListingToFavoritesPayloadCreator
+  addListingToFavoritesPayloadCreator,
+  {
+    // Prevent concurrent favorites operations to avoid race conditions
+    condition: (_, { getState }) => {
+      const { addListingToFavoritesInProgress, removeListingFromFavoritesInProgress } = getState().user;
+      return !addListingToFavoritesInProgress && !removeListingFromFavoritesInProgress;
+    },
+  }
 );
 
 // Backward compatible wrapper for the thunk
@@ -364,7 +371,14 @@ const removeListingFromFavoritesPayloadCreator = (listingId, thunkAPI) => {
 
 export const removeListingFromFavoritesThunk = createAsyncThunk(
   'user/removeListingFromFavorites',
-  removeListingFromFavoritesPayloadCreator
+  removeListingFromFavoritesPayloadCreator,
+  {
+    // Prevent concurrent favorites operations to avoid race conditions
+    condition: (_, { getState }) => {
+      const { addListingToFavoritesInProgress, removeListingFromFavoritesInProgress } = getState().user;
+      return !addListingToFavoritesInProgress && !removeListingFromFavoritesInProgress;
+    },
+  }
 );
 
 // Backward compatible wrapper for the thunk
