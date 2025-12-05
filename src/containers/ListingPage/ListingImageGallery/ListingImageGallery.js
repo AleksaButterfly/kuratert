@@ -109,7 +109,7 @@ const ListingImageGallery = props => {
   };
   const renderThumbInner = item => {
     return (
-      <div>
+      <div className={css.thumbInner}>
         <ResponsiveImage
           rootClassName={css.thumb}
           image={item.image}
