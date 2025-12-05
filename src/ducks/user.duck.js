@@ -296,20 +296,16 @@ export const sendVerificationEmail = () => (dispatch, getState, sdk) => {
 const addListingToFavoritesPayloadCreator = (listingId, thunkAPI) => {
   const { getState, dispatch, extra: sdk, rejectWithValue } = thunkAPI;
   const { currentUser } = getState().user;
+
+  // Get current favorites from optimistically updated state
   const currentFavorites = getFavoriteListingIds(currentUser);
 
-  // Check if already in favorites
-  if (currentFavorites.includes(listingId)) {
-    return Promise.resolve({ listingId, alreadyInFavorites: true });
-  }
-
-  // Prepend new listing to favorites array
-  const updatedFavorites = [listingId, ...currentFavorites];
-
+  // Since we use optimistic updates, the listingId is already in the array
+  // Just send the current state to the server
   return sdk.currentUser
     .updateProfile({
       privateData: {
-        favoriteListingIds: updatedFavorites,
+        favoriteListingIds: currentFavorites,
       },
     })
     .then(() => {
@@ -340,15 +336,16 @@ export const addListingToFavorites = listingId => (dispatch, getState, sdk) => {
 const removeListingFromFavoritesPayloadCreator = (listingId, thunkAPI) => {
   const { getState, dispatch, extra: sdk, rejectWithValue } = thunkAPI;
   const { currentUser } = getState().user;
+
+  // Get current favorites from optimistically updated state
   const currentFavorites = getFavoriteListingIds(currentUser);
 
-  // Filter out the listing ID
-  const updatedFavorites = currentFavorites.filter(id => id !== listingId);
-
+  // Since we use optimistic updates, the listingId is already removed
+  // Just send the current state to the server
   return sdk.currentUser
     .updateProfile({
       privateData: {
-        favoriteListingIds: updatedFavorites,
+        favoriteListingIds: currentFavorites,
       },
     })
     .then(() => {
