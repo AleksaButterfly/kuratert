@@ -126,9 +126,8 @@
 
 .favoritesBadge {
   /* Dimensions */
-  min-width: 16px;
+  width: 16px;
   height: 16px;
-  padding: 0 4px;
   border-radius: 50%;
 
   /* Position */
@@ -136,13 +135,16 @@
   top: -6px;
   right: -10px;
 
+  /* Flexbox centering */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   /* Style */
   background-color: var(--colorGrey900);
   color: var(--colorWhite);
   font-size: 10px;
   font-weight: var(--fontWeightSemiBold);
-  line-height: 16px;
-  text-align: center;
 
   /* Animation */
   animation-name: notificationPop;
