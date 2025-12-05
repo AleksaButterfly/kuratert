@@ -146,7 +146,7 @@
   font-size: 10px;
   font-weight: var(--fontWeightSemiBold);
   line-height: 1;
-  padding-bottom: 1px; /* Optical adjustment for font baseline */
+  padding-bottom: 2px; /* Optical adjustment for font baseline */
 
   /* Animation */
   animation-name: notificationPop;
