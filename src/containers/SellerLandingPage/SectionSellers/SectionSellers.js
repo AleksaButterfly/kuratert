@@ -60,9 +60,7 @@ const SectionSellers = props => {
                 />
                 <div className={css.cardContent}>
                   <h3 className={css.sellerName}>{displayName || 'Seller'}</h3>
-                  {userType && (
-                    <p className={css.sellerType}>{userType}</p>
-                  )}
+                  <p className={css.sellerType}>Gallery</p>
                 </div>
               </NamedLink>
             );
