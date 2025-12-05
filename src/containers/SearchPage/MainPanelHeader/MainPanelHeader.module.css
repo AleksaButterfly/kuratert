@@ -22,6 +22,10 @@
   margin-bottom: 24px;
 }
 
+.headerRowNoResults {
+  margin-bottom: 0;
+}
+
 .titleSection {
   display: flex;
   flex-direction: column;

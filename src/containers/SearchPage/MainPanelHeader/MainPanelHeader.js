@@ -74,16 +74,30 @@ const MainPanelHeader = props => {
   const classes = classNames(rootClassName || css.root, className);
   const hasNoResults = listingsAreLoaded && resultsCount === 0;
 
+  const activeFiltersComponent = filterConfigs && onRemoveFilter ? (
+    <ActiveFilters
+      urlQueryParams={urlQueryParams}
+      filterConfigs={filterConfigs}
+      marketplaceCurrency={marketplaceCurrency}
+      listingCategories={listingCategories}
+      listingTypes={listingTypes}
+      onRemoveFilter={onRemoveFilter}
+    />
+  ) : null;
+
   return (
     <div className={classes}>
       <div className={css.breadcrumbs}>
         <FormattedMessage id="MainPanelHeader.breadcrumbs" />
       </div>
 
-      <div className={css.headerRow}>
-        <div className={css.titleSection}>
-          {hasNoResults ? (
-            <>
+      {hasNoResults ? (
+        <>
+          {/* When no results: ActiveFilters above the no results message */}
+          {activeFiltersComponent}
+
+          <div className={classNames(css.headerRow, css.headerRowNoResults)}>
+            <div className={css.titleSection}>
               <p className={css.noResultsText}>
                 <FormattedMessage id="SearchPage.noResults" />
               </p>
@@ -92,9 +106,14 @@ const MainPanelHeader = props => {
                   <FormattedMessage id="SearchPage.resetAllFilters" />
                 </button>
               ) : null}
-            </>
-          ) : (
-            <>
+            </div>
+          </div>
+        </>
+      ) : (
+        <>
+          {/* When has results: header row first, then ActiveFilters below */}
+          <div className={css.headerRow}>
+            <div className={css.titleSection}>
               <h1 className={css.pageTitle}>
                 <FormattedMessage id="MainPanelHeader.pageTitle" />
               </h1>
@@ -108,56 +127,45 @@ const MainPanelHeader = props => {
                   />
                 )}
               </p>
-            </>
-          )}
-        </div>
+            </div>
 
-        {!hasNoResults ? (
-          <div className={css.controlsSection}>
-            {isSortByActive ? (
-              <div className={css.sortByWrapper}>
-                {sortByComponent}
-              </div>
-            ) : null}
+            <div className={css.controlsSection}>
+              {isSortByActive ? (
+                <div className={css.sortByWrapper}>
+                  {sortByComponent}
+                </div>
+              ) : null}
 
-            {onViewModeChange ? (
-              <div className={css.viewToggle}>
-                <button
-                  type="button"
-                  className={classNames(css.viewButton, {
-                    [css.viewButtonActive]: viewMode === 'grid',
-                  })}
-                  onClick={() => onViewModeChange('grid')}
-                  aria-label="Grid view"
-                >
-                  <IconGrid />
-                </button>
-                <button
-                  type="button"
-                  className={classNames(css.viewButton, {
-                    [css.viewButtonActive]: viewMode === 'list',
-                  })}
-                  onClick={() => onViewModeChange('list')}
-                  aria-label="List view"
-                >
-                  <IconList />
-                </button>
-              </div>
-            ) : null}
+              {onViewModeChange ? (
+                <div className={css.viewToggle}>
+                  <button
+                    type="button"
+                    className={classNames(css.viewButton, {
+                      [css.viewButtonActive]: viewMode === 'grid',
+                    })}
+                    onClick={() => onViewModeChange('grid')}
+                    aria-label="Grid view"
+                  >
+                    <IconGrid />
+                  </button>
+                  <button
+                    type="button"
+                    className={classNames(css.viewButton, {
+                      [css.viewButtonActive]: viewMode === 'list',
+                    })}
+                    onClick={() => onViewModeChange('list')}
+                    aria-label="List view"
+                  >
+                    <IconList />
+                  </button>
+                </div>
+              ) : null}
+            </div>
           </div>
-        ) : null}
-      </div>
 
-      {filterConfigs && onRemoveFilter ? (
-        <ActiveFilters
-          urlQueryParams={urlQueryParams}
-          filterConfigs={filterConfigs}
-          marketplaceCurrency={marketplaceCurrency}
-          listingCategories={listingCategories}
-          listingTypes={listingTypes}
-          onRemoveFilter={onRemoveFilter}
-        />
-      ) : null}
+          {activeFiltersComponent}
+        </>
+      )}
 
       {children}
     </div>

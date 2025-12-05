@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { useHistory, useLocation } from 'react-router-dom';
-import classNames from 'classnames';
 
 // Contexts
 import { useConfiguration } from '../../context/configurationContext';
@@ -26,7 +25,11 @@ import {
   isForbiddenError,
 } from '../../util/errors.js';
 import { hasPermissionToViewData, isUserAuthorized } from '../../util/userHelpers.js';
-import { requireListingImage } from '../../util/configHelpers';
+import { isFieldForListingType } from '../../util/fieldHelpers';
+import {
+  isFieldForCategory,
+  pickCategoryFields,
+} from '../../util/fieldHelpers.js';
 import {
   ensureListing,
   ensureOwnListing,
@@ -50,13 +53,12 @@ import { initializeCardPaymentData } from '../../ducks/stripe.duck.js';
 
 // Shared components
 import {
-  H4,
-  H3,
   Page,
   NamedLink,
   NamedRedirect,
-  OrderPanel,
   LayoutSingleColumn,
+  Modal,
+  Avatar,
 } from '../../components';
 
 // Related components and modules
@@ -78,18 +80,11 @@ import {
   listingImages,
   handleContactUser,
   handleSubmitInquiry,
-  handleNavigateToMakeOfferPage,
-  handleNavigateToRequestQuotePage,
   handleSubmit,
   priceForSchemaMaybe,
 } from './ListingPage.shared';
 import ActionBarMaybe from './ActionBarMaybe';
-import SectionTextMaybe from './SectionTextMaybe';
-import SectionReviews from './SectionReviews';
-import SectionAuthorMaybe from './SectionAuthorMaybe';
-import SectionMapMaybe from './SectionMapMaybe';
-import SectionGallery from './SectionGallery';
-import CustomListingFields from './CustomListingFields';
+import ListingImageGallery from './ListingImageGallery/ListingImageGallery';
 
 import css from './ListingPage.module.css';
 
@@ -97,11 +92,168 @@ const MIN_LENGTH_FOR_LONG_WORDS_IN_TITLE = 16;
 
 const { UUID } = sdkTypes;
 
+// Icons
+const IconHeart = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M17.5 6.875C17.5 4.80393 15.8211 3.125 13.75 3.125C12.2963 3.125 11.0229 3.97909 10.4509 5.20793C10.2996 5.5325 9.7004 5.5325 9.54914 5.20793C8.97707 3.97909 7.70372 3.125 6.25 3.125C4.17893 3.125 2.5 4.80393 2.5 6.875C2.5 12.5 10 16.875 10 16.875C10 16.875 17.5 12.5 17.5 6.875Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+  </svg>
+);
+
+const IconShare = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M7.5 11.25L12.5 8.75M7.5 8.75L12.5 11.25" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+    <circle cx="5" cy="10" r="2.5" stroke="currentColor" strokeWidth="1.5" fill="none" />
+    <circle cx="15" cy="6.25" r="2.5" stroke="currentColor" strokeWidth="1.5" fill="none" />
+    <circle cx="15" cy="13.75" r="2.5" stroke="currentColor" strokeWidth="1.5" fill="none" />
+  </svg>
+);
+
+const IconShield = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 22C12 22 20 18 20 12V5L12 2L4 5V12C4 18 12 22 12 22Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    <path d="M9 12L11 14L15 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+  </svg>
+);
+
+const IconTruck = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="1" y="3" width="15" height="13" rx="1" stroke="currentColor" strokeWidth="1.5" fill="none" />
+    <path d="M16 8H19L22 11V16H16V8Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    <circle cx="5.5" cy="18.5" r="2.5" stroke="currentColor" strokeWidth="1.5" fill="none" />
+    <circle cx="18.5" cy="18.5" r="2.5" stroke="currentColor" strokeWidth="1.5" fill="none" />
+  </svg>
+);
+
+const IconBox = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M21 16V8C21 7.46957 20.7893 6.96086 20.4142 6.58579C20.0391 6.21071 19.5304 6 19 6H5C4.46957 6 3.96086 6.21071 3.58579 6.58579C3.21071 6.96086 3 7.46957 3 8V16C3 16.5304 3.21071 17.0391 3.58579 17.4142C3.96086 17.7893 4.46957 18 5 18H19C19.5304 18 20.0391 17.7893 20.4142 17.4142C20.7893 17.0391 21 16.5304 21 16Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    <path d="M3 8L12 13L21 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+  </svg>
+);
+
+const IconTag = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M20.59 13.41L13.42 20.58C13.2343 20.766 13.0137 20.9135 12.7709 21.0141C12.5281 21.1148 12.2678 21.1666 12.005 21.1666C11.7422 21.1666 11.4819 21.1148 11.2391 21.0141C10.9963 20.9135 10.7757 20.766 10.59 20.58L2 12V2H12L20.59 10.59C20.9625 10.9647 21.1716 11.4716 21.1716 12C21.1716 12.5284 20.9625 13.0353 20.59 13.41Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    <path d="M7 7H7.01" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+  </svg>
+);
+
+const IconCopy = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="5" y="5" width="9" height="9" rx="1" stroke="currentColor" strokeWidth="1.5" fill="none" />
+    <path d="M11 5V3C11 2.44772 10.5523 2 10 2H3C2.44772 2 2 2.44772 2 3V10C2 10.5523 2.44772 11 3 11H5" stroke="currentColor" strokeWidth="1.5" fill="none" />
+  </svg>
+);
+
+const IconCheck = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M3 8L6.5 11.5L13 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+  </svg>
+);
+
+const IconFacebook = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M18 10C18 5.58172 14.4183 2 10 2C5.58172 2 2 5.58172 2 10C2 14.0084 4.92548 17.3425 8.75 17.9V12.3125H6.71875V10H8.75V8.2375C8.75 6.2325 9.94438 5.125 11.7717 5.125C12.6467 5.125 13.5625 5.28125 13.5625 5.28125V7.25H12.5533C11.56 7.25 11.25 7.86667 11.25 8.5V10H13.4688L13.1146 12.3125H11.25V17.9C15.0745 17.3425 18 14.0084 18 10Z" fill="currentColor"/>
+  </svg>
+);
+
+const IconTwitter = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M15.2719 3H17.6831L12.4106 9.01244L18.5 17H13.6788L10.0381 12.2018L5.88438 17H3.47188L9.10312 10.5706L3.25 3H8.19375L11.4775 7.37562L15.2719 3ZM14.3869 15.5019H15.6781L7.43 4.32312H6.04563L14.3869 15.5019Z" fill="currentColor"/>
+  </svg>
+);
+
+const IconLinkedIn = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M5.78125 17.5H2.8125V7.1875H5.78125V17.5ZM4.29688 5.9375C3.35156 5.9375 2.5 5.11719 2.5 4.14062C2.5 3.16406 3.35156 2.34375 4.29688 2.34375C5.27344 2.34375 6.09375 3.16406 6.09375 4.14062C6.09375 5.11719 5.27344 5.9375 4.29688 5.9375ZM17.5 17.5H14.5625V12.4219C14.5625 11.2266 14.5312 9.71875 12.9375 9.71875C11.3125 9.71875 11.0625 11.0156 11.0625 12.3438V17.5H8.09375V7.1875H10.9375V8.59375H10.9688C11.375 7.78125 12.4062 6.9375 13.9375 6.9375C16.9375 6.9375 17.5 8.9375 17.5 11.5156V17.5Z" fill="currentColor"/>
+  </svg>
+);
+
+const IconEmail = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="2" y="4" width="16" height="12" rx="1" stroke="currentColor" strokeWidth="1.5" fill="none" />
+    <path d="M2 5L10 11L18 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+  </svg>
+);
+
+// Helper to get category label
+const getCategoryLabel = (publicData, categoryConfiguration) => {
+  if (!publicData || !categoryConfiguration) return null;
+
+  const { key: categoryPrefix, categories: listingCategoriesConfig } = categoryConfiguration;
+  const categoriesObj = pickCategoryFields(publicData, categoryPrefix, 1, listingCategoriesConfig);
+  const currentCategories = Object.values(categoriesObj);
+
+  if (currentCategories.length > 0) {
+    const categoryKey = currentCategories[currentCategories.length - 1];
+    const findCategory = (cats, key) => {
+      for (const cat of cats) {
+        if (cat.id === key) return cat;
+        if (cat.subcategories) {
+          const found = findCategory(cat.subcategories, key);
+          if (found) return found;
+        }
+      }
+      return null;
+    };
+    const category = findCategory(listingCategoriesConfig, categoryKey);
+    return category?.name || categoryKey;
+  }
+  return null;
+};
+
+// Helper to get listing specifications
+const getSpecifications = (publicData, metadata, listingFieldConfigs, categoryConfiguration, intl) => {
+  if (!publicData || !listingFieldConfigs) return [];
+
+  const { key: categoryPrefix, categories: listingCategoriesConfig } = categoryConfiguration || {};
+  const categoriesObj = pickCategoryFields(publicData, categoryPrefix, 1, listingCategoriesConfig);
+  const currentCategories = Object.values(categoriesObj);
+
+  const isFieldForSelectedCategories = fieldConfig => {
+    return isFieldForCategory(currentCategories, fieldConfig);
+  };
+
+  const pickListingFields = (filteredConfigs, config) => {
+    const { key, schemaType, enumOptions, showConfig = {} } = config;
+    const listingType = publicData.listingType;
+    const isTargetListingType = isFieldForListingType(listingType, config);
+    const isTargetCategory = isFieldForSelectedCategories(config);
+
+    const { isDetail, label } = showConfig;
+    const publicDataValue = publicData[key];
+    const metadataValue = metadata?.[key];
+    const value = publicDataValue != null ? publicDataValue : metadataValue;
+
+    if (isDetail && isTargetListingType && isTargetCategory && typeof value !== 'undefined') {
+      const findSelectedOption = enumValue => enumOptions?.find(o => enumValue === `${o.option}`);
+      const getBooleanMessage = value =>
+        value
+          ? intl.formatMessage({ id: 'SearchPage.detailYes' })
+          : intl.formatMessage({ id: 'SearchPage.detailNo' });
+      const optionConfig = findSelectedOption(value);
+
+      return schemaType === 'enum'
+        ? filteredConfigs.concat({ key, value: optionConfig?.label || value, label })
+        : schemaType === 'boolean'
+        ? filteredConfigs.concat({ key, value: getBooleanMessage(value), label })
+        : schemaType === 'long'
+        ? filteredConfigs.concat({ key, value, label })
+        : filteredConfigs;
+    }
+    return filteredConfigs;
+  };
+
+  return listingFieldConfigs.reduce(pickListingFields, []);
+};
+
 export const ListingPageComponent = props => {
   const [inquiryModalOpen, setInquiryModalOpen] = useState(
     props.inquiryModalOpenForListingId === props.params.id
   );
   const [mounted, setMounted] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -155,11 +307,6 @@ export const ListingPageComponent = props => {
 
   const pendingIsApproved = isPendingApprovalVariant && isApproved;
 
-  // If a /pending-approval URL is shared, the UI requires
-  // authentication and attempts to fetch the listing from own
-  // listings. This will fail with 403 Forbidden if the author is
-  // another user. We use this information to try to fetch the
-  // public listing.
   const pendingOtherUsersListing =
     (isPendingApprovalVariant || isDraftVariant) &&
     showListingError &&
@@ -173,13 +320,10 @@ export const ListingPageComponent = props => {
   const topbar = <TopbarContainer />;
 
   if (showListingError && showListingError.status === 404) {
-    // 404 listing not found
     return <NotFoundPage staticContext={props.staticContext} />;
   } else if (showListingError) {
-    // Other error in fetching listing
     return <ErrorPage topbar={topbar} scrollingDisabled={scrollingDisabled} intl={intl} />;
   } else if (!currentListing.id) {
-    // Still loading the listing
     return <LoadingPage topbar={topbar} scrollingDisabled={scrollingDisabled} intl={intl} />;
   }
 
@@ -208,49 +352,83 @@ export const ListingPageComponent = props => {
 
   const { listingType, transactionProcessAlias, unitType } = publicData;
   if (!(listingType && transactionProcessAlias && unitType)) {
-    // Listing should always contain listingType, transactionProcessAlias and unitType)
     return (
       <ErrorPage topbar={topbar} scrollingDisabled={scrollingDisabled} intl={intl} invalidListing />
     );
   }
-  const validListingTypes = listingConfig.listingTypes;
-  const foundListingTypeConfig = validListingTypes.find(conf => conf.listingType === listingType);
-  const showListingImage = requireListingImage(foundListingTypeConfig);
 
   const processName = resolveLatestProcessName(transactionProcessAlias.split('/')[0]);
   const isBooking = isBookingProcess(processName);
   const isPurchase = isPurchaseProcess(processName);
   const isNegotiation = isNegotiationProcess(processName);
-  const processType = isBooking
-    ? 'booking'
-    : isPurchase
-    ? 'purchase'
-    : isNegotiation
-    ? 'negotiation'
-    : 'inquiry';
 
   const currentAuthor = authorAvailable ? currentListing.author : null;
   const ensuredAuthor = ensureUser(currentAuthor);
-  const authorNeedsPayoutDetails =
-    ['booking', 'purchase'].includes(processType) || (isNegotiation && unitType === OFFER);
-  const noPayoutDetailsSetWithOwnListing =
-    isOwnListing && (authorNeedsPayoutDetails && !currentUser?.attributes?.stripeConnected);
-  const payoutDetailsWarning = noPayoutDetailsSetWithOwnListing ? (
-    <span className={css.payoutDetailsWarning}>
-      <FormattedMessage id="ListingPage.payoutDetailsWarning" values={{ processType }} />
-      <NamedLink name="StripePayoutPage">
-        <FormattedMessage id="ListingPage.payoutDetailsWarningLink" />
-      </NamedLink>
-    </span>
-  ) : null;
-
-  // When user is banned or deleted the listing is also deleted.
-  // Because listing can be never showed with banned or deleted user we don't have to provide
-  // banned or deleted display names for the function
   const authorDisplayName = userDisplayNameAsString(ensuredAuthor, '');
 
   const { formattedPrice } = priceData(price, config.currency, intl);
 
+  // Get category label
+  const categoryLabel = getCategoryLabel(publicData, config.categoryConfiguration);
+
+  // Get specifications
+  const specifications = getSpecifications(
+    publicData,
+    metadata,
+    listingConfig.listingFields,
+    config.categoryConfiguration,
+    intl
+  );
+
+  // Get images
+  const images = currentListing.images || [];
+  const variantPrefix = config.layout.listingImage.variantPrefix;
+  const imageVariants = ['scaled-small', 'scaled-medium', 'scaled-large', 'scaled-xlarge'];
+  const thumbnailVariants = [variantPrefix, `${variantPrefix}-2x`, `${variantPrefix}-4x`];
+
+  // Share functionality
+  const getShareUrl = () => {
+    if (typeof window !== 'undefined') {
+      return window.location.href;
+    }
+    return '';
+  };
+
+  const shareUrl = getShareUrl();
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy link:', err);
+    }
+  };
+
+  const handleShareFacebook = () => {
+    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+    window.open(url, '_blank', 'width=600,height=400');
+  };
+
+  const handleShareTwitter = () => {
+    const text = intl.formatMessage({ id: 'ListingPage.shareText' }, { title });
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`;
+    window.open(url, '_blank', 'width=600,height=400');
+  };
+
+  const handleShareLinkedIn = () => {
+    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
+    window.open(url, '_blank', 'width=600,height=400');
+  };
+
+  const handleShareEmail = () => {
+    const subject = intl.formatMessage({ id: 'ListingPage.shareEmailSubject' }, { title });
+    const body = intl.formatMessage({ id: 'ListingPage.shareEmailBody' }, { title, url: shareUrl });
+    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  };
+
+  // Contact user handler
   const commonParams = { params, history, routes: routeConfiguration };
   const onContactUser = handleContactUser({
     ...commonParams,
@@ -260,24 +438,14 @@ export const ListingPageComponent = props => {
     setInitialValues,
     setInquiryModalOpen,
   });
-  // Note: this is for inquire transition to inquiry state in booking, purchase and negotiation processes.
-  // Inquiry process is handled through handleSubmit.
+
   const onSubmitInquiry = handleSubmitInquiry({
     ...commonParams,
     getListing,
     onSendInquiry,
     setInquiryModalOpen,
   });
-  // This is to navigate to MakeOfferPage when InvokeNegotiationForm is submitted
-  const onNavigateToMakeOfferPage = handleNavigateToMakeOfferPage({
-    ...commonParams,
-    getListing,
-  });
-  // This is to navigate to MakeOfferPage when InvokeNegotiationForm is submitted
-  const onNavigateToRequestQuotePage = handleNavigateToRequestQuotePage({
-    ...commonParams,
-    getListing,
-  });
+
   const onSubmit = handleSubmit({
     ...commonParams,
     currentUser,
@@ -290,29 +458,43 @@ export const ListingPageComponent = props => {
     const isCurrentlyClosed = currentListing.attributes.state === LISTING_STATE_CLOSED;
     if (isOwnListing || isCurrentlyClosed) {
       window.scrollTo(0, 0);
-    } else if (isNegotiation && unitType === REQUEST) {
-      onNavigateToMakeOfferPage(values);
-    } else if (isNegotiation && unitType === OFFER) {
-      onNavigateToRequestQuotePage(values);
     } else {
       onSubmit(values);
     }
   };
 
+  // Author info
+  const authorBio = ensuredAuthor.attributes?.profile?.bio || '';
+  const authorInitials = authorDisplayName
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+
+  // Calculate average rating
+  const calculateAverageRating = () => {
+    if (!reviews || reviews.length === 0) return null;
+    const totalRating = reviews.reduce((sum, review) => {
+      return sum + (review.attributes?.rating || 0);
+    }, 0);
+    return (totalRating / reviews.length).toFixed(1);
+  };
+  const averageRating = calculateAverageRating();
+  const reviewCount = reviews.length;
+
+  // Schema
   const facebookImages = listingImages(currentListing, 'facebook');
   const twitterImages = listingImages(currentListing, 'twitter');
   const schemaImages = listingImages(
     currentListing,
-    `${config.layout.listingImage.variantPrefix}-2x`
+    `${variantPrefix}-2x`
   ).map(img => img.url);
   const marketplaceName = config.marketplaceName;
   const schemaTitle = intl.formatMessage(
     { id: 'ListingPage.schemaTitle' },
     { title, price: formattedPrice, marketplaceName }
   );
-  // You could add reviews, sku, etc. into page schema
-  // Read more about product schema
-  // https://developers.google.com/search/docs/advanced/structured-data/product
   const productURL = `${config.marketplaceRootURL}${location.pathname}${location.search}${location.hash}`;
   const currentStock = currentListing.currentStock?.attributes?.quantity || 0;
   const schemaAvailability = !currentListing.currentStock
@@ -349,156 +531,249 @@ export const ListingPageComponent = props => {
       }}
     >
       <LayoutSingleColumn className={css.pageRoot} topbar={topbar} footer={<FooterContainer />}>
-        <div className={css.contentWrapperForProductLayout}>
-          <div className={css.mainColumnForProductLayout}>
-            {mounted && currentListing.id && noPayoutDetailsSetWithOwnListing ? (
-              <ActionBarMaybe
-                className={css.actionBarForProductLayout}
-                isOwnListing={isOwnListing}
-                listing={currentListing}
-                showNoPayoutDetailsSet={noPayoutDetailsSetWithOwnListing}
-                currentUser={currentUser}
-              />
-            ) : null}
-            {mounted && currentListing.id ? (
-              <ActionBarMaybe
-                className={css.actionBarForProductLayout}
-                isOwnListing={isOwnListing}
-                listing={currentListing}
-                currentUser={currentUser}
-                editParams={{
-                  id: listingId.uuid,
-                  slug: listingSlug,
-                  type: listingPathParamType,
-                  tab: listingTab,
-                }}
-              />
-            ) : null}
-            {showListingImage && (
-              <SectionGallery
-                listing={currentListing}
-                variantPrefix={config.layout.listingImage.variantPrefix}
-              />
-            )}
-            <div
-              className={showListingImage ? css.mobileHeading : css.noListingImageHeadingProduct}
-            >
-              {showListingImage ? (
-                <H4 as="h1" className={css.orderPanelTitle}>
-                  <FormattedMessage id="ListingPage.orderTitle" values={{ title: richTitle }} />
-                </H4>
-              ) : (
-                <H3 as="h1" className={css.orderPanelTitle}>
-                  <FormattedMessage id="ListingPage.orderTitle" values={{ title: richTitle }} />
-                </H3>
-              )}
-            </div>
-            <SectionTextMaybe text={description} showAsIngress />
-
-            <CustomListingFields
-              publicData={publicData}
-              metadata={metadata}
-              listingFieldConfigs={listingConfig.listingFields}
-              categoryConfiguration={config.categoryConfiguration}
-              intl={intl}
-            />
-
-            <SectionMapMaybe
-              geolocation={geolocation}
-              publicData={publicData}
-              listingId={currentListing.id}
-              mapsConfig={config.maps}
-            />
-            <SectionReviews reviews={reviews} fetchReviewsError={fetchReviewsError} />
-            <SectionAuthorMaybe
-              title={title}
+        {/* Action bar for own listing */}
+        {mounted && currentListing.id && isOwnListing ? (
+          <div className={css.actionBarWrapper}>
+            <ActionBarMaybe
+              className={css.actionBarForProductLayout}
+              isOwnListing={isOwnListing}
               listing={currentListing}
-              authorDisplayName={authorDisplayName}
-              onContactUser={onContactUser}
-              isInquiryModalOpen={isAuthenticated && inquiryModalOpen}
-              onCloseInquiryModal={() => setInquiryModalOpen(false)}
-              sendInquiryError={sendInquiryError}
-              sendInquiryInProgress={sendInquiryInProgress}
-              onSubmitInquiry={onSubmitInquiry}
               currentUser={currentUser}
-              onManageDisableScrolling={onManageDisableScrolling}
+              editParams={{
+                id: listingId.uuid,
+                slug: listingSlug,
+                type: listingPathParamType,
+                tab: listingTab,
+              }}
             />
           </div>
-          <div className={css.orderColumnForProductLayout}>
-            <OrderPanel
-              className={classNames(css.productOrderPanel, {
-                [css.imagesEnabled]: showListingImage,
-              })}
-              listing={currentListing}
-              isOwnListing={isOwnListing}
-              onSubmit={handleOrderSubmit}
-              authorLink={
-                <NamedLink
-                  className={css.authorNameLink}
-                  name={isVariant ? 'ListingPageVariant' : 'ListingPage'}
-                  params={params}
-                  to={{ hash: '#author' }}
-                >
-                  {authorDisplayName}
-                </NamedLink>
-              }
-              title={<FormattedMessage id="ListingPage.orderTitle" values={{ title: richTitle }} />}
-              titleDesktop={
-                <H4 as="h1" className={css.orderPanelTitle}>
-                  <FormattedMessage id="ListingPage.orderTitle" values={{ title: richTitle }} />
-                </H4>
-              }
-              payoutDetailsWarning={payoutDetailsWarning}
-              author={ensuredAuthor}
-              onManageDisableScrolling={onManageDisableScrolling}
-              onContactUser={onContactUser}
-              {...restOfProps}
-              validListingTypes={config.listing.listingTypes}
-              marketplaceCurrency={config.currency}
-              dayCountAvailableForBooking={config.stripe.dayCountAvailableForBooking}
-              marketplaceName={config.marketplaceName}
-              showListingImage={showListingImage}
+        ) : null}
+
+        {/* Main grid layout */}
+        <div className={css.listingPageGrid}>
+          {/* Left column - Gallery */}
+          <div className={css.galleryColumn}>
+            <ListingImageGallery
+              images={images}
+              imageVariants={imageVariants}
+              thumbnailVariants={thumbnailVariants}
             />
+          </div>
+
+          {/* Right column - Content */}
+          <div className={css.contentColumn}>
+            {/* Header: Category, Title, Author, Actions */}
+            <div className={css.listingHeader}>
+              <div className={css.listingHeaderInfo}>
+                {categoryLabel && (
+                  <p className={css.listingCategory}>{categoryLabel}</p>
+                )}
+                <h1 className={css.listingTitle}>{richTitle}</h1>
+                <p className={css.listingAuthor}>
+                  <FormattedMessage id="ListingPage.soldBy" />{' '}
+                  <NamedLink
+                    className={css.listingAuthorLink}
+                    name="ProfilePage"
+                    params={{ id: ensuredAuthor.id?.uuid }}
+                  >
+                    {authorDisplayName}
+                  </NamedLink>
+                </p>
+              </div>
+              <div className={css.headerActions}>
+                <button
+                  className={css.actionIconButton}
+                  title={intl.formatMessage({ id: 'ListingPage.addToFavorites' })}
+                >
+                  <IconHeart />
+                </button>
+                <button
+                  className={css.actionIconButton}
+                  title={intl.formatMessage({ id: 'ListingPage.share' })}
+                  onClick={() => setIsShareModalOpen(true)}
+                >
+                  <IconShare />
+                </button>
+              </div>
+            </div>
+
+            {/* Price */}
+            <div className={css.priceSection}>
+              <p className={css.currentPrice}>{formattedPrice}</p>
+            </div>
+
+            {/* Description */}
+            {description && (
+              <div className={css.descriptionSection}>
+                <p className={css.descriptionText}>{description}</p>
+              </div>
+            )}
+
+            {/* Specifications */}
+            {specifications.length > 0 && (
+              <div className={css.specificationsSection}>
+                <h3 className={css.sectionTitle}>
+                  <FormattedMessage id="ListingPage.specifications" />
+                </h3>
+                <div className={css.specificationsGrid}>
+                  {specifications.map(spec => (
+                    <div key={spec.key} className={css.specItem}>
+                      <span className={css.specLabel}>{spec.label}</span>
+                      <span className={css.specValue}>{spec.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Trust badges */}
+            <div className={css.trustBadgesSection}>
+              <div className={css.trustBadgesGrid}>
+                <div className={css.trustBadge}>
+                  <div className={css.trustBadgeIcon}>
+                    <IconShield />
+                  </div>
+                  <span className={css.trustBadgeText}>
+                    <FormattedMessage id="ListingPage.authenticityGuarantee" />
+                  </span>
+                </div>
+                <div className={css.trustBadge}>
+                  <div className={css.trustBadgeIcon}>
+                    <IconTruck />
+                  </div>
+                  <span className={css.trustBadgeText}>
+                    <FormattedMessage id="ListingPage.whiteGloveDelivery" />
+                  </span>
+                </div>
+                <div className={css.trustBadge}>
+                  <div className={css.trustBadgeIcon}>
+                    <IconBox />
+                  </div>
+                  <span className={css.trustBadgeText}>
+                    <FormattedMessage id="ListingPage.professionalPackaging" />
+                  </span>
+                </div>
+                <div className={css.trustBadge}>
+                  <div className={css.trustBadgeIcon}>
+                    <IconTag />
+                  </div>
+                  <span className={css.trustBadgeText}>
+                    <FormattedMessage id="ListingPage.freeReturns" />
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            <div className={css.actionsSection}>
+              {isPurchase && (
+                <button
+                  className={css.addToCartButton}
+                  onClick={() => handleOrderSubmit({})}
+                  disabled={isOwnListing}
+                >
+                  <FormattedMessage id="ListingPage.addToCart" />
+                </button>
+              )}
+              <button className={css.makeOfferButton} disabled={isOwnListing}>
+                <FormattedMessage id="ListingPage.makeAnOffer" />
+              </button>
+              <button
+                className={css.contactSellerButton}
+                onClick={onContactUser}
+                disabled={isOwnListing}
+              >
+                <FormattedMessage id="ListingPage.contactSeller" />
+              </button>
+            </div>
+
+            {/* Author card */}
+            <div className={css.authorCardSection}>
+              <div className={css.authorCardHeader}>
+                <Avatar
+                  className={css.authorAvatar}
+                  user={ensuredAuthor}
+                  disableProfileLink
+                />
+                <div className={css.authorCardInfo}>
+                  <h4 className={css.authorCardName}>
+                    <NamedLink
+                      className={css.authorCardNameLink}
+                      name="ProfilePage"
+                      params={{ id: ensuredAuthor.id?.uuid }}
+                    >
+                      {authorDisplayName}
+                    </NamedLink>
+                  </h4>
+                  <div className={css.authorCardMeta}>
+                    <span className={css.authorCardMetaText}>
+                      ⭐ {averageRating || '0'} ({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})
+                    </span>
+                  </div>
+                </div>
+              </div>
+              {authorBio && (
+                <p className={css.authorCardBio}>{authorBio}</p>
+              )}
+            </div>
           </div>
         </div>
       </LayoutSingleColumn>
+
+      {/* Share Modal */}
+      <Modal
+        id="ListingPage.shareModal"
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        onManageDisableScrolling={onManageDisableScrolling}
+        usePortal
+      >
+        <div className={css.shareModalContent}>
+          <h2 className={css.shareModalTitle}>
+            <FormattedMessage id="ListingPage.shareModalTitle" />
+          </h2>
+
+          <div className={css.copyLinkSection}>
+            <input
+              type="text"
+              value={shareUrl}
+              readOnly
+              className={css.copyLinkInput}
+            />
+            <button
+              className={css.copyLinkButton}
+              onClick={handleCopyLink}
+            >
+              {copied ? <IconCheck /> : <IconCopy />}
+              <span>{copied ? intl.formatMessage({ id: 'ListingPage.copied' }) : intl.formatMessage({ id: 'ListingPage.copyLink' })}</span>
+            </button>
+          </div>
+
+          <div className={css.socialShareSection}>
+            <p className={css.socialShareLabel}>
+              <FormattedMessage id="ListingPage.shareOn" />
+            </p>
+            <div className={css.socialButtons}>
+              <button className={css.socialButton} onClick={handleShareFacebook} title="Facebook">
+                <IconFacebook />
+              </button>
+              <button className={css.socialButton} onClick={handleShareTwitter} title="X (Twitter)">
+                <IconTwitter />
+              </button>
+              <button className={css.socialButton} onClick={handleShareLinkedIn} title="LinkedIn">
+                <IconLinkedIn />
+              </button>
+              <button className={css.socialButton} onClick={handleShareEmail} title="Email">
+                <IconEmail />
+              </button>
+            </div>
+          </div>
+        </div>
+      </Modal>
     </Page>
   );
 };
 
-/**
- * The ListingPage component with carousel layout.
- *
- * @component
- * @param {Object} props
- * @param {Object} props.params - The path params object
- * @param {string} props.params.id - The listing id
- * @param {string} props.params.slug - The listing slug
- * @param {LISTING_PAGE_DRAFT_VARIANT | LISTING_PAGE_PENDING_APPROVAL_VARIANT} props.params.variant - The listing variant
- * @param {Function} props.onManageDisableScrolling - The on manage disable scrolling function
- * @param {boolean} props.isAuthenticated - Whether the user is authenticated
- * @param {Function} props.getListing - The get listing function
- * @param {Function} props.getOwnListing - The get own listing function
- * @param {Object} props.currentUser - The current user
- * @param {boolean} props.scrollingDisabled - Whether scrolling is disabled
- * @param {string} props.inquiryModalOpenForListingId - The inquiry modal open for the specific listing id
- * @param {propTypes.error} props.showListingError - The show listing error
- * @param {Function} props.callSetInitialValues - The call setInitialValues function, which is given to this function as a parameter
- * @param {Array<propTypes.review>} props.reviews - The reviews
- * @param {propTypes.error} props.fetchReviewsError - The fetch reviews error
- * @param {Object<string, Object>} props.monthlyTimeSlots - The monthly time slots. E.g. { '2019-11': { timeSlots: [], fetchTimeSlotsInProgress: false, fetchTimeSlotsError: null } }
- * @param {Object<string, Object>} props.timeSlotsForDate - The time slots for date. E.g. { '2019-11-01': { timeSlots: [], fetchedAt: 1572566400000, fetchTimeSlotsError: null, fetchTimeSlotsInProgress: false } }
- * @param {boolean} props.sendInquiryInProgress - Whether the send inquiry is in progress
- * @param {propTypes.error} props.sendInquiryError - The send inquiry error
- * @param {Function} props.onSendInquiry - The on send inquiry function
- * @param {Function} props.onInitializeCardPaymentData - The on initialize card payment data function
- * @param {Function} props.onFetchTimeSlots - The on fetch time slots function
- * @param {Function} props.onFetchTransactionLineItems - The on fetch transaction line items function
- * @param {Array<propTypes.transactionLineItem>} props.lineItems - The line items
- * @param {boolean} props.fetchLineItemsInProgress - Whether the fetch line items is in progress
- * @param {propTypes.error} props.fetchLineItemsError - The fetch line items error
- * @returns {JSX.Element} listing page component
- */
 const EnhancedListingPage = props => {
   const config = useConfiguration();
   const routeConfiguration = useRouteConfiguration();
@@ -510,7 +785,6 @@ const EnhancedListingPage = props => {
   const isVariant = props.params?.variant != null;
   const currentUser = props.currentUser;
   if (isForbiddenError(showListingError) && !isVariant && !currentUser) {
-    // This can happen if private marketplace mode is active
     return (
       <NamedRedirect
         name="SignupPage"
@@ -535,8 +809,6 @@ const EnhancedListingPage = props => {
     (hasNoViewingRights && isForbiddenError(showListingError)) ||
     isErrorNoViewingPermission(showListingError)
   ) {
-    // If the user has no viewing rights, fetching anything but their own listings
-    // will return a 403 error. If that happens, redirect to NoAccessPage.
     return (
       <NamedRedirect
         name="NoAccessPage"
@@ -597,11 +869,11 @@ const mapStateToProps = state => {
     showListingError,
     reviews,
     fetchReviewsError,
-    monthlyTimeSlots, // for OrderPanel
-    timeSlotsForDate, // for OrderPanel
-    lineItems, // for OrderPanel
-    fetchLineItemsInProgress, // for OrderPanel
-    fetchLineItemsError, // for OrderPanel
+    monthlyTimeSlots,
+    timeSlotsForDate,
+    lineItems,
+    fetchLineItemsInProgress,
+    fetchLineItemsError,
     sendInquiryInProgress,
     sendInquiryError,
   };
@@ -612,19 +884,13 @@ const mapDispatchToProps = dispatch => ({
     dispatch(manageDisableScrolling(componentId, disableScrolling)),
   callSetInitialValues: (setInitialValues, values, saveToSessionStorage) =>
     dispatch(setInitialValues(values, saveToSessionStorage)),
-  onFetchTransactionLineItems: params => dispatch(fetchTransactionLineItems(params)), // for OrderPanel
+  onFetchTransactionLineItems: params => dispatch(fetchTransactionLineItems(params)),
   onSendInquiry: (listing, message) => dispatch(sendInquiry(listing, message)),
   onInitializeCardPaymentData: () => dispatch(initializeCardPaymentData()),
   onFetchTimeSlots: (listingId, start, end, timeZone, options) =>
-    dispatch(fetchTimeSlots(listingId, start, end, timeZone, options)), // for OrderPanel
+    dispatch(fetchTimeSlots(listingId, start, end, timeZone, options)),
 });
 
-// Note: it is important that the withRouter HOC is **outside** the
-// connect HOC, otherwise React Router won't rerender any Route
-// components since connect implements a shouldComponentUpdate
-// lifecycle hook.
-//
-// See: https://github.com/ReactTraining/react-router/issues/4671
 const ListingPage = compose(
   connect(
     mapStateToProps,
