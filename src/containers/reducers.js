@@ -6,6 +6,7 @@
 import ArticlePage from './ArticlePage/ArticlePage.duck';
 import ArticlesPage from './ArticlesPage/ArticlesPage.duck';
 import CheckoutPage from './CheckoutPage/CheckoutPage.duck';
+import FavoritesPage from './FavoritesPage/FavoritesPage.duck';
 import ContactDetailsPage from './ContactDetailsPage/ContactDetailsPage.duck';
 import EditListingPage from './EditListingPage/EditListingPage.duck';
 import InboxPage from './InboxPage/InboxPage.duck';
@@ -31,6 +32,7 @@ export {
   CheckoutPage,
   ContactDetailsPage,
   EditListingPage,
+  FavoritesPage,
   InboxPage,
   LandingPage,
   ListingPage,

@@ -4,7 +4,7 @@ import { denormalisedResponseEntities, ensureOwnListing } from '../util/data';
 import * as log from '../util/log';
 import { LISTING_STATE_DRAFT } from '../util/types';
 import { storableError } from '../util/errors';
-import { isUserAuthorized } from '../util/userHelpers';
+import { isUserAuthorized, getFavoriteListingIds } from '../util/userHelpers';
 import {
   getStatesNeedingProviderAttention,
   getStatesNeedingCustomerAttention,
@@ -289,6 +289,89 @@ export const sendVerificationEmail = () => (dispatch, getState, sdk) => {
   return dispatch(sendVerificationEmailThunk()).unwrap();
 };
 
+///////////////////////////////////////////
+// Add listing to favorites (CUSTOM)    //
+///////////////////////////////////////////
+
+const addListingToFavoritesPayloadCreator = (listingId, thunkAPI) => {
+  const { getState, dispatch, extra: sdk, rejectWithValue } = thunkAPI;
+  const { currentUser } = getState().user;
+  const currentFavorites = getFavoriteListingIds(currentUser);
+
+  // Check if already in favorites
+  if (currentFavorites.includes(listingId)) {
+    return Promise.resolve({ listingId, alreadyInFavorites: true });
+  }
+
+  // Prepend new listing to favorites array
+  const updatedFavorites = [listingId, ...currentFavorites];
+
+  return sdk.currentUser
+    .updateProfile({
+      privateData: {
+        favoriteListingIds: updatedFavorites,
+      },
+    })
+    .then(() => {
+      // Refresh current user data
+      dispatch(fetchCurrentUser());
+      return { listingId };
+    })
+    .catch(e => {
+      log.error(e, 'add-listing-to-favorites-failed', { listingId });
+      return rejectWithValue({ error: storableError(e), listingId });
+    });
+};
+
+export const addListingToFavoritesThunk = createAsyncThunk(
+  'user/addListingToFavorites',
+  addListingToFavoritesPayloadCreator
+);
+
+// Backward compatible wrapper for the thunk
+export const addListingToFavorites = listingId => (dispatch, getState, sdk) => {
+  return dispatch(addListingToFavoritesThunk(listingId)).unwrap();
+};
+
+///////////////////////////////////////////////
+// Remove listing from favorites (CUSTOM)   //
+///////////////////////////////////////////////
+
+const removeListingFromFavoritesPayloadCreator = (listingId, thunkAPI) => {
+  const { getState, dispatch, extra: sdk, rejectWithValue } = thunkAPI;
+  const { currentUser } = getState().user;
+  const currentFavorites = getFavoriteListingIds(currentUser);
+
+  // Filter out the listing ID
+  const updatedFavorites = currentFavorites.filter(id => id !== listingId);
+
+  return sdk.currentUser
+    .updateProfile({
+      privateData: {
+        favoriteListingIds: updatedFavorites,
+      },
+    })
+    .then(() => {
+      // Refresh current user data
+      dispatch(fetchCurrentUser());
+      return { listingId };
+    })
+    .catch(e => {
+      log.error(e, 'remove-listing-from-favorites-failed', { listingId });
+      return rejectWithValue({ error: storableError(e), listingId });
+    });
+};
+
+export const removeListingFromFavoritesThunk = createAsyncThunk(
+  'user/removeListingFromFavorites',
+  removeListingFromFavoritesPayloadCreator
+);
+
+// Backward compatible wrapper for the thunk
+export const removeListingFromFavorites = listingId => (dispatch, getState, sdk) => {
+  return dispatch(removeListingFromFavoritesThunk(listingId)).unwrap();
+};
+
 // ================ Slice ================ //
 
 const userSlice = createSlice({
@@ -306,6 +389,12 @@ const userSlice = createSlice({
     currentUserHasOrdersError: null,
     sendVerificationEmailInProgress: false,
     sendVerificationEmailError: null,
+    // Favorites
+    addListingToFavoritesInProgress: false,
+    addListingToFavoritesError: null,
+    removeListingFromFavoritesInProgress: false,
+    removeListingFromFavoritesError: null,
+    currentFavoriteListingId: null,
   },
   reducers: {
     clearCurrentUser: state => {
@@ -385,6 +474,36 @@ const userSlice = createSlice({
       .addCase(sendVerificationEmailThunk.rejected, (state, action) => {
         state.sendVerificationEmailInProgress = false;
         state.sendVerificationEmailError = action.payload;
+      })
+      // addListingToFavorites
+      .addCase(addListingToFavoritesThunk.pending, (state, action) => {
+        state.addListingToFavoritesInProgress = true;
+        state.addListingToFavoritesError = null;
+        state.currentFavoriteListingId = action.meta.arg;
+      })
+      .addCase(addListingToFavoritesThunk.fulfilled, state => {
+        state.addListingToFavoritesInProgress = false;
+        state.currentFavoriteListingId = null;
+      })
+      .addCase(addListingToFavoritesThunk.rejected, (state, action) => {
+        state.addListingToFavoritesInProgress = false;
+        state.addListingToFavoritesError = action.payload?.error || action.payload;
+        state.currentFavoriteListingId = null;
+      })
+      // removeListingFromFavorites
+      .addCase(removeListingFromFavoritesThunk.pending, (state, action) => {
+        state.removeListingFromFavoritesInProgress = true;
+        state.removeListingFromFavoritesError = null;
+        state.currentFavoriteListingId = action.meta.arg;
+      })
+      .addCase(removeListingFromFavoritesThunk.fulfilled, state => {
+        state.removeListingFromFavoritesInProgress = false;
+        state.currentFavoriteListingId = null;
+      })
+      .addCase(removeListingFromFavoritesThunk.rejected, (state, action) => {
+        state.removeListingFromFavoritesInProgress = false;
+        state.removeListingFromFavoritesError = action.payload?.error || action.payload;
+        state.currentFavoriteListingId = null;
       });
   },
 });

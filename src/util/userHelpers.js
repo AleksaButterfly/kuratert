@@ -270,3 +270,12 @@ export const getCurrentUserTypeRoles = (config, currentUser) => {
     }
   );
 };
+
+/**
+ * Get the list of favorite listing IDs for the current user
+ * @param {Object} currentUser API entity
+ * @returns {Array<string>} Array of listing IDs that the user has favorited
+ */
+export const getFavoriteListingIds = (currentUser = {}) => {
+  return currentUser?.attributes?.profile?.privateData?.favoriteListingIds || [];
+};

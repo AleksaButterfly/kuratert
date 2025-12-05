@@ -52,7 +52,7 @@ const SearchButton = ({ intl, isSearchOpen, onClick }) => {
 const FavoritesLink = ({ intl }) => {
   return (
     <NamedLink
-      name="LandingPage"
+      name="FavoritesPage"
       className={css.topbarLink}
       aria-label={intl.formatMessage({ id: 'TopbarDesktop.favorites' })}
     >

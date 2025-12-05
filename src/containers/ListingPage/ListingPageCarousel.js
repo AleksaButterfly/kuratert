@@ -50,6 +50,8 @@ import {
 import { getMarketplaceEntities } from '../../ducks/marketplaceData.duck';
 import { manageDisableScrolling, isScrollingDisabled } from '../../ducks/ui.duck';
 import { initializeCardPaymentData } from '../../ducks/stripe.duck.js';
+import { addListingToFavorites, removeListingFromFavorites } from '../../ducks/user.duck';
+import { getFavoriteListingIds } from '../../util/userHelpers.js';
 
 // Shared components
 import {
@@ -59,6 +61,7 @@ import {
   LayoutSingleColumn,
   Modal,
   Avatar,
+  ButtonFavorite,
 } from '../../components';
 
 // Related components and modules
@@ -281,6 +284,12 @@ export const ListingPageComponent = props => {
     config,
     routeConfiguration,
     showOwnListingsOnly,
+    // Favorites
+    addListingToFavoritesInProgress,
+    removeListingFromFavoritesInProgress,
+    currentFavoriteListingId,
+    onAddListingToFavorites,
+    onRemoveListingFromFavorites,
     ...restOfProps
   } = props;
 
@@ -427,6 +436,24 @@ export const ListingPageComponent = props => {
     const body = intl.formatMessage({ id: 'ListingPage.shareEmailBody' }, { title, url: shareUrl });
     window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
+
+  // Favorites logic
+  const listingIdString = listingId.uuid;
+  const favoriteListingIds = getFavoriteListingIds(currentUser);
+  const isFavorite = favoriteListingIds.includes(listingIdString);
+
+  const handleToggleFavorite = (listingIdToToggle, isFavoriteNow) => {
+    if (isFavoriteNow) {
+      onRemoveListingFromFavorites(listingIdToToggle);
+    } else {
+      onAddListingToFavorites(listingIdToToggle);
+    }
+  };
+
+  // Check if this specific listing is being favorited/unfavorited
+  const isThisListingInProgress = currentFavoriteListingId === listingIdString;
+  const addInProgressForThisListing = isThisListingInProgress && addListingToFavoritesInProgress;
+  const removeInProgressForThisListing = isThisListingInProgress && removeListingFromFavoritesInProgress;
 
   // Contact user handler
   const commonParams = { params, history, routes: routeConfiguration };
@@ -581,12 +608,15 @@ export const ListingPageComponent = props => {
                 </p>
               </div>
               <div className={css.headerActions}>
-                <button
+                <ButtonFavorite
                   className={css.actionIconButton}
-                  title={intl.formatMessage({ id: 'ListingPage.addToFavorites' })}
-                >
-                  <IconHeart />
-                </button>
+                  listingId={listingIdString}
+                  isFavorite={isFavorite}
+                  isAuthenticated={isAuthenticated}
+                  onToggleFavorite={handleToggleFavorite}
+                  addInProgress={addInProgressForThisListing}
+                  removeInProgress={removeInProgressForThisListing}
+                />
                 <button
                   className={css.actionIconButton}
                   title={intl.formatMessage({ id: 'ListingPage.share' })}
@@ -845,7 +875,12 @@ const mapStateToProps = state => {
     fetchLineItemsError,
     inquiryModalOpenForListingId,
   } = state.ListingPage;
-  const { currentUser } = state.user;
+  const {
+    currentUser,
+    addListingToFavoritesInProgress,
+    removeListingFromFavoritesInProgress,
+    currentFavoriteListingId,
+  } = state.user;
 
   const getListing = id => {
     const ref = { id, type: 'listing' };
@@ -876,6 +911,10 @@ const mapStateToProps = state => {
     fetchLineItemsError,
     sendInquiryInProgress,
     sendInquiryError,
+    // Favorites
+    addListingToFavoritesInProgress,
+    removeListingFromFavoritesInProgress,
+    currentFavoriteListingId,
   };
 };
 
@@ -889,6 +928,9 @@ const mapDispatchToProps = dispatch => ({
   onInitializeCardPaymentData: () => dispatch(initializeCardPaymentData()),
   onFetchTimeSlots: (listingId, start, end, timeZone, options) =>
     dispatch(fetchTimeSlots(listingId, start, end, timeZone, options)),
+  // Favorites
+  onAddListingToFavorites: listingId => dispatch(addListingToFavorites(listingId)),
+  onRemoveListingFromFavorites: listingId => dispatch(removeListingFromFavorites(listingId)),
 });
 
 const ListingPage = compose(

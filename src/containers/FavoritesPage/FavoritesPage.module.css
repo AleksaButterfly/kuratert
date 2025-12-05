@@ -1,0 +1,62 @@
+@import '../../styles/customMediaQueries.css';
+
+.root {
+}
+
+.content {
+  max-width: var(--contentMaxWidthPages);
+  margin: 0 auto;
+  width: 100%;
+  padding: 24px;
+
+  @media (--viewportMedium) {
+    padding: 48px 24px;
+  }
+}
+
+.title {
+  margin-top: 0;
+  margin-bottom: 24px;
+  padding: 0;
+}
+
+.listingCards {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 24px;
+  width: 100%;
+
+  @media (min-width: 550px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (--viewportMedium) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (--viewportLarge) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (--viewportXLarge) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.noResults {
+  margin-top: 0;
+  margin-bottom: 0;
+  color: var(--colorGrey700);
+}
+
+.loading {
+  margin-top: 0;
+  margin-bottom: 0;
+  color: var(--colorGrey700);
+}
+
+.error {
+  color: var(--colorFail);
+  margin-top: 0;
+  margin-bottom: 0;
+}

@@ -121,7 +121,7 @@ const TopbarMobileMenu = props => {
       <NamedLink name="SearchPage" className={css.navigationLink}>
         <FormattedMessage id="TopbarMobileMenu.searchLink" />
       </NamedLink>
-      <NamedLink name="LandingPage" className={css.navigationLink}>
+      <NamedLink name="FavoritesPage" className={css.navigationLink}>
         <FormattedMessage id="TopbarMobileMenu.favoritesLink" />
       </NamedLink>
       <NamedLink name="LandingPage" className={css.navigationLink}>
