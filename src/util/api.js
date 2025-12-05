@@ -160,6 +160,14 @@ export const queryUsers = keywords => {
   });
 };
 
+// Query seller users for the seller landing page.
+// Uses the Integration API on the server side to fetch sellers.
+export const querySellers = (perPage = 6) => {
+  return request(`/api/sellers-query?perPage=${perPage}`, {
+    method: methods.GET,
+  });
+};
+
 // Fetch user statistics (sales count, response rate, response time).
 // Uses the Integration API on the server side to calculate stats from transactions.
 export const fetchUserStats = userId => {

@@ -94,6 +94,7 @@ const routeConfiguration = (layoutConfig, accessControlConfig) => {
       path: '/sell',
       name: 'SellerLandingPage',
       component: SellerLandingPage,
+      loadData: pageDataLoadingAPI.SellerLandingPage.loadData,
     },
     {
       path: '/about',

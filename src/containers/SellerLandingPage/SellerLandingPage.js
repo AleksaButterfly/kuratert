@@ -1,8 +1,11 @@
 import React from 'react';
+import { array, bool } from 'prop-types';
+import { compose } from 'redux';
+import { connect } from 'react-redux';
+
 import { useIntl } from '../../util/reactIntl';
 import { useConfiguration } from '../../context/configurationContext';
 import { isScrollingDisabled } from '../../ducks/ui.duck';
-import { useSelector } from 'react-redux';
 
 import { Page, LayoutSingleColumn } from '../../components';
 import TopbarContainer from '../../containers/TopbarContainer/TopbarContainer';
@@ -17,10 +20,10 @@ import SectionSell from './SectionSell/SectionSell';
 
 import css from './SellerLandingPage.module.css';
 
-const SellerLandingPage = () => {
+const SellerLandingPageComponent = props => {
+  const { sellers, querySellersInProgress, scrollingDisabled } = props;
   const intl = useIntl();
   const config = useConfiguration();
-  const scrollingDisabled = useSelector(state => isScrollingDisabled(state));
 
   const marketplaceName = config.marketplaceName;
   const schemaTitle = intl.formatMessage(
@@ -31,6 +34,9 @@ const SellerLandingPage = () => {
     { id: 'SellerLandingPage.schemaDescription' },
     { marketplaceName }
   );
+
+  // Only show sellers section if we have sellers
+  const hasSellers = sellers && sellers.length > 0;
 
   return (
     <Page
@@ -52,7 +58,9 @@ const SellerLandingPage = () => {
         <div className={css.content}>
           <SectionHero />
           <SectionAbout />
-          <SectionSellers />
+          {hasSellers && !querySellersInProgress ? (
+            <SectionSellers sellers={sellers} />
+          ) : null}
           <SectionHowItWorks />
           <SectionPricing />
           <SectionSell />
@@ -61,5 +69,24 @@ const SellerLandingPage = () => {
     </Page>
   );
 };
+
+SellerLandingPageComponent.propTypes = {
+  sellers: array,
+  querySellersInProgress: bool,
+  scrollingDisabled: bool.isRequired,
+};
+
+const mapStateToProps = state => {
+  const { sellers, querySellersInProgress, querySellersError } = state.SellerLandingPage;
+
+  return {
+    sellers,
+    querySellersInProgress,
+    querySellersError,
+    scrollingDisabled: isScrollingDisabled(state),
+  };
+};
+
+const SellerLandingPage = compose(connect(mapStateToProps))(SellerLandingPageComponent);
 
 export default SellerLandingPage;

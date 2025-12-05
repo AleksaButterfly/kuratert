@@ -69,7 +69,7 @@ const SectionPricing = props => {
               </div>
             ))}
           </div>
-          <NamedLink name="CMSPage" params={{ pageId: 'contact' }} className={css.ctaButton}>
+          <NamedLink name="ContactPage" className={css.ctaButton}>
             <FormattedMessage id="SellerLandingPage.SectionPricing.ctaButton" />
             <IconArrowRight />
           </NamedLink>

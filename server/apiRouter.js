@@ -18,6 +18,7 @@ const transitionPrivileged = require('./api/transition-privileged');
 const deleteAccount = require('./api/delete-account');
 const usersQuery = require('./api/users-query');
 const userStats = require('./api/user-stats');
+const sellersQuery = require('./api/sellers-query');
 const { getFeaturedArticles, getAllArticles, getArticleBySlug } = require('./api/articles');
 
 const createUserWithIdp = require('./api/auth/createUserWithIdp');
@@ -61,6 +62,7 @@ router.post('/transition-privileged', transitionPrivileged);
 router.post('/delete-account', deleteAccount);
 router.get('/users-query', usersQuery);
 router.get('/user-stats', userStats);
+router.get('/sellers-query', sellersQuery);
 
 // Articles endpoints (Sanity CMS)
 router.get('/articles/featured', getFeaturedArticles);

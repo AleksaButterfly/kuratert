@@ -1,23 +1,19 @@
 import React from 'react';
-import { string } from 'prop-types';
+import { array, string } from 'prop-types';
 import classNames from 'classnames';
 
 import { FormattedMessage } from '../../../util/reactIntl';
+import { Avatar, NamedLink } from '../../../components';
 
 import css from './SectionSellers.module.css';
 
-const sellers = [
-  { name: 'ARTEMIS', type: 'Gallery' },
-  { name: 'MODERN', type: 'Collective' },
-  { name: 'VAULT', type: 'Arts' },
-  { name: 'ATELIER', type: 'Studio' },
-  { name: 'LUMIÈRE', type: 'Gallery' },
-  { name: 'APEX', type: 'Design' },
-];
-
 const SectionSellers = props => {
-  const { rootClassName, className } = props;
+  const { rootClassName, className, sellers } = props;
   const classes = classNames(rootClassName || css.root, className);
+
+  if (!sellers || sellers.length === 0) {
+    return null;
+  }
 
   return (
     <section className={classes}>
@@ -31,15 +27,46 @@ const SectionSellers = props => {
           </h2>
         </div>
         <div className={css.grid}>
-          {sellers.map((seller, index) => (
-            <div key={index} className={css.card}>
-              <div className={css.imagePlaceholder} />
-              <div className={css.cardContent}>
-                <h3 className={css.sellerName}>{seller.name}</h3>
-                <p className={css.sellerType}>{seller.type}</p>
-              </div>
-            </div>
-          ))}
+          {sellers.map((seller, index) => {
+            const { id, attributes, profileImage } = seller;
+            const { profile } = attributes || {};
+            const { displayName, publicData } = profile || {};
+            const { userType } = publicData || {};
+
+            // Create a user-like object for Avatar component
+            const userForAvatar = {
+              id,
+              type: 'user',
+              attributes: {
+                profile: {
+                  displayName,
+                  abbreviatedName: displayName?.charAt(0) || '?',
+                },
+              },
+              profileImage,
+            };
+
+            return (
+              <NamedLink
+                key={id?.uuid || index}
+                name="ProfilePage"
+                params={{ id: id?.uuid }}
+                className={css.card}
+              >
+                <Avatar
+                  className={css.avatar}
+                  user={userForAvatar}
+                  disableProfileLink
+                />
+                <div className={css.cardContent}>
+                  <h3 className={css.sellerName}>{displayName || 'Seller'}</h3>
+                  {userType && (
+                    <p className={css.sellerType}>{userType}</p>
+                  )}
+                </div>
+              </NamedLink>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -49,6 +76,7 @@ const SectionSellers = props => {
 SectionSellers.propTypes = {
   rootClassName: string,
   className: string,
+  sellers: array,
 };
 
 export default SectionSellers;
