@@ -49,7 +49,6 @@ const SOCIAL_LINKS = [
 const BOTTOM_LINKS = [
   { name: 'PrivacyPolicyPage', labelId: 'Footer.privacyPolicy' },
   { name: 'TermsOfServicePage', labelId: 'Footer.termsOfService' },
-  { name: 'CMSPage', params: { pageId: 'cookie-policy' }, labelId: 'Footer.cookiePolicy' },
 ];
 
 /**
