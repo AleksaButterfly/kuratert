@@ -325,14 +325,7 @@ const addListingToFavoritesPayloadCreator = (listingId, thunkAPI) => {
 
 export const addListingToFavoritesThunk = createAsyncThunk(
   'user/addListingToFavorites',
-  addListingToFavoritesPayloadCreator,
-  {
-    // Prevent concurrent favorites operations to avoid race conditions
-    condition: (_, { getState }) => {
-      const { addListingToFavoritesInProgress, removeListingFromFavoritesInProgress } = getState().user;
-      return !addListingToFavoritesInProgress && !removeListingFromFavoritesInProgress;
-    },
-  }
+  addListingToFavoritesPayloadCreator
 );
 
 // Backward compatible wrapper for the thunk
@@ -371,14 +364,7 @@ const removeListingFromFavoritesPayloadCreator = (listingId, thunkAPI) => {
 
 export const removeListingFromFavoritesThunk = createAsyncThunk(
   'user/removeListingFromFavorites',
-  removeListingFromFavoritesPayloadCreator,
-  {
-    // Prevent concurrent favorites operations to avoid race conditions
-    condition: (_, { getState }) => {
-      const { addListingToFavoritesInProgress, removeListingFromFavoritesInProgress } = getState().user;
-      return !addListingToFavoritesInProgress && !removeListingFromFavoritesInProgress;
-    },
-  }
+  removeListingFromFavoritesPayloadCreator
 );
 
 // Backward compatible wrapper for the thunk
@@ -494,6 +480,15 @@ const userSlice = createSlice({
         state.addListingToFavoritesInProgress = true;
         state.addListingToFavoritesError = null;
         state.currentFavoriteListingId = action.meta.arg;
+
+        // Optimistic update: add to favorites immediately
+        const listingId = action.meta.arg;
+        if (state.currentUser?.attributes?.profile?.privateData) {
+          const currentFavorites = state.currentUser.attributes.profile.privateData.favoriteListingIds || [];
+          if (!currentFavorites.includes(listingId)) {
+            state.currentUser.attributes.profile.privateData.favoriteListingIds = [listingId, ...currentFavorites];
+          }
+        }
       })
       .addCase(addListingToFavoritesThunk.fulfilled, state => {
         state.addListingToFavoritesInProgress = false;
@@ -503,12 +498,26 @@ const userSlice = createSlice({
         state.addListingToFavoritesInProgress = false;
         state.addListingToFavoritesError = action.payload?.error || action.payload;
         state.currentFavoriteListingId = null;
+
+        // Revert optimistic update on error
+        const listingId = action.meta.arg;
+        if (state.currentUser?.attributes?.profile?.privateData?.favoriteListingIds) {
+          state.currentUser.attributes.profile.privateData.favoriteListingIds =
+            state.currentUser.attributes.profile.privateData.favoriteListingIds.filter(id => id !== listingId);
+        }
       })
       // removeListingFromFavorites
       .addCase(removeListingFromFavoritesThunk.pending, (state, action) => {
         state.removeListingFromFavoritesInProgress = true;
         state.removeListingFromFavoritesError = null;
         state.currentFavoriteListingId = action.meta.arg;
+
+        // Optimistic update: remove from favorites immediately
+        const listingId = action.meta.arg;
+        if (state.currentUser?.attributes?.profile?.privateData?.favoriteListingIds) {
+          state.currentUser.attributes.profile.privateData.favoriteListingIds =
+            state.currentUser.attributes.profile.privateData.favoriteListingIds.filter(id => id !== listingId);
+        }
       })
       .addCase(removeListingFromFavoritesThunk.fulfilled, state => {
         state.removeListingFromFavoritesInProgress = false;
@@ -518,6 +527,15 @@ const userSlice = createSlice({
         state.removeListingFromFavoritesInProgress = false;
         state.removeListingFromFavoritesError = action.payload?.error || action.payload;
         state.currentFavoriteListingId = null;
+
+        // Revert optimistic update on error: add back to favorites
+        const listingId = action.meta.arg;
+        if (state.currentUser?.attributes?.profile?.privateData) {
+          const currentFavorites = state.currentUser.attributes.profile.privateData.favoriteListingIds || [];
+          if (!currentFavorites.includes(listingId)) {
+            state.currentUser.attributes.profile.privateData.favoriteListingIds = [listingId, ...currentFavorites];
+          }
+        }
       });
   },
 });
