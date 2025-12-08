@@ -247,11 +247,14 @@ export const ManageListingsPageComponent = props => {
     ? formatMoney(intl, new Money(thisMonthPayouts, payoutCurrency))
     : `0 ${payoutCurrency}`;
 
-  // Filter listings by search query
+  // Filter listings by search query (matches title or category)
   const filteredListings = searchQuery
-    ? listings.filter(l =>
-        l.attributes.title?.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+    ? listings.filter(l => {
+        const title = l.attributes.title?.toLowerCase() || '';
+        const category = l.attributes.publicData?.categoryLevel1?.toLowerCase() || '';
+        const query = searchQuery.toLowerCase();
+        return title.includes(query) || category.includes(query);
+      })
     : listings;
 
   const showManageListingsLink = showCreateListingLinkForUser(config, currentUser);
