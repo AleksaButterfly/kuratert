@@ -74,10 +74,9 @@ const IconClock = () => (
 
 const IconShare = () => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M6 9L10 7M6 7L10 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none" />
-    <circle cx="4" cy="8" r="2" stroke="currentColor" strokeWidth="1.5" fill="none" />
-    <circle cx="12" cy="5" r="2" stroke="currentColor" strokeWidth="1.5" fill="none" />
-    <circle cx="12" cy="11" r="2" stroke="currentColor" strokeWidth="1.5" fill="none" />
+    <path d="M12.667 8.667V12.667C12.667 13.02 12.526 13.359 12.276 13.609C12.026 13.859 11.687 14 11.333 14H3.333C2.98 14 2.64 13.859 2.39 13.609C2.14 13.359 2 13.02 2 12.667V4.667C2 4.313 2.14 3.974 2.39 3.724C2.64 3.474 2.98 3.333 3.333 3.333H7.333" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    <path d="M10 2H14V6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    <path d="M6.667 9.333L14 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
   </svg>
 );
 

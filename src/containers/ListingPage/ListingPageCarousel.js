@@ -104,10 +104,9 @@ const IconHeart = () => (
 
 const IconShare = () => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M7.5 11.25L12.5 8.75M7.5 8.75L12.5 11.25" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none" />
-    <circle cx="5" cy="10" r="2.5" stroke="currentColor" strokeWidth="1.5" fill="none" />
-    <circle cx="15" cy="6.25" r="2.5" stroke="currentColor" strokeWidth="1.5" fill="none" />
-    <circle cx="15" cy="13.75" r="2.5" stroke="currentColor" strokeWidth="1.5" fill="none" />
+    <path d="M15.833 10.833V15.833C15.833 16.275 15.6578 16.699 15.3452 17.0115C15.0327 17.3241 14.6087 17.4993 14.1667 17.4993H4.16667C3.72464 17.4993 3.30072 17.3241 2.98816 17.0115C2.67559 16.699 2.5 16.275 2.5 15.833V5.83301C2.5 5.39098 2.67559 4.96706 2.98816 4.6545C3.30072 4.34193 3.72464 4.16634 4.16667 4.16634H9.16667" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    <path d="M12.5 2.5H17.5V7.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    <path d="M8.33333 11.6667L17.5 2.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
   </svg>
 );
 
