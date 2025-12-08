@@ -10,6 +10,7 @@
     padding-top: 16px;
     padding-bottom: 0;
     border-bottom: 0;
+    border-top: 1px solid var(--colorGrey100);
   }
 }
 

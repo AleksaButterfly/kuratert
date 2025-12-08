@@ -113,8 +113,6 @@
   align-items: center;
   justify-content: space-between;
   padding-bottom: 16px;
-  margin-bottom: 8px;
-  border-bottom: 1px solid var(--colorGrey100);
 }
 
 .filterHeaderLabel {
