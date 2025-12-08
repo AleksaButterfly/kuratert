@@ -347,6 +347,10 @@ export const ManageListingsPageComponent = props => {
               <div className={css.errorState}>
                 <FormattedMessage id="ManageListingsPage.queryError" />
               </div>
+            ) : filteredListings.length === 0 && searchQuery ? (
+              <div className={css.emptyState}>
+                <FormattedMessage id="ManageListingsPage.noSearchResults" />
+              </div>
             ) : filteredListings.length === 0 ? (
               <div className={css.emptyState}>
                 <FormattedMessage id="ManageListingsPage.noResults" />

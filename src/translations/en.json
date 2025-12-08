@@ -710,6 +710,7 @@
   "ManageListingsPage.myListings": "My Listings",
   "ManageListingsPage.newListing": "New Listing",
   "ManageListingsPage.noResults": "You haven't listed any listings.",
+  "ManageListingsPage.noSearchResults": "No listings found matching your search.",
   "ManageListingsPage.openListing": "Open listing",
   "ManageListingsPage.queryError": "Query failed. Please try again.",
   "ManageListingsPage.searchPlaceholder": "Search listings...",
