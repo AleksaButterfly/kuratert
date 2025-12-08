@@ -8,11 +8,7 @@
   padding: 24px;
 
   @media (--viewportMedium) {
-    padding: 48px 24px;
-  }
-
-  @media (--viewportLarge) {
-    padding: 72px 36px;
+    padding: 32px 24px;
   }
 }
 
