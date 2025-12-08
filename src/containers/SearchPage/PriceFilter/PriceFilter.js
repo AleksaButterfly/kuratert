@@ -85,6 +85,10 @@ const PriceFilter = props => {
   const currentLabel = rest.showAsPopup ? labelWithRange : label;
 
   const getLabelForRangeInput = (priceInMajorUnit, handleName) => {
+    // Guard against invalid values (empty string, null, undefined, NaN)
+    if (!Number.isInteger(priceInMajorUnit)) {
+      return handleName;
+    }
     const formattedPrice = formatCurrencyMajorUnit(intl, marketplaceCurrency, priceInMajorUnit);
     return intl.formatMessage(
       { id: 'PriceFilter.screenreader.rangeHandle' },
