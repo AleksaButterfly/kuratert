@@ -585,6 +585,7 @@
   "ListingPage.closedListing": "This listing is not available right now.",
   "ListingPage.contactUser": "Contact",
   "ListingPage.detailsTitle": "Details",
+  "ListingPage.dimensionsCm": "Dimensions (cm)",
   "ListingPage.editListing": "Edit listing",
   "ListingPage.editProfileLink": "Edit profile",
   "ListingPage.errorInvalidListingMessage": "The listing contained invalid data. Please contact the marketplace operator.",

@@ -205,6 +205,9 @@ const getCategoryLabel = (publicData, categoryConfiguration) => {
   return null;
 };
 
+// Dimension keys to combine
+const DIMENSION_KEYS = ['dimension_height', 'dimension_width', 'dimension_depth'];
+
 // Helper to get listing specifications
 const getSpecifications = (publicData, metadata, listingFieldConfigs, categoryConfiguration, intl) => {
   if (!publicData || !listingFieldConfigs) return [];
@@ -217,6 +220,9 @@ const getSpecifications = (publicData, metadata, listingFieldConfigs, categoryCo
     return isFieldForCategory(currentCategories, fieldConfig);
   };
 
+  // Track if we've already added dimensions
+  let dimensionsAdded = false;
+
   const pickListingFields = (filteredConfigs, config) => {
     const { key, schemaType, enumOptions, showConfig = {} } = config;
     const listingType = publicData.listingType;
@@ -227,6 +233,33 @@ const getSpecifications = (publicData, metadata, listingFieldConfigs, categoryCo
     const publicDataValue = publicData[key];
     const metadataValue = metadata?.[key];
     const value = publicDataValue != null ? publicDataValue : metadataValue;
+
+    // Handle dimension fields - combine them into one entry
+    if (DIMENSION_KEYS.includes(key) && !dimensionsAdded) {
+      dimensionsAdded = true;
+
+      const height = publicData.dimension_height;
+      const width = publicData.dimension_width;
+      const depth = publicData.dimension_depth;
+
+      // Build dimensions string based on available values
+      const dimensionValues = [height, width, depth].filter(v => v != null && v !== '');
+
+      if (dimensionValues.length > 0) {
+        const dimensionsValue = dimensionValues.join(' x ');
+        return filteredConfigs.concat({
+          key: 'dimensions',
+          value: dimensionsValue,
+          label: intl.formatMessage({ id: 'ListingPage.dimensionsCm' })
+        });
+      }
+      return filteredConfigs;
+    }
+
+    // Skip individual dimension fields since we've combined them
+    if (DIMENSION_KEYS.includes(key)) {
+      return filteredConfigs;
+    }
 
     if (isDetail && isTargetListingType && isTargetCategory && typeof value !== 'undefined') {
       const findSelectedOption = enumValue => enumOptions?.find(o => enumValue === `${o.option}`);
