@@ -3,6 +3,8 @@ import { updatedEntities, denormalisedEntities } from '../../util/data';
 import { storableError } from '../../util/errors';
 import { createImageVariantConfig } from '../../util/sdkLoader';
 import { parse } from '../../util/urlHelpers';
+import { getSupportedProcessesInfo } from '../../transactions/transaction';
+import { addMarketplaceEntities } from '../../ducks/marketplaceData.duck';
 
 import { fetchCurrentUser } from '../../ducks/user.duck';
 
@@ -135,6 +137,47 @@ export const discardDraft = listingId => (dispatch, getState, sdk) => {
   return dispatch(discardDraftThunk(listingId)).unwrap();
 };
 
+/////////////////////////
+// Query Sales (Stats) //
+/////////////////////////
+const querySalesStatsPayloadCreator = (_, { extra: sdk, dispatch, rejectWithValue }) => {
+  const processNames = getSupportedProcessesInfo().map(p => p.name);
+
+  const apiQueryParams = {
+    only: 'sale',
+    processNames,
+    include: ['listing', 'messages'],
+    'fields.transaction': [
+      'processName',
+      'lastTransition',
+      'lastTransitionedAt',
+      'payoutTotal',
+      'lineItems',
+    ],
+    'fields.listing': ['title'],
+    perPage: 100,
+  };
+
+  return sdk.transactions
+    .query(apiQueryParams)
+    .then(response => {
+      dispatch(addMarketplaceEntities(response));
+      return response;
+    })
+    .catch(e => {
+      return rejectWithValue(storableError(e));
+    });
+};
+
+export const querySalesStatsThunk = createAsyncThunk(
+  'app/ManageListingsPage/querySalesStats',
+  querySalesStatsPayloadCreator
+);
+// Backward compatible wrapper for the thunk
+export const querySalesStats = () => (dispatch, getState, sdk) => {
+  return dispatch(querySalesStatsThunk()).unwrap();
+};
+
 // ================ Slice ================ //
 
 const resultIds = data => data.data.map(l => l.id);
@@ -167,6 +210,10 @@ const manageListingsPageSlice = createSlice({
     closingListingError: null,
     discardingDraft: null,
     discardingDraftError: null,
+    // Sales stats
+    salesTransactions: [],
+    salesStatsInProgress: false,
+    salesStatsError: null,
   },
   reducers: {
     clearOpenListingError: state => {
@@ -266,6 +313,23 @@ const manageListingsPageSlice = createSlice({
         };
         state.discardingDraft = null;
       });
+
+    // Sales stats
+    builder
+      .addCase(querySalesStatsThunk.pending, state => {
+        state.salesStatsInProgress = true;
+        state.salesStatsError = null;
+      })
+      .addCase(querySalesStatsThunk.fulfilled, (state, action) => {
+        state.salesTransactions = action.payload.data.data;
+        state.salesStatsInProgress = false;
+      })
+      .addCase(querySalesStatsThunk.rejected, (state, action) => {
+        // eslint-disable-next-line no-console
+        console.error(action.payload || action.error);
+        state.salesStatsInProgress = false;
+        state.salesStatsError = action.payload;
+      });
   },
 });
 
@@ -300,6 +364,7 @@ export const loadData = (params, search, config) => (dispatch, getState, sdk) =>
         'limit.images': 1,
       })
     ),
+    dispatch(querySalesStats()),
   ])
     .then(response => {
       // const currentUser = response[0]?.data?.data;

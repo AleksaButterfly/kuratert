@@ -1,8 +1,446 @@
 @import '../../styles/customMediaQueries.css';
 
-.root {
+/* Dashboard Container */
+.dashboardContainer {
+  width: 100%;
+  max-width: var(--contentMaxWidth);
+  margin: 0 auto;
+  padding: 24px;
+
+  @media (--viewportMedium) {
+    padding: 48px 24px;
+  }
+
+  @media (--viewportLarge) {
+    padding: 72px 36px;
+  }
 }
 
+/* Dashboard Header */
+.dashboardHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 32px;
+
+  @media (--viewportMedium) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 48px;
+  }
+}
+
+.headerContent {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dashboardTitle {
+  composes: h1 from global;
+  font-family: var(--fontFamilySerif);
+  font-size: 36px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--colorGrey900);
+  margin: 0;
+
+  @media (--viewportMedium) {
+    font-size: 48px;
+  }
+}
+
+.dashboardSubtitle {
+  composes: marketplaceBodyFontStyles from global;
+  color: var(--colorGrey600);
+  margin: 0;
+}
+
+.newListingButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background-color: var(--colorGrey900);
+  color: var(--colorWhite);
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: var(--fontWeightMedium);
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+
+  &:hover {
+    background-color: var(--colorGrey700);
+    color: var(--colorWhite);
+    text-decoration: none;
+  }
+
+  & svg {
+    stroke: currentColor;
+  }
+}
+
+/* Stats Grid */
+.statsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-bottom: 32px;
+
+  @media (min-width: 550px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (--viewportMedium) {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    margin-bottom: 48px;
+  }
+}
+
+/* Stat Card */
+.statCard {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  background-color: var(--colorWhite);
+  border: 1px solid var(--colorGrey100);
+}
+
+.statCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.statCardIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  color: var(--colorGrey900);
+}
+
+.statCardChange {
+  font-size: 12px;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  color: var(--colorGrey900);
+}
+
+.statCardValue {
+  font-family: var(--fontFamilySerif);
+  font-size: 30px;
+  line-height: 1.2;
+  color: var(--colorGrey900);
+}
+
+.statCardLabel {
+  font-size: 12px;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  color: var(--colorGrey600);
+}
+
+/* Listings Table Container */
+.listingsTableContainer {
+  background-color: var(--colorWhite);
+  border: 1px solid var(--colorGrey100);
+}
+
+.tableHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  border-bottom: 1px solid var(--colorGrey100);
+
+  @media (--viewportMedium) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.tableTitle {
+  composes: h2 from global;
+  font-family: var(--fontFamilySerif);
+  font-size: 28px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--colorGrey900);
+  margin: 0;
+
+  @media (--viewportMedium) {
+    font-size: 36px;
+  }
+}
+
+.tableControls {
+  display: flex;
+  gap: 8px;
+}
+
+.searchInput {
+  padding: 8px 16px;
+  border: 1px solid var(--colorGrey100);
+  font-size: 14px;
+  width: 100%;
+  min-width: 200px;
+
+  &::placeholder {
+    color: rgba(26, 26, 26, 0.5);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--colorGrey300);
+  }
+
+  @media (--viewportMedium) {
+    width: auto;
+    min-width: 250px;
+  }
+}
+
+/* Table */
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.listingsTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+
+  & thead {
+    & tr {
+      border-bottom: 1px solid var(--colorGrey100);
+    }
+
+    & th {
+      padding: 16px 24px;
+      text-align: left;
+      font-size: 14px;
+      font-weight: var(--fontWeightBold);
+      color: var(--colorGrey600);
+      white-space: nowrap;
+    }
+  }
+
+  & tbody {
+    & tr {
+      border-top: 1px solid var(--colorGrey100);
+
+      &:hover {
+        background-color: var(--colorGrey50);
+      }
+    }
+
+    & td {
+      padding: 16px 24px;
+      font-size: 14px;
+      color: var(--colorGrey900);
+      vertical-align: middle;
+    }
+  }
+}
+
+.tableRow {
+  transition: background-color 0.15s ease;
+}
+
+.productColumn {
+  width: 30%;
+  min-width: 280px;
+}
+
+.productCell {
+  width: 30%;
+  min-width: 280px;
+}
+
+.productInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.productImage {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.listingImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.noImage {
+  width: 100%;
+  height: 100%;
+  background-color: var(--colorGrey100);
+}
+
+.productTitle {
+  font-size: 14px;
+  color: var(--colorGrey900);
+}
+
+.categoryCell {
+  color: var(--colorGrey600);
+}
+
+.priceCell {
+  color: var(--colorGrey900);
+  font-weight: var(--fontWeightMedium);
+}
+
+/* Status Badge */
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.statusActive {
+  background-color: var(--colorGrey100);
+  color: var(--colorGrey900);
+}
+
+.statusPending {
+  background-color: #fef9c2;
+  color: #a65f00;
+}
+
+.statusClosed {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.statusDraft {
+  background-color: var(--colorGrey100);
+  color: var(--colorGrey600);
+}
+
+.statusDefault {
+  background-color: var(--colorGrey100);
+  color: var(--colorGrey900);
+}
+
+/* Actions */
+.actionsCell {
+  width: 150px;
+}
+
+.actionButtons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 8px;
+  border: none;
+  background: transparent;
+  color: var(--colorGrey600);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  text-decoration: none;
+
+  &:hover {
+    background-color: var(--colorGrey100);
+    color: var(--colorGrey900);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.moreButtonWrapper {
+  position: relative;
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 10;
+  min-width: 150px;
+  background-color: var(--colorWhite);
+  border: 1px solid var(--colorGrey100);
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 4px 0;
+}
+
+.dropdownItem {
+  display: block;
+  width: 100%;
+  padding: 8px 16px;
+  text-align: left;
+  font-size: 14px;
+  color: var(--colorGrey900);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+
+  &:hover {
+    background-color: var(--colorGrey50);
+  }
+}
+
+/* Loading/Empty/Error States */
+.loadingState,
+.emptyState,
+.errorState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--colorGrey600);
+}
+
+.createListingLink {
+  color: var(--colorGrey900);
+  text-decoration: underline;
+
+  &:hover {
+    color: var(--colorGrey700);
+  }
+}
+
+/* Pagination */
+.pagination {
+  padding: 24px;
+  border-top: 1px solid var(--colorGrey100);
+}
+
+/* Legacy styles kept for compatibility */
 .tabs {
   display: none;
 
@@ -53,18 +491,6 @@
   }
 }
 
-.noResultsContainer {
-  margin: 0 24px;
-
-  @media (--viewportMedium) {
-    margin: 0 24px;
-  }
-
-  @media (--viewportLarge) {
-    margin: 0 36px;
-  }
-}
-
 .heading {
   margin: 0 24px 24px 24px;
 
@@ -74,72 +500,5 @@
 
   @media (--viewportLarge) {
     margin: 0 36px 32px 36px;
-  }
-}
-
-.createListingParagraph,
-.headingNoListings {
-  margin: 0 0 12px 0;
-
-  @media (--viewportMedium) {
-    margin: 0 0 8px 0;
-  }
-
-  @media (--viewportLarge) {
-    margin: 0 0 8px 0;
-  }
-}
-
-.listingCards {
-  padding: 0 24px;
-
-  display: grid;
-  grid-template-columns: repeat(1, 1fr);
-  gap: 24px;
-  width: 100%;
-
-  @media (min-width: 550px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  @media (--viewportMedium) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  @media (--viewportLarge) {
-    grid-template-columns: repeat(3, 1fr);
-    padding: 0 36px;
-  }
-}
-
-.listingCard {
-  margin-bottom: 36px;
-  width: 100%;
-}
-
-/**
- * Remove margin-right from listingCards on the last column
- * This is a special case in the world of breakpoints. Nth-of-type effects every nth item.
- * Here we take margin-right away, but we don't want it affect the next column breakpoint.
- */
-
-.listingCard:nth-of-type(2n) {
-  @media screen and (min-width: 768px) and (max-width: 1920px) {
-    margin-right: 0;
-  }
-}
-
-.listingCard:nth-of-type(3n) {
-  @media (--viewportXLarge) {
-    margin-right: 0;
-  }
-}
-
-.pagination {
-  /* margin-top: auto; pushes pagination to the end of the page. */
-  margin: auto 24px 0 24px;
-
-  @media (--viewportLarge) {
-    margin: auto 36px 0 36px;
   }
 }
