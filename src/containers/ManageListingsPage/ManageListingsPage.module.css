@@ -208,7 +208,7 @@
   overflow-x: auto;
 
   @media (--viewportMedium) {
-    overflow-x: visible;
+    overflow-x: unset;
   }
 }
 
