@@ -439,41 +439,66 @@ export class SearchPageComponent extends Component {
                 const otherFilters = availableFilters.filter(f => !DIMENSION_KEYS.includes(f.key));
                 const hasDimensionFilters = dimensionFilters.length > 0;
 
-                return (
-                  <>
-                    {otherFilters.map(filterConfig => {
-                      const key = `SearchFiltersDesktop.${filterConfig.scope || 'built-in'}.${
-                        filterConfig.key
-                      }`;
-                      return (
-                        <FilterComponent
-                          key={key}
-                          idPrefix="SearchFiltersDesktop"
+                // Render filters with DimensionsFilter inserted after 'color'
+                const renderFilters = () => {
+                  const elements = [];
+
+                  otherFilters.forEach(filterConfig => {
+                    const key = `SearchFiltersDesktop.${filterConfig.scope || 'built-in'}.${
+                      filterConfig.key
+                    }`;
+                    elements.push(
+                      <FilterComponent
+                        key={key}
+                        idPrefix="SearchFiltersDesktop"
+                        className={css.filter}
+                        config={filterConfig}
+                        listingCategories={listingCategories}
+                        marketplaceCurrency={marketplaceCurrency}
+                        urlQueryParams={validQueryParams}
+                        initialValues={initialValues(this.props, this.state.currentQueryParams)}
+                        getHandleChangedValueFn={this.getHandleChangedValueFn}
+                        intl={intl}
+                        liveEdit
+                        showAsPopup={false}
+                        isDesktop
+                      />
+                    );
+
+                    // Insert DimensionsFilter after color filter
+                    if (filterConfig.key === 'color' && hasDimensionFilters) {
+                      elements.push(
+                        <DimensionsFilter
+                          key="dimensions-filter"
                           className={css.filter}
-                          config={filterConfig}
-                          listingCategories={listingCategories}
-                          marketplaceCurrency={marketplaceCurrency}
+                          dimensionConfigs={dimensionFilters}
                           urlQueryParams={validQueryParams}
                           initialValues={initialValues(this.props, this.state.currentQueryParams)}
                           getHandleChangedValueFn={this.getHandleChangedValueFn}
-                          intl={intl}
-                          liveEdit
-                          showAsPopup={false}
-                          isDesktop
                         />
                       );
-                    })}
-                    {hasDimensionFilters && (
+                    }
+                  });
+
+                  // If no color filter exists, add DimensionsFilter at the end
+                  const hasColorFilter = otherFilters.some(f => f.key === 'color');
+                  if (!hasColorFilter && hasDimensionFilters) {
+                    elements.push(
                       <DimensionsFilter
+                        key="dimensions-filter"
                         className={css.filter}
                         dimensionConfigs={dimensionFilters}
                         urlQueryParams={validQueryParams}
                         initialValues={initialValues(this.props, this.state.currentQueryParams)}
                         getHandleChangedValueFn={this.getHandleChangedValueFn}
                       />
-                    )}
-                  </>
-                );
+                    );
+                  }
+
+                  return elements;
+                };
+
+                return <>{renderFilters()}</>;
               })()}
             </div>
           </aside>
@@ -504,39 +529,63 @@ export class SearchPageComponent extends Component {
                   const otherFilters = availableFilters.filter(f => !DIMENSION_KEYS.includes(f.key));
                   const hasDimensionFilters = dimensionFilters.length > 0;
 
-                  return (
-                    <>
-                      {otherFilters.map(filterConfig => {
-                        const key = `SearchFiltersMobile.${filterConfig.scope || 'built-in'}.${
-                          filterConfig.key
-                        }`;
+                  // Render filters with DimensionsFilter inserted after 'color'
+                  const renderFilters = () => {
+                    const elements = [];
 
-                        return (
-                          <FilterComponent
-                            key={key}
-                            idPrefix="SearchFiltersMobile"
-                            config={filterConfig}
-                            listingCategories={listingCategories}
-                            marketplaceCurrency={marketplaceCurrency}
+                    otherFilters.forEach(filterConfig => {
+                      const key = `SearchFiltersMobile.${filterConfig.scope || 'built-in'}.${
+                        filterConfig.key
+                      }`;
+
+                      elements.push(
+                        <FilterComponent
+                          key={key}
+                          idPrefix="SearchFiltersMobile"
+                          config={filterConfig}
+                          listingCategories={listingCategories}
+                          marketplaceCurrency={marketplaceCurrency}
+                          urlQueryParams={validQueryParams}
+                          initialValues={initialValues(this.props, this.state.currentQueryParams)}
+                          getHandleChangedValueFn={this.getHandleChangedValueFn}
+                          intl={intl}
+                          liveEdit
+                          showAsPopup={false}
+                        />
+                      );
+
+                      // Insert DimensionsFilter after color filter
+                      if (filterConfig.key === 'color' && hasDimensionFilters) {
+                        elements.push(
+                          <DimensionsFilter
+                            key="dimensions-filter"
+                            dimensionConfigs={dimensionFilters}
                             urlQueryParams={validQueryParams}
                             initialValues={initialValues(this.props, this.state.currentQueryParams)}
                             getHandleChangedValueFn={this.getHandleChangedValueFn}
-                            intl={intl}
-                            liveEdit
-                            showAsPopup={false}
                           />
                         );
-                      })}
-                      {hasDimensionFilters && (
+                      }
+                    });
+
+                    // If no color filter exists, add DimensionsFilter at the end
+                    const hasColorFilter = otherFilters.some(f => f.key === 'color');
+                    if (!hasColorFilter && hasDimensionFilters) {
+                      elements.push(
                         <DimensionsFilter
+                          key="dimensions-filter"
                           dimensionConfigs={dimensionFilters}
                           urlQueryParams={validQueryParams}
                           initialValues={initialValues(this.props, this.state.currentQueryParams)}
                           getHandleChangedValueFn={this.getHandleChangedValueFn}
                         />
-                      )}
-                    </>
-                  );
+                      );
+                    }
+
+                    return elements;
+                  };
+
+                  return <>{renderFilters()}</>;
                 })()}
               </SearchFiltersMobile>
               <MainPanelHeader
