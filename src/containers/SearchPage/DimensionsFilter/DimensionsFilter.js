@@ -1,9 +1,8 @@
 import React, { useRef } from 'react';
 import debounce from 'lodash/debounce';
 import classNames from 'classnames';
-import { Field } from 'react-final-form';
 
-import { FormattedMessage, useIntl } from '../../../util/reactIntl';
+import { useIntl } from '../../../util/reactIntl';
 import { constructQueryParamName } from '../../../util/search';
 
 import FilterPlain from '../FilterPlain/FilterPlain';
@@ -33,7 +32,7 @@ const getDimensionLabel = key => {
   }
 };
 
-// Convert query param to object
+// Convert query param to object (e.g., "30,100" -> { minValue: 30, maxValue: 100 })
 const convertQueryParamToObject = valueRange => {
   const [minValue, maxValue] = !!valueRange
     ? valueRange.split(',').map(v => Number.parseInt(v, RADIX))
@@ -41,23 +40,23 @@ const convertQueryParamToObject = valueRange => {
   return !!valueRange && minValue != null && maxValue != null ? { minValue, maxValue } : null;
 };
 
-// Format to query param
+// Format to query param (e.g., { minValue: 30, maxValue: 100 } -> "30,100")
 const formatToQueryParam = (range, queryParamName) => {
   const { minValue, maxValue } = range || {};
   const value = minValue != null && maxValue != null ? `${minValue},${maxValue}` : null;
   return { [queryParamName]: value };
 };
 
-// Get valid range values
-const getValidRangeValues = (queryParamName, rangeParams, min, max) => {
-  const parsedRangeValues = rangeParams?.[queryParamName]
-    ? convertQueryParamToObject(rangeParams[queryParamName])
+// Get valid range values from URL params
+const getValidRangeValues = (queryParamValue, min, max) => {
+  const parsedRangeValues = queryParamValue
+    ? convertQueryParamToObject(queryParamValue)
     : {};
 
   const { minValue, maxValue } = parsedRangeValues || {};
   const hasValidMinValue = minValue != null && minValue >= min;
   const hasValidMaxValue = maxValue != null && maxValue >= minValue && maxValue <= max;
-  const hasRangeValues = rangeParams && hasValidMinValue && hasValidMaxValue;
+  const hasRangeValues = hasValidMinValue && hasValidMaxValue;
 
   return hasRangeValues ? { minValue, maxValue } : {};
 };
@@ -101,7 +100,7 @@ const DimensionsFilter = props => {
   const {
     dimensionConfigs,
     urlQueryParams,
-    initialValues,
+    initialValues, // This is a curried function: (queryParamNames, isLiveEdit) => values
     getHandleChangedValueFn,
     className,
     id = 'DimensionsFilter',
@@ -110,16 +109,23 @@ const DimensionsFilter = props => {
 
   const bypassDebounce = useRef({});
 
+  // Build query param names for all dimensions
+  const allQueryParamNames = dimensionConfigs.map(config => {
+    const { key, scope } = config;
+    return constructQueryParamName(key, scope);
+  });
+
+  // Get actual initial values by calling the curried function
+  // initialValues is (queryParamNames, isLiveEdit) => { paramName: value }
+  const urlValues = initialValues(allQueryParamNames, true);
+
   // Get query param names and initial values for each dimension
   const dimensionsData = dimensionConfigs.map(config => {
-    const { key, scope, minimum = 0, maximum = 1000, step = 1 } = config;
+    const { key, scope, minimum = 0, maximum = 9999999, step = 1 } = config;
     const queryParamName = constructQueryParamName(key, scope);
-    const validValues = getValidRangeValues(
-      queryParamName,
-      initialValues,
-      minimum,
-      maximum
-    );
+    const queryParamValue = urlValues[queryParamName];
+    const validValues = getValidRangeValues(queryParamValue, minimum, maximum);
+
     return {
       key,
       queryParamName,
@@ -139,34 +145,42 @@ const DimensionsFilter = props => {
     ? intl.formatMessage({ id: 'DimensionsFilter.labelSelected' }, { count: selectedCount })
     : '';
 
-  // Create debounced submit handler
-  const createDebouncedHandler = (queryParamName, useHistoryPush) => {
-    return debounce(
-      values => {
-        if (bypassDebounce.current[queryParamName]) {
-          bypassDebounce.current[queryParamName] = false;
-          return;
-        }
-        const formattedValue = formatToQueryParam(values, queryParamName);
-        getHandleChangedValueFn(useHistoryPush)(formattedValue);
-      },
-      400,
-      { leading: false, trailing: true }
-    );
+  // Create debounced submit handler for each dimension
+  const debouncedHandlers = useRef({});
+  const getDebouncedHandler = (queryParamName) => {
+    if (!debouncedHandlers.current[queryParamName]) {
+      debouncedHandlers.current[queryParamName] = debounce(
+        values => {
+          if (bypassDebounce.current[queryParamName]) {
+            bypassDebounce.current[queryParamName] = false;
+            return;
+          }
+          const formattedValue = formatToQueryParam(values, queryParamName);
+          getHandleChangedValueFn(true)(formattedValue);
+        },
+        400,
+        { leading: false, trailing: true }
+      );
+    }
+    return debouncedHandlers.current[queryParamName];
   };
 
   const handleSubmit = formValues => {
     // Process each dimension's values
     dimensionsData.forEach(dimension => {
       const values = formValues?.[dimension.key];
-      if (values) {
-        const handler = createDebouncedHandler(dimension.queryParamName, true);
+      if (values && (values.minValue != null || values.maxValue != null)) {
+        const handler = getDebouncedHandler(dimension.queryParamName);
         handler(values);
       }
     });
   };
 
   const handleClear = () => {
+    // Bypass debounce for clear
+    dimensionsData.forEach(d => {
+      bypassDebounce.current[d.queryParamName] = true;
+    });
     // Clear all dimension filters
     const clearedValues = dimensionsData.reduce((acc, d) => {
       acc[d.queryParamName] = null;
@@ -175,7 +189,7 @@ const DimensionsFilter = props => {
     getHandleChangedValueFn(true)(clearedValues);
   };
 
-  // Build initial values object for the form
+  // Build initial values object for the form (keyed by dimension key, not query param name)
   const formInitialValues = dimensionsData.reduce((acc, d) => {
     acc[d.key] = d.initialValue;
     return acc;
