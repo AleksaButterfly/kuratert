@@ -27,5 +27,6 @@
   font-weight: var(--fontWeightSemiBold);
   line-height: 1.4;
   color: var(--colorGrey700);
-  margin-bottom: 4px;
+  margin: 0;
+  padding: 0;
 }
