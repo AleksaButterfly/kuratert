@@ -49,13 +49,6 @@ const IconListings = () => (
   </svg>
 );
 
-const IconViews = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12C23 12 19 20 12 20C5 20 1 12 1 12Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-    <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-  </svg>
-);
-
 const IconMessages = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
@@ -230,9 +223,6 @@ export const ManageListingsPageComponent = props => {
   // Calculate stats
   const activeListings = listings.filter(l => l.attributes.state === 'published').length;
 
-  // Hardcoded total views for now
-  const totalViews = 3421;
-
   // Calculate messages count from sales transactions
   const messagesCount = salesTransactions.reduce((count, tx) => {
     // Each transaction might have messages - we'll count transactions as a proxy
@@ -314,12 +304,6 @@ export const ManageListingsPageComponent = props => {
               value={activeListings}
               label={intl.formatMessage({ id: 'ManageListingsPage.activeListings' })}
               change={pagination?.totalItems > 0 ? `+${Math.min(3, pagination.totalItems)}` : null}
-            />
-            <StatCard
-              icon={<IconViews />}
-              value={totalViews.toLocaleString()}
-              label={intl.formatMessage({ id: 'ManageListingsPage.totalViews' })}
-              change="+12%"
             />
             <StatCard
               icon={<IconMessages />}
