@@ -174,9 +174,13 @@ const TopbarComponent = props => {
         bounds,
       };
     };
+
+    // Remove keywords from currentSearchParams if empty search submitted
+    const { keywords: existingKeywords, ...restOfCurrentParams } = currentSearchParams || {};
+    const newSearchParams = topbarSearchParams();
     const searchParams = {
-      ...currentSearchParams,
-      ...topbarSearchParams(),
+      ...restOfCurrentParams,
+      ...newSearchParams,
     };
 
     const { routeName, pathParams } = getSearchPageResourceLocatorStringParams(
