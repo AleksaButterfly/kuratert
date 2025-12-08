@@ -8,7 +8,7 @@
 
   @media (--viewportMedium) {
     padding-top: 16px;
-    padding-bottom: 0;
+    padding-bottom: 16px;
     border-bottom: 0;
     border-top: 1px solid var(--colorGrey100);
   }
@@ -103,10 +103,6 @@
 .plain {
   width: 100%;
   display: none;
-
-  @media (--viewportMedium) {
-    padding-bottom: 16px;
-  }
 }
 
 .isOpen {
