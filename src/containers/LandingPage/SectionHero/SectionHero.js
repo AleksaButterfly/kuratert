@@ -36,7 +36,8 @@ const SectionHero = props => {
 
     let searchParams = {};
     if (isKeywordsSearch) {
-      searchParams = { keywords: values?.keywords };
+      const keywords = values?.keywords?.trim();
+      searchParams = keywords ? { keywords } : {};
     } else {
       const { search, selectedPlace } = values?.location || {};
       const { origin, bounds } = selectedPlace || {};

@@ -160,7 +160,8 @@ const TopbarComponent = props => {
 
     const topbarSearchParams = () => {
       if (isMainSearchTypeKeywords(config)) {
-        return { keywords: values?.keywords };
+        const keywords = values?.keywords?.trim();
+        return keywords ? { keywords } : {};
       }
       // topbar search defaults to 'location' search
       const { search, selectedPlace } = values?.location || {};
