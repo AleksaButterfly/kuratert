@@ -8,6 +8,23 @@ import css from './ActiveFilters.module.css';
 
 const { Money } = sdkTypes;
 
+// Dimension filter keys
+const DIMENSION_KEYS = ['dimension_height', 'dimension_width', 'dimension_depth'];
+
+// Get dimension label
+const getDimensionLabel = (key, intl) => {
+  switch (key) {
+    case 'dimension_height':
+      return intl.formatMessage({ id: 'DimensionsFilter.height' });
+    case 'dimension_width':
+      return intl.formatMessage({ id: 'DimensionsFilter.width' });
+    case 'dimension_depth':
+      return intl.formatMessage({ id: 'DimensionsFilter.depth' });
+    default:
+      return key;
+  }
+};
+
 const IconClose = () => (
   <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M9 3L3 9M3 3L9 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -36,7 +53,33 @@ const findCategoryLabel = (categories, categoryId) => {
  * Get the display label for a filter value
  */
 const getFilterLabel = (filterConfig, value, intl, marketplaceCurrency, listingCategories, listingTypes) => {
-  const { key, schemaType, enumOptions, label } = filterConfig;
+  const { key, schemaType, enumOptions, filterConfig: filterCfg } = filterConfig;
+  const label = filterCfg?.label || filterConfig.label;
+
+  // Handle dimension filters
+  if (DIMENSION_KEYS.includes(key) && value) {
+    try {
+      const [minValue, maxValue] = value.split(',').map(Number);
+      if (!isNaN(minValue) && !isNaN(maxValue)) {
+        const dimensionLabel = getDimensionLabel(key, intl);
+        return `${dimensionLabel} (cm): ${minValue} - ${maxValue}`;
+      }
+    } catch (e) {
+      return getDimensionLabel(key, intl);
+    }
+  }
+
+  // Handle other long/integer range filters
+  if (schemaType === 'long' && value) {
+    try {
+      const [minValue, maxValue] = value.split(',').map(Number);
+      if (!isNaN(minValue) && !isNaN(maxValue)) {
+        return `${label}: ${minValue} - ${maxValue}`;
+      }
+    } catch (e) {
+      return label || key;
+    }
+  }
 
   // Handle price filter
   if (schemaType === 'price' && value) {
@@ -57,8 +100,9 @@ const getFilterLabel = (filterConfig, value, intl, marketplaceCurrency, listingC
 
   // Handle category filter
   if (schemaType === 'category') {
-    const categoryLabel = findCategoryLabel(listingCategories || [], value);
-    return categoryLabel || value;
+    const categoryName = findCategoryLabel(listingCategories || [], value);
+    const categoryLabel = intl.formatMessage({ id: 'FilterComponent.categoryLabel' });
+    return categoryName ? `${categoryLabel}: ${categoryName}` : value;
   }
 
   // Handle enum/multi-enum filters
@@ -68,7 +112,8 @@ const getFilterLabel = (filterConfig, value, intl, marketplaceCurrency, listingC
       const option = enumOptions.find(opt => opt.option === v);
       return option ? option.label : v;
     });
-    return labels.join(', ');
+    const selectedLabels = labels.join(', ');
+    return label ? `${label}: ${selectedLabels}` : selectedLabels;
   }
 
   // Handle listingType filter
@@ -79,7 +124,8 @@ const getFilterLabel = (filterConfig, value, intl, marketplaceCurrency, listingC
 
   // Handle keywords
   if (key === 'keywords') {
-    return `"${value}"`;
+    const keywordsLabel = intl.formatMessage({ id: 'FilterComponent.keywordsLabel' });
+    return `${keywordsLabel}: "${value}"`;
   }
 
   // Try to find if value matches a category/subcategory in the tree
