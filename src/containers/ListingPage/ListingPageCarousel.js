@@ -269,8 +269,21 @@ const getSpecifications = (publicData, metadata, listingFieldConfigs, categoryCo
           : intl.formatMessage({ id: 'SearchPage.detailNo' });
       const optionConfig = findSelectedOption(value);
 
+      // Handle multi-enum - value is an array, convert to comma-separated labels
+      const getMultiEnumLabels = (values) => {
+        if (!Array.isArray(values)) return values;
+        return values
+          .map(v => {
+            const option = enumOptions?.find(o => v === `${o.option}`);
+            return option?.label || v;
+          })
+          .join(', ');
+      };
+
       return schemaType === 'enum'
         ? filteredConfigs.concat({ key, value: optionConfig?.label || value, label })
+        : schemaType === 'multi-enum'
+        ? filteredConfigs.concat({ key, value: getMultiEnumLabels(value), label })
         : schemaType === 'boolean'
         ? filteredConfigs.concat({ key, value: getBooleanMessage(value), label })
         : schemaType === 'long'
