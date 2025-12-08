@@ -76,7 +76,8 @@ const TopbarDesktopSearchForm = props => {
       if (selectedItem) {
         handlePredictionSelect(selectedItem);
       } else {
-        onSubmit({ keywords: values.keywords || searchTerm });
+        const keywords = (values.keywords || searchTerm || '').trim();
+        onSubmit(keywords ? { keywords } : {});
       }
       searchInputRef?.current?.blur();
       hidePredictions();
