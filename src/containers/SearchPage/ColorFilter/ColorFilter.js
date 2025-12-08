@@ -70,7 +70,7 @@ const isLightColor = hex => {
 // Checkmark icon component
 const CheckIcon = ({ className }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-    <polyline points="20 6 9 17 4 12" />
+    <polyline points="20 6 9 17 4 12" fill="none" />
   </svg>
 );
 
