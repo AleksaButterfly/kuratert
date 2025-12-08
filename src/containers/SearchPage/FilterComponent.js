@@ -12,6 +12,7 @@ import KeywordFilter from './KeywordFilter/KeywordFilter';
 import PriceFilter from './PriceFilter/PriceFilter';
 import IntegerRangeFilter from './IntegerRangeFilter/IntegerRangeFilter';
 import SeatsFilter from './SeatsFilter/SeatsFilter';
+import ColorFilter from './ColorFilter/ColorFilter';
 
 /**
  * FilterComponent is used to map configured filter types
@@ -162,6 +163,25 @@ const FilterComponent = props => {
       const { scope, enumOptions, filterConfig = {} } = config;
       const { label, filterType } = filterConfig;
       const queryParamNames = [constructQueryParamName(key, scope)];
+
+      // Use ColorFilter for color attribute
+      if (key === 'color') {
+        return (
+          <ColorFilter
+            id={componentId}
+            label={label}
+            getAriaLabel={getAriaLabel}
+            name={name}
+            queryParamNames={queryParamNames}
+            initialValues={initialValues(queryParamNames, liveEdit)}
+            onSubmit={getHandleChangedValueFn(useHistoryPush)}
+            options={enumOptions}
+            schemaType={schemaType}
+            {...rest}
+          />
+        );
+      }
+
       return filterType === 'SelectSingleFilter' ? (
         <SelectSingleFilter
           id={componentId}
@@ -194,6 +214,26 @@ const FilterComponent = props => {
       const { scope, enumOptions, filterConfig = {} } = config;
       const { label, searchMode } = filterConfig;
       const queryParamNames = [constructQueryParamName(key, scope)];
+
+      // Use ColorFilter for color attribute
+      if (key === 'color') {
+        return (
+          <ColorFilter
+            id={componentId}
+            label={label}
+            getAriaLabel={getAriaLabel}
+            name={name}
+            queryParamNames={queryParamNames}
+            initialValues={initialValues(queryParamNames, liveEdit)}
+            onSubmit={getHandleChangedValueFn(useHistoryPush)}
+            options={enumOptions}
+            schemaType={schemaType}
+            searchMode={searchMode}
+            {...rest}
+          />
+        );
+      }
+
       return (
         <SelectMultipleFilter
           id={componentId}

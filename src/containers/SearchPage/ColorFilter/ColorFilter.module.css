@@ -1,0 +1,91 @@
+@import '../../../styles/customMediaQueries.css';
+
+.root {
+  position: relative;
+  display: inline-block;
+}
+
+.popupSize {
+  min-width: 280px;
+}
+
+.fieldGroup {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.fieldGroupPlain {
+  margin: 0;
+  padding: 12px;
+  border: none;
+
+  @media (--viewportMedium) {
+    padding: 4px 0 4px 12px;
+  }
+}
+
+.swatchGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.swatchLabel {
+  display: block;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.swatchLabel:hover {
+  transform: scale(1.1);
+}
+
+.hiddenInput {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.swatch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--colorGrey100);
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.swatchLabel:hover .swatch {
+  border-color: var(--colorGrey300);
+}
+
+.selected .swatch {
+  border-color: var(--colorGrey900);
+  box-shadow: 0 0 0 2px var(--colorWhite), 0 0 0 4px var(--colorGrey900);
+}
+
+.whiteSwatch .swatch {
+  border-color: var(--colorGrey200);
+}
+
+.whiteSwatch.selected .swatch {
+  border-color: var(--colorGrey900);
+}
+
+.checkIcon {
+  width: 18px;
+  height: 18px;
+  color: var(--colorWhite);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.darkCheck {
+  color: var(--colorGrey900);
+}
