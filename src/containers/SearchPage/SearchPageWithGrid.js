@@ -425,6 +425,14 @@ export class SearchPageComponent extends Component {
         <div className={css.layoutWrapperContainer}>
           <aside className={css.layoutWrapperFilterColumn} data-testid="filterColumnAside">
             <div className={css.filterColumnContent}>
+              <div className={css.filterHeader}>
+                <span className={css.filterHeaderLabel}>
+                  <FormattedMessage id={'SearchPage.filtersLabel'} />
+                </span>
+                <button className={css.clearAllButton} onClick={e => this.handleResetAll(e)}>
+                  <FormattedMessage id={'SearchPage.clearAll'} />
+                </button>
+              </div>
               {(() => {
                 // Separate dimension filters from other filters
                 const dimensionFilters = availableFilters.filter(f => DIMENSION_KEYS.includes(f.key));
@@ -467,9 +475,6 @@ export class SearchPageComponent extends Component {
                   </>
                 );
               })()}
-              <button className={css.resetAllButton} onClick={e => this.handleResetAll(e)}>
-                <FormattedMessage id={'SearchFiltersMobile.resetAll'} />
-              </button>
             </div>
           </aside>
 
