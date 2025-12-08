@@ -125,10 +125,9 @@
 }
 
 .clearAllButton {
-  font-family: var(--fontFamily);
-  font-size: 12px;
-  line-height: 24px;
-  color: var(--colorGrey900);
+  composes: h5 from global;
+  font-weight: var(--fontWeightMedium);
+  color: var(--colorGrey600);
 
   /* Override button styles */
   background: none;
@@ -140,8 +139,7 @@
 
   &:focus,
   &:hover {
-    color: var(--colorGrey700);
-    text-decoration: underline;
+    color: var(--colorBlack);
   }
 }
 
