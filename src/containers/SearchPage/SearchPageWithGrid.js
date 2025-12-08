@@ -54,6 +54,7 @@ import {
 } from './SearchPage.shared';
 
 import FilterComponent from './FilterComponent';
+import DimensionsFilter, { DIMENSION_KEYS } from './DimensionsFilter/DimensionsFilter';
 import MainPanelHeader from './MainPanelHeader/MainPanelHeader';
 import SearchFiltersMobile from './SearchFiltersMobile/SearchFiltersMobile';
 import SortBy from './SortBy/SortBy';
@@ -424,28 +425,48 @@ export class SearchPageComponent extends Component {
         <div className={css.layoutWrapperContainer}>
           <aside className={css.layoutWrapperFilterColumn} data-testid="filterColumnAside">
             <div className={css.filterColumnContent}>
-              {availableFilters.map(filterConfig => {
-                const key = `SearchFiltersDesktop.${filterConfig.scope || 'built-in'}.${
-                  filterConfig.key
-                }`;
+              {(() => {
+                // Separate dimension filters from other filters
+                const dimensionFilters = availableFilters.filter(f => DIMENSION_KEYS.includes(f.key));
+                const otherFilters = availableFilters.filter(f => !DIMENSION_KEYS.includes(f.key));
+                const hasDimensionFilters = dimensionFilters.length > 0;
+
                 return (
-                  <FilterComponent
-                    key={key}
-                    idPrefix="SearchFiltersDesktop"
-                    className={css.filter}
-                    config={filterConfig}
-                    listingCategories={listingCategories}
-                    marketplaceCurrency={marketplaceCurrency}
-                    urlQueryParams={validQueryParams}
-                    initialValues={initialValues(this.props, this.state.currentQueryParams)}
-                    getHandleChangedValueFn={this.getHandleChangedValueFn}
-                    intl={intl}
-                    liveEdit
-                    showAsPopup={false}
-                    isDesktop
-                  />
+                  <>
+                    {otherFilters.map(filterConfig => {
+                      const key = `SearchFiltersDesktop.${filterConfig.scope || 'built-in'}.${
+                        filterConfig.key
+                      }`;
+                      return (
+                        <FilterComponent
+                          key={key}
+                          idPrefix="SearchFiltersDesktop"
+                          className={css.filter}
+                          config={filterConfig}
+                          listingCategories={listingCategories}
+                          marketplaceCurrency={marketplaceCurrency}
+                          urlQueryParams={validQueryParams}
+                          initialValues={initialValues(this.props, this.state.currentQueryParams)}
+                          getHandleChangedValueFn={this.getHandleChangedValueFn}
+                          intl={intl}
+                          liveEdit
+                          showAsPopup={false}
+                          isDesktop
+                        />
+                      );
+                    })}
+                    {hasDimensionFilters && (
+                      <DimensionsFilter
+                        className={css.filter}
+                        dimensionConfigs={dimensionFilters}
+                        urlQueryParams={validQueryParams}
+                        initialValues={initialValues(this.props, this.state.currentQueryParams)}
+                        getHandleChangedValueFn={this.getHandleChangedValueFn}
+                      />
+                    )}
+                  </>
                 );
-              })}
+              })()}
               <button className={css.resetAllButton} onClick={e => this.handleResetAll(e)}>
                 <FormattedMessage id={'SearchFiltersMobile.resetAll'} />
               </button>
@@ -472,27 +493,46 @@ export class SearchPageComponent extends Component {
                 noResultsInfo={noResultsInfo}
                 location={location}
               >
-                {availableFilters.map(filterConfig => {
-                  const key = `SearchFiltersMobile.${filterConfig.scope || 'built-in'}.${
-                    filterConfig.key
-                  }`;
+                {(() => {
+                  // Separate dimension filters from other filters
+                  const dimensionFilters = availableFilters.filter(f => DIMENSION_KEYS.includes(f.key));
+                  const otherFilters = availableFilters.filter(f => !DIMENSION_KEYS.includes(f.key));
+                  const hasDimensionFilters = dimensionFilters.length > 0;
 
                   return (
-                    <FilterComponent
-                      key={key}
-                      idPrefix="SearchFiltersMobile"
-                      config={filterConfig}
-                      listingCategories={listingCategories}
-                      marketplaceCurrency={marketplaceCurrency}
-                      urlQueryParams={validQueryParams}
-                      initialValues={initialValues(this.props, this.state.currentQueryParams)}
-                      getHandleChangedValueFn={this.getHandleChangedValueFn}
-                      intl={intl}
-                      liveEdit
-                      showAsPopup={false}
-                    />
+                    <>
+                      {otherFilters.map(filterConfig => {
+                        const key = `SearchFiltersMobile.${filterConfig.scope || 'built-in'}.${
+                          filterConfig.key
+                        }`;
+
+                        return (
+                          <FilterComponent
+                            key={key}
+                            idPrefix="SearchFiltersMobile"
+                            config={filterConfig}
+                            listingCategories={listingCategories}
+                            marketplaceCurrency={marketplaceCurrency}
+                            urlQueryParams={validQueryParams}
+                            initialValues={initialValues(this.props, this.state.currentQueryParams)}
+                            getHandleChangedValueFn={this.getHandleChangedValueFn}
+                            intl={intl}
+                            liveEdit
+                            showAsPopup={false}
+                          />
+                        );
+                      })}
+                      {hasDimensionFilters && (
+                        <DimensionsFilter
+                          dimensionConfigs={dimensionFilters}
+                          urlQueryParams={validQueryParams}
+                          initialValues={initialValues(this.props, this.state.currentQueryParams)}
+                          getHandleChangedValueFn={this.getHandleChangedValueFn}
+                        />
+                      )}
+                    </>
                   );
-                })}
+                })()}
               </SearchFiltersMobile>
               <MainPanelHeader
                 className={css.mainPanel}

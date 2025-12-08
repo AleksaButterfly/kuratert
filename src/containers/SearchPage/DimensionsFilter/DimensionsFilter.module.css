@@ -1,0 +1,25 @@
+@import '../../../styles/customMediaQueries.css';
+
+.root {
+  position: relative;
+}
+
+.dimensionsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 12px 0;
+}
+
+.dimensionRow {
+  display: flex;
+  flex-direction: column;
+}
+
+.dimensionLabel {
+  font-size: 14px;
+  font-weight: var(--fontWeightSemiBold);
+  line-height: 1.4;
+  color: var(--colorGrey700);
+  margin-bottom: 4px;
+}
