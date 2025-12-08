@@ -16,6 +16,12 @@
   flex-direction: column;
 }
 
+/* Hide the slider for dimension filters */
+.dimensionRow :global(.IntegerRangeFilter_sliderWrapper__6H\+AY),
+.dimensionRow :global([class*="sliderWrapper"]) {
+  display: none;
+}
+
 .dimensionLabel {
   font-size: 14px;
   font-weight: var(--fontWeightSemiBold);
