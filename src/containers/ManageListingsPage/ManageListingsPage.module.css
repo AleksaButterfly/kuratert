@@ -205,10 +205,10 @@
 
 /* Table */
 .tableWrapper {
-  overflow: visible;
+  overflow-x: auto;
 
-  @media (max-width: 900px) {
-    overflow-x: auto;
+  @media (--viewportMedium) {
+    overflow-x: visible;
   }
 }
 
