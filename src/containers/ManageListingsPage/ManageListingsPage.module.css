@@ -205,7 +205,11 @@
 
 /* Table */
 .tableWrapper {
-  overflow-x: auto;
+  overflow: visible;
+
+  @media (max-width: 900px) {
+    overflow-x: auto;
+  }
 }
 
 .listingsTable {
@@ -381,7 +385,7 @@
   position: absolute;
   top: 100%;
   right: 0;
-  z-index: 10;
+  z-index: 100;
   min-width: 150px;
   background-color: var(--colorWhite);
   border: 1px solid var(--colorGrey100);
