@@ -35,6 +35,7 @@ const queryCartListingsPayloadCreator = (config, thunkAPI) => {
 
   const queryParams = {
     ids: cartListingIds,
+    minStock: 1,
     include: ['author', 'images', 'currentStock'],
     'fields.listing': [
       'title',

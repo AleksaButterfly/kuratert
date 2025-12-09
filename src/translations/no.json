@@ -804,6 +804,7 @@
   "ManageListingsPage.statusActive": "active",
   "ManageListingsPage.statusClosed": "closed",
   "ManageListingsPage.statusDraft": "draft",
+  "ManageListingsPage.statusOutOfStock": "out of stock",
   "ManageListingsPage.statusPending": "pending",
   "ManageListingsPage.thisMonth": "This Month",
   "ManageListingsPage.title": "Manage your listings",

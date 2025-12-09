@@ -388,6 +388,10 @@ export const ManageListingsPageComponent = props => {
                       const isDraft = state === 'draft';
                       const isMenuOpen = listingMenuOpen?.id?.uuid === listingId;
 
+                      // Stock info
+                      const currentStock = listing.currentStock?.attributes?.quantity;
+                      const isOutOfStock = currentStock === 0;
+
                       return (
                         <tr key={listingId} className={css.tableRow}>
                           <td className={css.productCell}>
@@ -414,8 +418,10 @@ export const ManageListingsPageComponent = props => {
                             {price ? formatMoney(intl, price) : '-'}
                           </td>
                           <td>
-                            <span className={`${css.statusBadge} ${getStatusBadgeClass(state)}`}>
-                              {getStatusLabel(state, intl)}
+                            <span className={`${css.statusBadge} ${isOutOfStock ? css.statusOutOfStock : getStatusBadgeClass(state)}`}>
+                              {isOutOfStock
+                                ? intl.formatMessage({ id: 'ManageListingsPage.statusOutOfStock' })
+                                : getStatusLabel(state, intl)}
                             </span>
                           </td>
                           <td className={css.actionsCell}>

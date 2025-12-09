@@ -330,6 +330,11 @@
   color: #dc2626;
 }
 
+.statusOutOfStock {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+
 .statusDraft {
   background-color: var(--colorGrey100);
   color: var(--colorGrey600);
