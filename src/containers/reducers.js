@@ -5,6 +5,7 @@
  */
 import ArticlePage from './ArticlePage/ArticlePage.duck';
 import ArticlesPage from './ArticlesPage/ArticlesPage.duck';
+import CartPage from './CartPage/CartPage.duck';
 import CheckoutPage from './CheckoutPage/CheckoutPage.duck';
 import FavoritesPage from './FavoritesPage/FavoritesPage.duck';
 import ContactDetailsPage from './ContactDetailsPage/ContactDetailsPage.duck';
@@ -30,6 +31,7 @@ import TransactionPage from './TransactionPage/TransactionPage.duck';
 export {
   ArticlePage,
   ArticlesPage,
+  CartPage,
   CheckoutPage,
   ContactDetailsPage,
   EditListingPage,

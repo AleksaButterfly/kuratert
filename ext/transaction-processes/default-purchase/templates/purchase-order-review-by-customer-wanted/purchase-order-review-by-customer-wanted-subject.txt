@@ -1,1 +1,1 @@
-{{set-translations (asset "content/email-texts.json")}}{{t "PurchaseOrderReviewByCustomerWanted.Subject" "Leave a review for {listingTitle}" listingTitle=transaction.listing.title}}
+{{set-translations (asset "content/email-texts.json")}}{{#with transaction}}{{#if protected-data.cartItems}}{{t "PurchaseOrderReviewByCustomerWanted.CartSubject" "Leave a review for your order"}}{{else}}{{t "PurchaseOrderReviewByCustomerWanted.Subject" "Leave a review for {listingTitle}" listingTitle=listing.title}}{{/if}}{{/with}}

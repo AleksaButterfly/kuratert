@@ -28,7 +28,13 @@ const LineItemUnknownItemsMaybe = props => {
   const { lineItems, isProvider, intl } = props;
 
   // resolve unknown non-reversal line items
-  const allItems = lineItems.filter(item => LINE_ITEMS.indexOf(item.code) === -1 && !item.reversal);
+  // Filter out cart item line items (they're handled separately)
+  const allItems = lineItems.filter(
+    item =>
+      LINE_ITEMS.indexOf(item.code) === -1 &&
+      !item.reversal &&
+      !item.code.startsWith('line-item/cart-item-')
+  );
 
   const items = isProvider
     ? allItems.filter(item => item.includeFor.includes('provider'))

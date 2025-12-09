@@ -22,7 +22,7 @@ import {
   IconSearch,
   IconUser,
 } from '../../../../components';
-import { getFavoriteListingIds } from '../../../../util/userHelpers';
+import { getFavoriteListingIds, getCartItemCount } from '../../../../util/userHelpers';
 
 import CategoryLinks from './CategoryLinks/CategoryLinks';
 import CustomLinksMenu from './CustomLinksMenu/CustomLinksMenu';
@@ -65,15 +65,16 @@ const FavoritesLink = ({ intl, count }) => {
   );
 };
 
-const CartLink = ({ intl }) => {
+const CartLink = ({ intl, count }) => {
   return (
     <NamedLink
-      name="LandingPage"
+      name="CartPage"
       className={css.topbarLink}
       aria-label={intl.formatMessage({ id: 'TopbarDesktop.cart' })}
     >
       <span className={css.topbarLinkLabel}>
         <IconCart />
+        {count > 0 && <span className={css.cartBadge}>{count}</span>}
       </span>
     </NamedLink>
   );
@@ -229,13 +230,15 @@ const TopbarDesktop = props => {
 
   // Get favorites count from currentUser
   const favoritesCount = getFavoriteListingIds(currentUser).length;
+  // Get cart item count from currentUser
+  const cartCount = getCartItemCount(currentUser);
 
   // Search button is conditionally shown based on Console settings
   const searchButton = showSearchForm ? (
     <SearchButton intl={intl} isSearchOpen={isSearchOpen} onClick={toggleSearch} />
   ) : null;
   const favoritesLink = <FavoritesLink intl={intl} count={favoritesCount} />;
-  const cartLink = <CartLink intl={intl} />;
+  const cartLink = <CartLink intl={intl} count={cartCount} />;
 
   const profileMenuMaybe = authenticatedOnClientSide ? (
     <ProfileMenu

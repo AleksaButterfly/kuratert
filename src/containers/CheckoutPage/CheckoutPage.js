@@ -77,11 +77,12 @@ const EnhancedCheckoutPage = props => {
       currentUser,
       orderData,
       listing,
+      cartItems,
       transaction,
       fetchSpeculatedTransaction,
       fetchStripeCustomer,
     } = props;
-    const initialData = { orderData, listing, transaction };
+    const initialData = { orderData, listing, cartItems, transaction };
     const data = handlePageData(initialData, STORAGE_KEY, history);
     setPageData(data || {});
     setIsDataLoaded(true);
@@ -160,6 +161,10 @@ const EnhancedCheckoutPage = props => {
   );
   const showListingImage = requireListingImage(foundListingTypeConfig);
 
+  // Check if there are cart items to display count
+  const cartItems = pageData?.cartItems;
+  const cartItemsCount = cartItems ? cartItems.length : 0;
+
   const listingTitle = listing?.attributes?.title;
   const authorDisplayName = userDisplayNameAsString(listing?.author, '');
   const title = processName
@@ -195,6 +200,7 @@ const EnhancedCheckoutPage = props => {
       pageData={pageData}
       setPageData={setPageData}
       listingTitle={listingTitle}
+      cartItemsCount={cartItemsCount}
       title={title}
       onSubmitCallback={onSubmitCallback}
       showListingImage={showListingImage}
@@ -211,6 +217,7 @@ const mapStateToProps = state => {
   const {
     listing,
     orderData,
+    cartItems,
     stripeCustomerFetched,
     speculateTransactionInProgress,
     speculateTransactionError,
@@ -228,6 +235,7 @@ const mapStateToProps = state => {
     currentUser,
     stripeCustomerFetched,
     orderData,
+    cartItems,
     speculateTransactionInProgress,
     speculateTransactionError,
     speculatedTransaction,

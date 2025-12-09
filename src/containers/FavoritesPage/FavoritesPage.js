@@ -1,6 +1,7 @@
 import { arrayOf, bool } from 'prop-types';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
+import classNames from 'classnames';
 
 import { useConfiguration } from '../../context/configurationContext';
 import { useRouteConfiguration } from '../../context/routeConfigurationContext';
@@ -10,7 +11,7 @@ import { getFavoriteListingIds } from '../../util/userHelpers';
 import { isScrollingDisabled } from '../../ducks/ui.duck';
 import { getListingsById } from '../../ducks/marketplaceData.duck';
 
-import { H3, Page, LayoutSingleColumn, ListingCard } from '../../components';
+import { Page, LayoutSingleColumn, ListingCard, NamedLink } from '../../components';
 
 import TopbarContainer from '../TopbarContainer/TopbarContainer';
 import FooterContainer from '../FooterContainer/FooterContainer';
@@ -61,9 +62,11 @@ export const FavoritesPageComponent = props => {
     >
       <LayoutSingleColumn topbar={<TopbarContainer />} footer={<FooterContainer />}>
         <div className={css.content}>
-          <H3 as="h1" className={css.title}>
-            <FormattedMessage id="FavoritesPage.heading" />
-          </H3>
+          <div className={classNames(css.header, { [css.headerEmpty]: !hasListings })}>
+            <h1 className={css.title}>
+              <FormattedMessage id="FavoritesPage.heading" />
+            </h1>
+          </div>
 
           {queryError ? (
             <p className={css.error}>
@@ -74,8 +77,13 @@ export const FavoritesPageComponent = props => {
               <FormattedMessage id="FavoritesPage.loading" />
             </p>
           ) : !hasListings ? (
-            <div className={css.noResults}>
-              <FormattedMessage id="FavoritesPage.noResults" />
+            <div className={css.emptyState}>
+              <p className={css.noResults}>
+                <FormattedMessage id="FavoritesPage.noResults" />
+              </p>
+              <NamedLink name="SearchPage" className={css.browseLink}>
+                <FormattedMessage id="FavoritesPage.browseListing" />
+              </NamedLink>
             </div>
           ) : (
             <div className={css.listingCards}>

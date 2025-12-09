@@ -108,6 +108,7 @@ const TransitionMessage = props => {
     stateData,
     deliveryMethod,
     listingTitle,
+    cartItemsCount = 0,
     negotiationOffer = '-',
     ownRole,
     otherUsersName,
@@ -139,6 +140,14 @@ const TransitionMessage = props => {
     </InlineTextButton>
   ) : null;
 
+  // Format listing title with cart items count if there are additional items
+  const listingTitleWithCount = cartItemsCount > 0
+    ? intl.formatMessage(
+        { id: 'TransactionPage.ActivityFeed.listingTitleWithCount' },
+        { listingTitle, count: cartItemsCount }
+      )
+    : listingTitle;
+
   // If there is a transition specific message, use it.
   const messageConfig = stateData.transitionMessages?.find(m => m.transition === transitionName);
   const transitionMessage = messageConfig
@@ -147,7 +156,7 @@ const TransitionMessage = props => {
         {
           actor,
           otherUsersName,
-          listingTitle,
+          listingTitle: listingTitleWithCount,
           reviewLink,
           deliveryMethod,
           stateStatus,
@@ -163,7 +172,7 @@ const TransitionMessage = props => {
     {
       actor,
       otherUsersName,
-      listingTitle,
+      listingTitle: listingTitleWithCount,
       reviewLink,
       deliveryMethod,
       stateStatus,
@@ -337,6 +346,10 @@ export const ActivityFeed = props => {
         ? intl.formatMessage({ id: 'TransactionPage.ActivityFeed.deletedListing' })
         : listing.attributes.title;
 
+      // Get cart items count from protectedData
+      const cartItems = transaction.attributes?.protectedData?.cartItems || [];
+      const cartItemsCount = cartItems.length;
+
       const ownRole = getUserTxRole(currentUser.id, transaction);
       const otherUser = ownRole === TX_TRANSITION_ACTOR_PROVIDER ? customer : provider;
 
@@ -355,6 +368,7 @@ export const ActivityFeed = props => {
               stateData={stateData}
               deliveryMethod={transaction.attributes?.protectedData?.deliveryMethod || 'none'}
               listingTitle={listingTitle}
+              cartItemsCount={cartItemsCount}
               negotiationOffer={negotiationOffer}
               ownRole={ownRole}
               otherUsersName={<UserDisplayName user={otherUser} intl={intl} />}

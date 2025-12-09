@@ -1,1 +1,1 @@
-{{set-translations (asset "content/email-texts.json")}}{{t "PurchaseOrderCanceledToProvider.Subject" "An order for {listingTitle} was canceled" listingTitle=transaction.listing.title}}
+{{set-translations (asset "content/email-texts.json")}}{{#with transaction}}{{#if protected-data.cartItems}}{{t "PurchaseOrderCanceledToProvider.CartSubject" "An order was canceled"}}{{else}}{{t "PurchaseOrderCanceledToProvider.Subject" "An order for {listingTitle} was canceled" listingTitle=listing.title}}{{/if}}{{/with}}

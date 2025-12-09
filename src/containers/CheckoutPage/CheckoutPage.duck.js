@@ -18,18 +18,57 @@ const initiateOrderPayloadCreator = (
   // If we already have a transaction ID, we should transition, not initiate.
   const isTransition = !!transactionId;
 
-  const { deliveryMethod, quantity, bookingDates, ...otherOrderParams } = orderParams;
+  // Extract cartItems along with other order params
+  const { deliveryMethod, quantity, bookingDates, cartItems, ...otherOrderParams } = orderParams;
   const quantityMaybe = quantity ? { stockReservationQuantity: quantity } : {};
   const bookingParamsMaybe = bookingDates || {};
 
-  // Parameters only for client app's server
-  const orderData = deliveryMethod ? { deliveryMethod } : {};
+  // Transform cartItems to extract essential data (id, title, price, imageUrl, quantity)
+  const transformedCartItems = cartItems?.map(item => {
+    // If item doesn't have a listing object, it's already transformed - just return it
+    if (!item?.listing) {
+      return item;
+    }
+
+    const listing = item.listing;
+    const firstImage = listing?.images?.[0];
+    const imageVariants = firstImage?.attributes?.variants;
+    const imageUrl = imageVariants?.['listing-card']?.url;
+    const itemQuantity = item.quantity || 1;
+
+    return {
+      id: listing.id.uuid,
+      title: listing?.attributes?.title,
+      price: {
+        amount: listing?.attributes?.price?.amount,
+        currency: listing?.attributes?.price?.currency,
+      },
+      quantity: itemQuantity,
+      ...(imageUrl ? { imageUrl } : {}),
+    };
+  });
+
+  // Parameters for client app's server
+  // Include transformed cartItems and quantity in orderData for line items calculation
+  const orderData = {
+    ...(deliveryMethod ? { deliveryMethod } : {}),
+    ...(quantity ? { quantity } : {}),
+    ...(transformedCartItems ? { cartItems: transformedCartItems } : {}),
+  };
 
   // Parameters for Marketplace API
+  // Add cartItems and stockReservationQuantity to protectedData so they get saved to transaction
   const transitionParams = {
     ...quantityMaybe,
     ...bookingParamsMaybe,
     ...otherOrderParams,
+    ...(transformedCartItems || quantity ? {
+      protectedData: {
+        ...otherOrderParams.protectedData,
+        ...(transformedCartItems ? { cartItems: transformedCartItems } : {}),
+        ...(quantity ? { stockReservationQuantity: quantity } : {}),
+      },
+    } : {}),
   };
 
   const bodyParams = isTransition
@@ -286,28 +325,66 @@ const speculateTransactionPayloadCreator = (
   // If we already have a transaction ID, we should transition, not initiate.
   const isTransition = !!transactionId;
 
+  // Extract cartItems along with other order params
   const {
     deliveryMethod,
     priceVariantName,
     quantity,
     bookingDates,
+    cartItems,
     ...otherOrderParams
   } = orderParams;
   const quantityMaybe = quantity ? { stockReservationQuantity: quantity } : {};
   const bookingParamsMaybe = bookingDates || {};
 
+  // Transform cartItems to extract only essential data (id, title, price, quantity, imageUrl)
+  // Serialize SDK types (UUID, Money) to plain values for protectedData
+  const transformedCartItems = cartItems?.map(item => {
+    // If item doesn't have a listing object, it's already transformed - just return it
+    if (!item?.listing) {
+      return item;
+    }
+
+    const listing = item.listing;
+    const firstImage = listing?.images?.[0];
+    const imageVariants = firstImage?.attributes?.variants;
+    const imageUrl = imageVariants?.['listing-card']?.url;
+    const itemQuantity = item.quantity || 1;
+
+    return {
+      id: listing.id.uuid, // Serialize UUID to string
+      title: listing?.attributes?.title,
+      price: {
+        amount: listing?.attributes?.price?.amount,
+        currency: listing?.attributes?.price?.currency,
+      },
+      quantity: itemQuantity,
+      ...(imageUrl ? { imageUrl } : {}),
+    };
+  });
+
   // Parameters only for client app's server
+  // Include cartItems in orderData for line items calculation
   const orderData = {
     ...(deliveryMethod ? { deliveryMethod } : {}),
     ...(priceVariantName ? { priceVariantName } : {}),
+    ...(transformedCartItems ? { cartItems: transformedCartItems } : {}),
   };
 
   // Parameters for Marketplace API
+  // Add cartItems and stockReservationQuantity to protectedData so they get saved to transaction
   const transitionParams = {
     ...quantityMaybe,
     ...bookingParamsMaybe,
     ...otherOrderParams,
     cardToken: 'CheckoutPage_speculative_card_token',
+    ...(transformedCartItems || quantity ? {
+      protectedData: {
+        ...otherOrderParams.protectedData,
+        ...(transformedCartItems ? { cartItems: transformedCartItems } : {}),
+        ...(quantity ? { stockReservationQuantity: quantity } : {}),
+      },
+    } : {}),
   };
 
   const bodyParams = isTransition
@@ -429,6 +506,7 @@ export const stripeCustomer = () => dispatch => {
 const initialState = {
   listing: null,
   orderData: null,
+  cartItems: null,
   speculateTransactionInProgress: false,
   speculateTransactionError: null,
   speculatedTransaction: null,

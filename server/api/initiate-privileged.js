@@ -55,20 +55,40 @@ module.exports = (req, res) => {
   let lineItems = null;
   let metadataMaybe = {};
 
-  Promise.all([listingPromise(sdk, bodyParams?.params?.listingId), fetchCommission(sdk)])
-    .then(([showListingResponse, fetchAssetsResponse]) => {
+  // If we have cart items, fetch all their listings too
+  const cartItems = orderData?.cartItems || [];
+  const cartListingIds = cartItems.map(item => item.id).filter(Boolean);
+
+  const cartListingsPromise = cartListingIds.length > 0
+    ? sdk.listings.query({ ids: cartListingIds, include: [] })
+    : Promise.resolve({ data: { data: [] } });
+
+  // Fetch main listing
+  Promise.all([
+    listingPromise(sdk, bodyParams?.params?.listingId),
+    fetchCommission(sdk),
+    cartListingsPromise
+  ])
+    .then(results => {
+      const showListingResponse = results[0];
+      const fetchAssetsResponse = results[1];
+      const cartListingsResponse = results[2];
+
       const listing = showListingResponse.data.data;
+      const cartListings = cartListingsResponse.data.data || [];
       const commissionAsset = fetchAssetsResponse.data.data[0];
 
       const currency = listing.attributes.price?.currency || orderData.currency;
       const { providerCommission, customerCommission } =
         commissionAsset?.type === 'jsonAsset' ? commissionAsset.attributes.data : {};
 
+      // cartItems are already transformed on client-side with only essential data (id, title, price, imageUrl)
       lineItems = transactionLineItems(
         listing,
         getFullOrderData(orderData, bodyParams, currency),
         providerCommission,
-        customerCommission
+        customerCommission,
+        cartListings // Pass cart listings for shipping calculation
       );
       metadataMaybe = getMetadata(orderData, transitionName);
 
@@ -77,19 +97,25 @@ module.exports = (req, res) => {
     .then(trustedSdk => {
       const { params } = bodyParams;
 
-      // Add lineItems to the body params
+      // Add lineItems and protectedData to the body params
       const body = {
         ...bodyParams,
         params: {
           ...params,
           lineItems,
           ...metadataMaybe,
+          // Merge with existing protectedData (cartItems already serialized by client if present)
+          protectedData: {
+            ...params.protectedData, // Keep existing protectedData (unitType, cartItems if already there)
+            ...(orderData.deliveryMethod ? { deliveryMethod: orderData.deliveryMethod } : {}),
+          },
         },
       };
 
       if (isSpeculative) {
         return trustedSdk.transactions.initiateSpeculative(body, queryParams);
       }
+
       return trustedSdk.transactions.initiate(body, queryParams);
     })
     .then(apiResponse => {

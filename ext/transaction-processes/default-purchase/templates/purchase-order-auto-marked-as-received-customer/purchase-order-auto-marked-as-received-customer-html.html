@@ -13,13 +13,13 @@
           <table align="center" role="presentation" cellSpacing="0" cellPadding="0" border="0" width="100%" style="max-width:600px;margin:0 auto">
             <tr style="width:100%">
               <td>
-                <h1 style="color:#484848;font-size:26px;line-height:1.3;font-weight:700">{{t "PurchaseOrderAutoMarkedAsReceivedCustomer.Title" "Your order for {listingTitle} is now considered completed" listingTitle=listing.title }}</h1>{{#eq "shipping" protected-data.deliveryMethod}}
+                <h1 style="color:#484848;font-size:26px;line-height:1.3;font-weight:700">{{#if protected-data.cartItems}}{{t "PurchaseOrderAutoMarkedAsReceivedCustomer.CartTitle" "Your order is now considered completed"}}{{else}}{{t "PurchaseOrderAutoMarkedAsReceivedCustomer.Title" "Your order for {listingTitle} is now considered completed" listingTitle=listing.title}}{{/if}}</h1>{{#eq "shipping" protected-data.deliveryMethod}}
                 <p style="font-size:16px;line-height:1.4;margin:16px 0;color:#484848">
-                  {{t "PurchaseOrderAutoMarkedAsReceivedCustomer.ShippingMessage" "{providerDisplayName} shipped {listingTitle} to you two weeks ago. As we haven't heard from you since, we assume that you have received what you ordered. We now consider your order completed. {providerDisplayName} has received your payment." providerDisplayName=provider.display-name listingTitle=listing.title }}
+                  {{#if protected-data.cartItems}}{{t "PurchaseOrderAutoMarkedAsReceivedCustomer.CartShippingMessage" "{providerDisplayName} shipped your items to you two weeks ago. As we haven't heard from you since, we assume that you have received what you ordered. We now consider your order completed. {providerDisplayName} has received your payment." providerDisplayName=provider.display-name}}{{else}}{{t "PurchaseOrderAutoMarkedAsReceivedCustomer.ShippingMessage" "{providerDisplayName} shipped {listingTitle} to you two weeks ago. As we haven't heard from you since, we assume that you have received what you ordered. We now consider your order completed. {providerDisplayName} has received your payment." providerDisplayName=provider.display-name listingTitle=listing.title}}{{/if}}
                   </p>
                 {{else}}
                 <p style="font-size:16px;line-height:1.4;margin:16px 0;color:#484848">
-                  {{t "PurchaseOrderAutoMarkedAsReceivedCustomer.DeliveryMessage" "{providerDisplayName} delivered {listingTitle} to you two weeks ago. As we haven't heard from you since, we assume that you have received what you ordered. We now consider your order completed. {providerDisplayName} has received your payment." providerDisplayName=provider.display-name listingTitle=listing.title}}</p>
+                  {{#if protected-data.cartItems}}{{t "PurchaseOrderAutoMarkedAsReceivedCustomer.CartDeliveryMessage" "{providerDisplayName} delivered your items to you two weeks ago. As we haven't heard from you since, we assume that you have received what you ordered. We now consider your order completed. {providerDisplayName} has received your payment." providerDisplayName=provider.display-name}}{{else}}{{t "PurchaseOrderAutoMarkedAsReceivedCustomer.DeliveryMessage" "{providerDisplayName} delivered {listingTitle} to you two weeks ago. As we haven't heard from you since, we assume that you have received what you ordered. We now consider your order completed. {providerDisplayName} has received your payment." providerDisplayName=provider.display-name listingTitle=listing.title}}{{/if}}</p>
                 {{/eq}}
                 <table style="padding:16px 0 0" align="center" border="0" cellPadding="0" cellSpacing="0" role="presentation" width="100%">
                   <tbody>
@@ -32,7 +32,7 @@
                     </tr>
                   </tbody>
                 </table>
-                <p style="font-size:16px;line-height:1.4;margin:16px 0;color:#484848">{{t "PurchaseOrderAutoMarkedAsReceivedCustomer.Disclaimer" "If you did not receive {listingTitle} yet, please contact {marketplaceName} support." listingTitle=listing.title marketplaceName=marketplace.name}}</p>
+                <p style="font-size:16px;line-height:1.4;margin:16px 0;color:#484848">{{#if protected-data.cartItems}}{{t "PurchaseOrderAutoMarkedAsReceivedCustomer.CartDisclaimer" "If you did not receive your items yet, please contact {marketplaceName} support." marketplaceName=marketplace.name}}{{else}}{{t "PurchaseOrderAutoMarkedAsReceivedCustomer.Disclaimer" "If you did not receive {listingTitle} yet, please contact {marketplaceName} support." listingTitle=listing.title marketplaceName=marketplace.name}}{{/if}}</p>
                 {{/with}}
                 <div>
                   <hr style="width:100%;border:none;border-top:1px solid #eaeaea;border-color:#E1E1E1;margin:20px 0" />

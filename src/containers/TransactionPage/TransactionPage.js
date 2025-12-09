@@ -609,6 +609,11 @@ export const TransactionPageComponent = props => {
   const hasViewingRights = currentUser && hasPermissionToViewData(currentUser);
 
   const txBookingMaybe = booking?.id ? { booking, timeZone } : {};
+
+  // Check if this transaction has cart items
+  const cartItems = transaction?.attributes?.protectedData?.cartItems || [];
+  const hasCartItems = cartItems.length > 0;
+
   const orderBreakdownMaybe = hasLineItems
     ? {
         orderBreakdown: (
@@ -619,6 +624,8 @@ export const TransactionPageComponent = props => {
             {...txBookingMaybe}
             currency={config.currency}
             marketplaceName={config.marketplaceName}
+            cartItems={hasCartItems ? cartItems : null}
+            listing={listing}
           />
         ),
       }

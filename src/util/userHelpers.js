@@ -279,3 +279,55 @@ export const getCurrentUserTypeRoles = (config, currentUser) => {
 export const getFavoriteListingIds = (currentUser = {}) => {
   return currentUser?.attributes?.profile?.privateData?.favoriteListingIds || [];
 };
+
+/**
+ * Get cart items from current user's private data
+ * @param {Object} currentUser - The current user object
+ * @returns {Array<Object>} Array of cart item objects with listingId and quantity
+ */
+export const getCartItems = (currentUser = {}) => {
+  return currentUser?.attributes?.profile?.privateData?.cartItems || [];
+};
+
+/**
+ * Get cart listing IDs from current user's private data
+ * @param {Object} currentUser - The current user object
+ * @returns {Array<string>} Array of listing UUID strings
+ */
+export const getCartListingIds = (currentUser = {}) => {
+  const cartItems = getCartItems(currentUser);
+  return cartItems.map(item => item.listingId);
+};
+
+/**
+ * Check if a listing is in the user's cart
+ * @param {Object} currentUser - The current user object
+ * @param {string} listingId - The listing ID to check
+ * @returns {boolean} True if the listing is in the cart
+ */
+export const isListingInCart = (currentUser, listingId) => {
+  const cartItems = getCartItems(currentUser);
+  return cartItems.some(item => item.listingId === listingId);
+};
+
+/**
+ * Get the quantity of a specific listing in the cart
+ * @param {Object} currentUser - The current user object
+ * @param {string} listingId - The listing ID to check
+ * @returns {number} The quantity in the cart, or 0 if not in cart
+ */
+export const getCartItemQuantity = (currentUser, listingId) => {
+  const cartItems = getCartItems(currentUser);
+  const item = cartItems.find(item => item.listingId === listingId);
+  return item?.quantity || 0;
+};
+
+/**
+ * Get total number of items in cart (sum of all quantities)
+ * @param {Object} currentUser - The current user object
+ * @returns {number} Total item count
+ */
+export const getCartItemCount = (currentUser = {}) => {
+  const cartItems = getCartItems(currentUser);
+  return cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
+};

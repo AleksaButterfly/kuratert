@@ -4,7 +4,7 @@ import { denormalisedResponseEntities, ensureOwnListing } from '../util/data';
 import * as log from '../util/log';
 import { LISTING_STATE_DRAFT } from '../util/types';
 import { storableError } from '../util/errors';
-import { isUserAuthorized, getFavoriteListingIds } from '../util/userHelpers';
+import { isUserAuthorized, getFavoriteListingIds, getCartItems } from '../util/userHelpers';
 import {
   getStatesNeedingProviderAttention,
   getStatesNeedingCustomerAttention,
@@ -369,6 +369,157 @@ export const removeListingFromFavorites = listingId => (dispatch, getState, sdk)
   return dispatch(removeListingFromFavoritesThunk(listingId)).unwrap();
 };
 
+///////////////////////////////////////////
+// Add listing to cart (CUSTOM)         //
+///////////////////////////////////////////
+
+const addListingToCartPayloadCreator = ({ listingId, quantity = 1 }, thunkAPI) => {
+  const { getState, dispatch, extra: sdk, rejectWithValue } = thunkAPI;
+  const { currentUser } = getState().user;
+
+  // Get current cart items from optimistically updated state
+  const currentCartItems = getCartItems(currentUser);
+
+  // Since we use optimistic updates, the item is already added
+  // Just send the current state to the server
+  // Note: deliveryMethod is not stored per cart item - it's determined from listing data in CartPage
+  return sdk.currentUser
+    .updateProfile({
+      privateData: {
+        cartItems: currentCartItems,
+      },
+    })
+    .then(() => {
+      // Refresh current user data
+      dispatch(fetchCurrentUser());
+      return { listingId, quantity };
+    })
+    .catch(e => {
+      log.error(e, 'add-listing-to-cart-failed', { listingId });
+      return rejectWithValue({ error: storableError(e), listingId });
+    });
+};
+
+export const addListingToCartThunk = createAsyncThunk(
+  'user/addListingToCart',
+  addListingToCartPayloadCreator
+);
+
+// Backward compatible wrapper for the thunk
+export const addListingToCart = (listingId, quantity = 1) => (dispatch, getState, sdk) => {
+  return dispatch(addListingToCartThunk({ listingId, quantity })).unwrap();
+};
+
+///////////////////////////////////////////////
+// Remove listing from cart (CUSTOM)        //
+///////////////////////////////////////////////
+
+const removeListingFromCartPayloadCreator = (listingId, thunkAPI) => {
+  const { getState, dispatch, extra: sdk, rejectWithValue } = thunkAPI;
+  const { currentUser } = getState().user;
+
+  // Get current cart items from optimistically updated state
+  const currentCartItems = getCartItems(currentUser);
+
+  // Since we use optimistic updates, the item is already removed
+  // Just send the current state to the server
+  return sdk.currentUser
+    .updateProfile({
+      privateData: {
+        cartItems: currentCartItems,
+      },
+    })
+    .then(() => {
+      // Refresh current user data
+      dispatch(fetchCurrentUser());
+      return { listingId };
+    })
+    .catch(e => {
+      log.error(e, 'remove-listing-from-cart-failed', { listingId });
+      return rejectWithValue({ error: storableError(e), listingId });
+    });
+};
+
+export const removeListingFromCartThunk = createAsyncThunk(
+  'user/removeListingFromCart',
+  removeListingFromCartPayloadCreator
+);
+
+// Backward compatible wrapper for the thunk
+export const removeListingFromCart = listingId => (dispatch, getState, sdk) => {
+  return dispatch(removeListingFromCartThunk(listingId)).unwrap();
+};
+
+///////////////////////////////////////////////
+// Update cart item quantity (CUSTOM)       //
+///////////////////////////////////////////////
+
+const updateCartItemQuantityPayloadCreator = ({ listingId, quantity }, thunkAPI) => {
+  const { getState, dispatch, extra: sdk, rejectWithValue } = thunkAPI;
+  const { currentUser } = getState().user;
+
+  // Get current cart items from optimistically updated state
+  const currentCartItems = getCartItems(currentUser);
+
+  // Send updated cart to server
+  return sdk.currentUser
+    .updateProfile({
+      privateData: {
+        cartItems: currentCartItems,
+      },
+    })
+    .then(() => {
+      return { listingId, quantity };
+    })
+    .catch(e => {
+      log.error(e, 'update-cart-item-quantity-failed', { listingId, quantity });
+      return rejectWithValue({ error: storableError(e), listingId, quantity });
+    });
+};
+
+export const updateCartItemQuantityThunk = createAsyncThunk(
+  'user/updateCartItemQuantity',
+  updateCartItemQuantityPayloadCreator
+);
+
+// Backward compatible wrapper for the thunk
+export const updateCartItemQuantity = (listingId, quantity) => (dispatch, getState, sdk) => {
+  return dispatch(updateCartItemQuantityThunk({ listingId, quantity })).unwrap();
+};
+
+///////////////////////////////////////////////
+// Clear cart (CUSTOM)                      //
+///////////////////////////////////////////////
+
+const clearCartPayloadCreator = (_, thunkAPI) => {
+  const { dispatch, extra: sdk, rejectWithValue } = thunkAPI;
+
+  return sdk.currentUser
+    .updateProfile({
+      privateData: {
+        cartItems: [],
+      },
+    })
+    .then(() => {
+      dispatch(fetchCurrentUser());
+      return {};
+    })
+    .catch(e => {
+      log.error(e, 'clear-cart-failed');
+      return rejectWithValue({ error: storableError(e) });
+    });
+};
+
+export const clearCartThunk = createAsyncThunk(
+  'user/clearCart',
+  clearCartPayloadCreator
+);
+
+// Backward compatible wrapper for the thunk
+export const clearCart = () => (dispatch, getState, sdk) => {
+  return dispatch(clearCartThunk()).unwrap();
+};
+
 // ================ Slice ================ //
 
 const userSlice = createSlice({
@@ -392,6 +543,16 @@ const userSlice = createSlice({
     removeListingFromFavoritesInProgress: false,
     removeListingFromFavoritesError: null,
     currentFavoriteListingId: null,
+    // Cart
+    addListingToCartInProgress: false,
+    addListingToCartError: null,
+    removeListingFromCartInProgress: false,
+    removeListingFromCartError: null,
+    updateCartItemQuantityInProgress: false,
+    updateCartItemQuantityError: null,
+    clearCartInProgress: false,
+    clearCartError: null,
+    currentCartListingId: null,
   },
   reducers: {
     clearCurrentUser: state => {
@@ -533,6 +694,107 @@ const userSlice = createSlice({
             state.currentUser.attributes.profile.privateData.favoriteListingIds = [listingId, ...currentFavorites];
           }
         }
+      })
+      // addListingToCart
+      .addCase(addListingToCartThunk.pending, (state, action) => {
+        state.addListingToCartInProgress = true;
+        state.addListingToCartError = null;
+        state.currentCartListingId = action.meta.arg.listingId;
+
+        // Optimistic update: add to cart immediately
+        const { listingId, quantity } = action.meta.arg;
+        if (state.currentUser?.attributes?.profile?.privateData) {
+          const currentCartItems = state.currentUser.attributes.profile.privateData.cartItems || [];
+          const existingItemIndex = currentCartItems.findIndex(item => item.listingId === listingId);
+          if (existingItemIndex === -1) {
+            // Cart items only store listingId and quantity
+            // Delivery method is determined from listing data in CartPage
+            const cartItem = { listingId, quantity: quantity || 1 };
+            state.currentUser.attributes.profile.privateData.cartItems = [
+              ...currentCartItems,
+              cartItem,
+            ];
+          }
+        }
+      })
+      .addCase(addListingToCartThunk.fulfilled, state => {
+        state.addListingToCartInProgress = false;
+        state.currentCartListingId = null;
+      })
+      .addCase(addListingToCartThunk.rejected, (state, action) => {
+        state.addListingToCartInProgress = false;
+        state.addListingToCartError = action.payload?.error || action.payload;
+        state.currentCartListingId = null;
+
+        // Revert optimistic update on error
+        const { listingId } = action.meta.arg;
+        if (state.currentUser?.attributes?.profile?.privateData?.cartItems) {
+          state.currentUser.attributes.profile.privateData.cartItems =
+            state.currentUser.attributes.profile.privateData.cartItems.filter(item => item.listingId !== listingId);
+        }
+      })
+      // removeListingFromCart
+      .addCase(removeListingFromCartThunk.pending, (state, action) => {
+        state.removeListingFromCartInProgress = true;
+        state.removeListingFromCartError = null;
+        state.currentCartListingId = action.meta.arg;
+
+        // Optimistic update: remove from cart immediately
+        const listingId = action.meta.arg;
+        if (state.currentUser?.attributes?.profile?.privateData?.cartItems) {
+          state.currentUser.attributes.profile.privateData.cartItems =
+            state.currentUser.attributes.profile.privateData.cartItems.filter(item => item.listingId !== listingId);
+        }
+      })
+      .addCase(removeListingFromCartThunk.fulfilled, state => {
+        state.removeListingFromCartInProgress = false;
+        state.currentCartListingId = null;
+      })
+      .addCase(removeListingFromCartThunk.rejected, (state, action) => {
+        state.removeListingFromCartInProgress = false;
+        state.removeListingFromCartError = action.payload?.error || action.payload;
+        state.currentCartListingId = null;
+
+        // Note: We don't revert here since we don't have the original quantity
+      })
+      // updateCartItemQuantity
+      .addCase(updateCartItemQuantityThunk.pending, (state, action) => {
+        state.updateCartItemQuantityInProgress = true;
+        state.updateCartItemQuantityError = null;
+
+        // Optimistic update: update quantity immediately
+        const { listingId, quantity } = action.meta.arg;
+        if (state.currentUser?.attributes?.profile?.privateData?.cartItems) {
+          const cartItems = state.currentUser.attributes.profile.privateData.cartItems;
+          const itemIndex = cartItems.findIndex(item => item.listingId === listingId);
+          if (itemIndex !== -1) {
+            state.currentUser.attributes.profile.privateData.cartItems[itemIndex].quantity = quantity;
+          }
+        }
+      })
+      .addCase(updateCartItemQuantityThunk.fulfilled, state => {
+        state.updateCartItemQuantityInProgress = false;
+      })
+      .addCase(updateCartItemQuantityThunk.rejected, (state, action) => {
+        state.updateCartItemQuantityInProgress = false;
+        state.updateCartItemQuantityError = action.payload?.error || action.payload;
+      })
+      // clearCart
+      .addCase(clearCartThunk.pending, state => {
+        state.clearCartInProgress = true;
+        state.clearCartError = null;
+
+        // Optimistic update: clear cart immediately
+        if (state.currentUser?.attributes?.profile?.privateData) {
+          state.currentUser.attributes.profile.privateData.cartItems = [];
+        }
+      })
+      .addCase(clearCartThunk.fulfilled, state => {
+        state.clearCartInProgress = false;
+      })
+      .addCase(clearCartThunk.rejected, (state, action) => {
+        state.clearCartInProgress = false;
+        state.clearCartError = action.payload?.error || action.payload;
       });
   },
 });

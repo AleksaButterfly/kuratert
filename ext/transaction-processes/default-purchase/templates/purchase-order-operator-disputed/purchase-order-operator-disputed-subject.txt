@@ -1,1 +1,1 @@
-{{set-translations (asset "content/email-texts.json")}}{{t "PurchaseOrderOperatorDisputed.Subject" "An order for {listingTitle} was disputed" listingTitle=transaction.listing.title}}
+{{set-translations (asset "content/email-texts.json")}}{{#with transaction}}{{#if protected-data.cartItems}}{{t "PurchaseOrderOperatorDisputed.CartSubject" "An order was disputed"}}{{else}}{{t "PurchaseOrderOperatorDisputed.Subject" "An order for {listingTitle} was disputed" listingTitle=listing.title}}{{/if}}{{/with}}

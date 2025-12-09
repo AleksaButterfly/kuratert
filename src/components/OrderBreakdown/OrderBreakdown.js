@@ -5,7 +5,9 @@
 import React from 'react';
 import classNames from 'classnames';
 
+import { useConfiguration } from '../../context/configurationContext';
 import { FormattedMessage, useIntl } from '../../util/reactIntl';
+import { formatMoney } from '../../util/currency';
 import {
   DATE_TYPE_DATE,
   DATE_TYPE_DATETIME,
@@ -17,6 +19,8 @@ import {
   LISTING_UNIT_TYPES,
   propTypes,
 } from '../../util/types';
+
+import { AspectRatioWrapper, ResponsiveImage } from '../index';
 
 import LineItemBookingPeriod from './LineItemBookingPeriod';
 import LineItemBasePriceMaybe from './LineItemBasePriceMaybe';
@@ -30,10 +34,12 @@ import LineItemProviderCommissionRefundMaybe from './LineItemProviderCommissionR
 import LineItemRefundMaybe from './LineItemRefundMaybe';
 import LineItemTotalPrice from './LineItemTotalPrice';
 import LineItemUnknownItemsMaybe from './LineItemUnknownItemsMaybe';
+import { getLineItemTitle, getCartItemFromLineItem, isCartItemLineItem } from '../../util/lineItems';
 
 import css from './OrderBreakdown.module.css';
 
 export const OrderBreakdownComponent = props => {
+  const config = useConfiguration();
   const {
     rootClassName,
     className,
@@ -44,6 +50,9 @@ export const OrderBreakdownComponent = props => {
     currency,
     marketplaceName,
     intl,
+    cartItems,
+    listing,
+    listingQuantity,
   } = props;
 
   const isCustomer = userRole === 'customer';
@@ -67,6 +76,20 @@ export const OrderBreakdownComponent = props => {
   });
 
   const classes = classNames(rootClassName || css.root, className);
+
+  // Check if we have cart items (stored in protectedData)
+  const protectedCartItems = transaction?.attributes?.protectedData?.cartItems || [];
+  const hasCartItems = cartItems && cartItems.length > 0;
+
+  // Filter line items to get only order items (not commission, shipping, etc.)
+  const orderLineItems = lineItems.filter(item => {
+    const isOrderItem = LISTING_UNIT_TYPES.includes(item.code) || item.code.startsWith('line-item/');
+    const isNotCommissionOrFee =
+      !item.code.includes('commission') &&
+      !item.code.includes('shipping') &&
+      !item.code.includes('pickup');
+    return isOrderItem && isNotCommissionOrFee && !item.reversal;
+  });
 
   /**
    * OrderBreakdown contains different line items:
@@ -113,10 +136,88 @@ export const OrderBreakdownComponent = props => {
         timeZone={timeZone}
       />
 
-      <LineItemBasePriceMaybe lineItems={lineItems} code={lineItemUnitType} intl={intl} />
+      {hasCartItems || protectedCartItems.length > 0 ? (
+        <>
+          {orderLineItems.map((item, index) => {
+            const itemQuantity = item.quantity || 1;
+
+            // Get title using helper function (handles both main listing and cart items)
+            const itemTitle = getLineItemTitle(item.code, protectedCartItems, listing);
+
+            // Sharetribe calculates lineTotal automatically (unitPrice × quantity)
+            const lineTotal = item.lineTotal;
+            const formattedPrice = lineTotal ? formatMoney(intl, lineTotal) : '';
+
+            // Show quantity in label if > 1
+            const displayLabel = itemQuantity > 1
+              ? `${itemTitle} x ${itemQuantity}`
+              : itemTitle;
+
+            // Get image data
+            // For cart items: get imageUrl from protectedData
+            // For main listing: use listing images
+            const isMainListing = LISTING_UNIT_TYPES.includes(item.code);
+            const cartItem = isCartItemLineItem(item.code)
+              ? getCartItemFromLineItem(item.code, protectedCartItems)
+              : null;
+
+            const imageUrl = cartItem?.imageUrl;
+            const firstImage = isMainListing ? listing?.images?.[0] : null;
+            const variantPrefix = config.layout?.listingImage?.variantPrefix || 'listing-card';
+            const variants = firstImage
+              ? Object.keys(firstImage?.attributes?.variants || {}).filter(k =>
+                  k.startsWith(variantPrefix)
+                )
+              : [];
+
+            return (
+              <div key={`${item.code}-${index}`} className={css.lineItem}>
+                {(firstImage || imageUrl) && (
+                  <div className={css.itemImageWrapper}>
+                    {firstImage ? (
+                      <AspectRatioWrapper
+                        className={css.itemAspectWrapper}
+                        width={1}
+                        height={1}
+                      >
+                        <ResponsiveImage
+                          rootClassName={css.itemImage}
+                          alt={itemTitle}
+                          image={firstImage}
+                          variants={variants}
+                          sizes="40px"
+                        />
+                      </AspectRatioWrapper>
+                    ) : imageUrl ? (
+                      <AspectRatioWrapper
+                        className={css.itemAspectWrapper}
+                        width={1}
+                        height={1}
+                      >
+                        <img
+                          src={imageUrl}
+                          alt={itemTitle}
+                          className={css.itemImage}
+                        />
+                      </AspectRatioWrapper>
+                    ) : null}
+                  </div>
+                )}
+                <span className={css.itemLabel}>{displayLabel}</span>
+                {formattedPrice && <span className={css.itemValue}>{formattedPrice}</span>}
+              </div>
+            );
+          })}
+        </>
+      ) : (
+        <LineItemBasePriceMaybe lineItems={lineItems} code={lineItemUnitType} intl={intl} />
+      )}
+
       <LineItemShippingFeeMaybe lineItems={lineItems} intl={intl} />
       <LineItemPickupFeeMaybe lineItems={lineItems} intl={intl} />
-      <LineItemUnknownItemsMaybe lineItems={lineItems} isProvider={isProvider} intl={intl} />
+      {!hasCartItems && !protectedCartItems.length && (
+        <LineItemUnknownItemsMaybe lineItems={lineItems} isProvider={isProvider} intl={intl} />
+      )}
 
       <LineItemSubTotalMaybe
         lineItems={lineItems}

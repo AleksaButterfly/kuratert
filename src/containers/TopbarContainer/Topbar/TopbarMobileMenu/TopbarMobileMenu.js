@@ -9,7 +9,7 @@ import { ACCOUNT_SETTINGS_PAGES } from '../../../../routing/routeConfiguration';
 import { FormattedMessage } from '../../../../util/reactIntl';
 import { ensureCurrentUser } from '../../../../util/data';
 import { useConfiguration } from '../../../../context/configurationContext';
-import { getFavoriteListingIds } from '../../../../util/userHelpers';
+import { getFavoriteListingIds, getCartItemCount } from '../../../../util/userHelpers';
 
 import {
   AvatarLarge,
@@ -123,6 +123,13 @@ const TopbarMobileMenu = props => {
       <NotificationBadge className={css.notificationBadge} count={favoritesCount} />
     ) : null;
 
+  // Get cart item count from currentUser
+  const cartCount = getCartItemCount(currentUser);
+  const cartBadge =
+    cartCount > 0 ? (
+      <NotificationBadge className={css.notificationBadge} count={cartCount} />
+    ) : null;
+
   // Navigation links - shown for both authenticated and unauthenticated users
   const navLinks = (
     <>
@@ -133,8 +140,9 @@ const TopbarMobileMenu = props => {
         <FormattedMessage id="TopbarMobileMenu.favoritesLink" />
         {favoritesBadge}
       </NamedLink>
-      <NamedLink name="LandingPage" className={css.navigationLink}>
+      <NamedLink name="CartPage" className={css.navigationLink}>
         <FormattedMessage id="TopbarMobileMenu.cartLink" />
+        {cartBadge}
       </NamedLink>
     </>
   );

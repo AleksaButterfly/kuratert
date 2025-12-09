@@ -8,7 +8,17 @@ import { useConfiguration } from '../../context/configurationContext';
 import { useRouteConfiguration } from '../../context/routeConfigurationContext';
 // Utils
 import { FormattedMessage, useIntl } from '../../util/reactIntl';
-import { LISTING_STATE_PENDING_APPROVAL, LISTING_STATE_CLOSED, propTypes } from '../../util/types';
+import {
+  LISTING_STATE_PENDING_APPROVAL,
+  LISTING_STATE_CLOSED,
+  STOCK_MULTIPLE_ITEMS,
+  STOCK_INFINITE_MULTIPLE_ITEMS,
+  propTypes,
+} from '../../util/types';
+import {
+  displayDeliveryPickup,
+  displayDeliveryShipping,
+} from '../../util/configHelpers';
 import { types as sdkTypes } from '../../util/sdkLoader';
 import {
   LISTING_PAGE_DRAFT_VARIANT,
@@ -50,8 +60,8 @@ import {
 import { getMarketplaceEntities } from '../../ducks/marketplaceData.duck';
 import { manageDisableScrolling, isScrollingDisabled } from '../../ducks/ui.duck';
 import { initializeCardPaymentData } from '../../ducks/stripe.duck.js';
-import { addListingToFavorites, removeListingFromFavorites } from '../../ducks/user.duck';
-import { getFavoriteListingIds } from '../../util/userHelpers.js';
+import { addListingToFavorites, removeListingFromFavorites, addListingToCart } from '../../ducks/user.duck';
+import { getFavoriteListingIds, isListingInCart, getCartListingIds } from '../../util/userHelpers.js';
 
 // Shared components
 import {
@@ -88,6 +98,7 @@ import {
 } from './ListingPage.shared';
 import ActionBarMaybe from './ActionBarMaybe';
 import ListingImageGallery from './ListingImageGallery/ListingImageGallery';
+import InquiryForm from './InquiryForm/InquiryForm';
 
 import css from './ListingPage.module.css';
 
@@ -302,6 +313,8 @@ export const ListingPageComponent = props => {
   const [mounted, setMounted] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  // Cart related state
+  const [selectedQuantity, setSelectedQuantity] = useState(1);
 
   useEffect(() => {
     setMounted(true);
@@ -335,6 +348,9 @@ export const ListingPageComponent = props => {
     currentFavoriteListingId,
     onAddListingToFavorites,
     onRemoveListingFromFavorites,
+    // Cart
+    addListingToCartInProgress,
+    onAddListingToCart,
     ...restOfProps
   } = props;
 
@@ -415,6 +431,21 @@ export const ListingPageComponent = props => {
   const isBooking = isBookingProcess(processName);
   const isPurchase = isPurchaseProcess(processName);
   const isNegotiation = isNegotiationProcess(processName);
+
+  // Get listing type configuration for stock type and delivery options
+  const validListingTypes = config.listing.listingTypes || [];
+  const listingTypeConfig = validListingTypes.find(conf => conf.listingType === listingType);
+  const stockType = listingTypeConfig?.stockType;
+  const allowOrdersOfMultipleItems = [STOCK_MULTIPLE_ITEMS, STOCK_INFINITE_MULTIPLE_ITEMS].includes(
+    stockType
+  );
+
+  // Delivery method is now selected in CartPage, not here
+
+  // Stock and quantity
+  const currentStock = currentListing.currentStock?.attributes?.quantity;
+  const hasStock = currentStock != null && currentStock > 0;
+  const maxQuantity = Math.min(currentStock || 1, 100);
 
   const currentAuthor = authorAvailable ? currentListing.author : null;
   const ensuredAuthor = ensureUser(currentAuthor);
@@ -535,6 +566,23 @@ export const ListingPageComponent = props => {
     }
   };
 
+  // Cart logic
+  const cartListingIds = getCartListingIds(currentUser);
+  const isInCart = cartListingIds.includes(listingId.uuid);
+
+  const handleAddToCart = () => {
+    if (onAddListingToCart) {
+      // Delivery method is selected in CartPage, not here
+      onAddListingToCart(listingId.uuid, selectedQuantity);
+    }
+  };
+
+  // Quantity options for selector
+  const quantityOptions = [];
+  for (let i = 1; i <= maxQuantity; i++) {
+    quantityOptions.push(i);
+  }
+
   // Author info
   const authorBio = ensuredAuthor.attributes?.profile?.bio || '';
   const authorInitials = authorDisplayName
@@ -568,10 +616,10 @@ export const ListingPageComponent = props => {
     { title, price: formattedPrice, marketplaceName }
   );
   const productURL = `${config.marketplaceRootURL}${location.pathname}${location.search}${location.hash}`;
-  const currentStock = currentListing.currentStock?.attributes?.quantity || 0;
+  const schemaStock = currentListing.currentStock?.attributes?.quantity || 0;
   const schemaAvailability = !currentListing.currentStock
     ? null
-    : currentStock > 0
+    : schemaStock > 0
     ? 'https://schema.org/InStock'
     : 'https://schema.org/OutOfStock';
 
@@ -739,15 +787,46 @@ export const ListingPageComponent = props => {
               </div>
             </div>
 
+            {/* Quantity selector - only show if multiple items allowed */}
+            {isPurchase && hasStock && !isInCart && allowOrdersOfMultipleItems && maxQuantity > 1 && (
+              <div className={css.purchaseOptionsSection}>
+                <div className={css.quantitySelectorWrapper}>
+                  <label className={css.selectorLabel}>
+                    <FormattedMessage id="ListingPage.quantityLabel" />
+                  </label>
+                  <select
+                    className={css.quantitySelect}
+                    value={selectedQuantity}
+                    onChange={e => setSelectedQuantity(Number(e.target.value))}
+                    disabled={isOwnListing}
+                  >
+                    {quantityOptions.map(qty => (
+                      <option key={qty} value={qty}>
+                        {qty}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
+
             {/* Action buttons */}
             <div className={css.actionsSection}>
               {isPurchase && (
                 <button
-                  className={css.addToCartButton}
-                  onClick={() => handleOrderSubmit({})}
-                  disabled={isOwnListing}
+                  className={isInCart ? css.addedToCartButton : css.addToCartButton}
+                  onClick={handleAddToCart}
+                  disabled={isOwnListing || addListingToCartInProgress || !hasStock || isInCart}
                 >
-                  <FormattedMessage id="ListingPage.addToCart" />
+                  {addListingToCartInProgress ? (
+                    <FormattedMessage id="ListingPage.addingToCart" />
+                  ) : isInCart ? (
+                    <FormattedMessage id="ListingPage.addedToCart" />
+                  ) : !hasStock ? (
+                    <FormattedMessage id="ListingPage.outOfStock" />
+                  ) : (
+                    <FormattedMessage id="ListingPage.addToCart" />
+                  )}
                 </button>
               )}
               <button className={css.makeOfferButton} disabled={isOwnListing}>
@@ -845,6 +924,26 @@ export const ListingPageComponent = props => {
           </div>
         </div>
       </Modal>
+
+      {/* Inquiry Modal */}
+      <Modal
+        id="ListingPage.inquiry"
+        contentClassName={css.inquiryModalContent}
+        isOpen={isAuthenticated && inquiryModalOpen}
+        onClose={() => setInquiryModalOpen(false)}
+        usePortal
+        onManageDisableScrolling={onManageDisableScrolling}
+      >
+        <InquiryForm
+          className={css.inquiryForm}
+          submitButtonWrapperClassName={css.inquirySubmitButtonWrapper}
+          listingTitle={title}
+          authorDisplayName={authorDisplayName}
+          sendInquiryError={sendInquiryError}
+          onSubmit={onSubmitInquiry}
+          inProgress={sendInquiryInProgress}
+        />
+      </Modal>
     </Page>
   );
 };
@@ -925,6 +1024,7 @@ const mapStateToProps = state => {
     addListingToFavoritesInProgress,
     removeListingFromFavoritesInProgress,
     currentFavoriteListingId,
+    addListingToCartInProgress,
   } = state.user;
 
   const getListing = id => {
@@ -960,6 +1060,8 @@ const mapStateToProps = state => {
     addListingToFavoritesInProgress,
     removeListingFromFavoritesInProgress,
     currentFavoriteListingId,
+    // Cart
+    addListingToCartInProgress,
   };
 };
 
@@ -976,6 +1078,8 @@ const mapDispatchToProps = dispatch => ({
   // Favorites
   onAddListingToFavorites: listingId => dispatch(addListingToFavorites(listingId)),
   onRemoveListingFromFavorites: listingId => dispatch(removeListingFromFavorites(listingId)),
+  // Cart
+  onAddListingToCart: (listingId, quantity) => dispatch(addListingToCart(listingId, quantity)),
 });
 
 const ListingPage = compose(

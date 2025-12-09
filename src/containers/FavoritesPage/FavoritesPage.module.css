@@ -14,9 +14,21 @@
   }
 }
 
-.title {
-  margin-top: 0;
+.header {
+  margin-bottom: 48px;
+}
+
+.headerEmpty {
   margin-bottom: 24px;
+}
+
+.title {
+  font-family: var(--fontFamilySerif);
+  font-size: 48px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--colorGrey900);
+  margin: 0 0 8px 0;
   padding: 0;
 }
 
@@ -43,10 +55,34 @@
   }
 }
 
+.emptyState {
+
+}
+
 .noResults {
-  margin-top: 0;
-  margin-bottom: 0;
+  font-family: var(--fontFamily);
+  font-size: 16px;
+  line-height: 1.5;
   color: var(--colorGrey700);
+  margin: 0 0 24px 0;
+  padding: 0;
+}
+
+.browseLink {
+  composes: marketplaceButtonStyles from global;
+  background-color: var(--marketplaceColor);
+  color: var(--colorWhite);
+  text-decoration: none;
+  display: inline-block;
+  padding: 12px 24px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: var(--fontWeightSemiBold);
+
+  &:hover {
+    background-color: var(--marketplaceColorDark);
+    text-decoration: none;
+  }
 }
 
 .loading {

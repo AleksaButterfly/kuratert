@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React, { useState, useMemo } from 'react';
+import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import { useIntl } from '../../util/reactIntl';
 import { useConfiguration } from '../../context/configurationContext';
 import { getMarketplaceEntities } from '../../ducks/marketplaceData.duck';
@@ -32,7 +32,10 @@ const FallbackLandingPage = props => {
     featuredArticlesInProgress,
   } = useSelector(state => state.LandingPage);
 
-  const listings = useSelector(state => getMarketplaceEntities(state, listingRefs));
+  const listings = useSelector(
+    state => getMarketplaceEntities(state, listingRefs),
+    shallowEqual
+  );
 
   const handleLoadMore = () => {
     const newPerPage = currentPerPage + 8;

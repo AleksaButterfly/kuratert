@@ -116,6 +116,9 @@ const getOrderParams = (pageData, shippingDetails, optionalPaymentParams, config
   const priceVariant = priceVariants?.find(pv => pv.name === priceVariantName);
   const priceVariantMaybe = priceVariant ? prefixPriceVariantProperties(priceVariant) : {};
 
+  // Pass cart items to orderParams - will be transformed in CheckoutPage.duck.js
+  const cartItemsMaybe = pageData.cartItems ? { cartItems: pageData.cartItems } : {};
+
   const protectedDataMaybe = {
     protectedData: {
       ...getTransactionTypeData(listingType, unitType, config),
@@ -141,6 +144,7 @@ const getOrderParams = (pageData, shippingDetails, optionalPaymentParams, config
     ...seatsMaybe,
     ...bookingDatesMaybe(pageData.orderData?.bookingDates),
     ...priceVariantNameMaybe,
+    ...cartItemsMaybe,
     ...protectedDataMaybe,
     ...optionalPaymentParams,
   };
@@ -414,6 +418,7 @@ export const CheckoutPageWithPayment = props => {
     pageData,
     processName,
     listingTitle,
+    cartItemsCount,
     title,
     config,
   } = props;
@@ -428,7 +433,7 @@ export const CheckoutPageWithPayment = props => {
     isTransactionInitiateListingNotFoundError(speculateTransactionError) ||
     isTransactionInitiateListingNotFoundError(initiateOrderError);
 
-  const { listing, transaction, orderData } = pageData;
+  const { listing, transaction, orderData, cartItems: rawCartItems } = pageData;
   const existingTransaction = ensureTransaction(transaction);
   const speculatedTransaction = ensureTransaction(speculatedTransactionMaybe, {}, null);
 
@@ -438,9 +443,14 @@ export const CheckoutPageWithPayment = props => {
     existingTransaction?.attributes?.lineItems?.length > 0
       ? existingTransaction
       : speculatedTransaction;
+
   const timeZone = listing?.attributes?.availabilityPlan?.timezone;
   const transactionProcessAlias = listing?.attributes?.publicData?.transactionProcessAlias;
   const priceVariantName = tx.attributes.protectedData?.priceVariantName;
+
+  // Transform cart items or get from protectedData
+  // Cart items might be in raw format {listing, quantity} or already transformed {id, title, price, quantity}
+  const cartItems = rawCartItems || tx.attributes.protectedData?.cartItems || [];
 
   const txBookingMaybe = tx?.booking?.id ? { booking: tx.booking, timeZone } : {};
 
@@ -455,6 +465,9 @@ export const CheckoutPageWithPayment = props => {
         {...txBookingMaybe}
         currency={config.currency}
         marketplaceName={config.marketplaceName}
+        cartItems={cartItems}
+        listing={listing}
+        listingQuantity={pageData.orderData?.quantity}
       />
     ) : null;
 
@@ -635,6 +648,7 @@ export const CheckoutPageWithPayment = props => {
         <DetailsSideCard
           listing={listing}
           listingTitle={listingTitle}
+          cartItemsCount={cartItemsCount}
           priceVariantName={priceVariantName}
           author={listing?.author}
           firstImage={firstImage}

@@ -37,6 +37,7 @@ const DetailsSideCard = props => {
   const {
     listing,
     listingTitle,
+    cartItemsCount,
     priceVariantName,
     author,
     firstImage,
@@ -60,7 +61,7 @@ const DetailsSideCard = props => {
 
   return (
     <div className={css.detailsContainerDesktop} role="complementary">
-      {showListingImage && (
+      {showListingImage && !cartItemsCount && (
         <AspectRatioWrapper
           width={aspectWidth}
           height={aspectHeight}
@@ -88,6 +89,15 @@ const DetailsSideCard = props => {
             >
               {listingTitle}
             </NamedLink>
+            {cartItemsCount > 0 && (
+              <span>
+                {' '}
+                <FormattedMessage
+                  id="CheckoutPage.listingTitleCount"
+                  values={{ count: cartItemsCount }}
+                />
+              </span>
+            )}
           </H4>
           {showPrice ? (
             <div className={css.priceContainer}>

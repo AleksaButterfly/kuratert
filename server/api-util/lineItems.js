@@ -14,8 +14,9 @@ const { Money } = types;
  * @param {Object} orderData should contain stockReservationQuantity and deliveryMethod
  * @param {*} publicData should contain shipping prices
  * @param {*} currency should point to the currency of listing's price.
+ * @param {Array} listings array of all listings (main + cart items) for shipping calculation
  */
-const getItemQuantityAndLineItems = (orderData, publicData, currency) => {
+const getItemQuantityAndLineItems = (orderData, publicData, currency, listings) => {
   // Check delivery method and shipping prices
   const quantity = orderData ? orderData.stockReservationQuantity : null;
   const deliveryMethod = orderData && orderData.deliveryMethod;
@@ -24,23 +25,69 @@ const getItemQuantityAndLineItems = (orderData, publicData, currency) => {
   const { shippingPriceInSubunitsOneItem, shippingPriceInSubunitsAdditionalItems } =
     publicData || {};
 
-  // Calculate shipping fee if applicable
-  const shippingFee = isShipping
-    ? calculateShippingFee(
+  // Check if we have cart items (multiple listings in one transaction)
+  const cartItems = orderData?.cartItems || [];
+  const hasCartItems = cartItems.length > 0;
+
+  // Calculate shipping fee based on whether we have cart items or single item
+  let totalShippingFee = null;
+
+  if (isShipping) {
+    if (hasCartItems) {
+      // For cart items, calculate shipping for ALL items (main listing + cart items)
+      let totalShippingAmount = 0;
+
+      // First, calculate shipping for the main listing
+      const mainListingShipping = calculateShippingFee(
         shippingPriceInSubunitsOneItem,
         shippingPriceInSubunitsAdditionalItems,
         currency,
         quantity
-      )
-    : null;
+      );
+      if (mainListingShipping) {
+        totalShippingAmount += mainListingShipping.amount;
+      }
+
+      // Then, calculate shipping for each cart item
+      // We need to get shipping prices from the listings array passed to transactionLineItems
+      if (listings && listings.length > 0) {
+        cartItems.forEach(cartItem => {
+          const cartItemListing = listings.find(l => l.id.uuid === cartItem.id);
+          if (cartItemListing) {
+            const cartItemPublicData = cartItemListing.attributes?.publicData || {};
+            const cartItemQuantity = cartItem.quantity || 1;
+            const cartItemShipping = calculateShippingFee(
+              cartItemPublicData.shippingPriceInSubunitsOneItem,
+              cartItemPublicData.shippingPriceInSubunitsAdditionalItems,
+              currency,
+              cartItemQuantity
+            );
+            if (cartItemShipping) {
+              totalShippingAmount += cartItemShipping.amount;
+            }
+          }
+        });
+      }
+
+      totalShippingFee = totalShippingAmount > 0 ? new Money(totalShippingAmount, currency) : null;
+    } else {
+      // Single item purchase - calculate shipping for just this item
+      totalShippingFee = calculateShippingFee(
+        shippingPriceInSubunitsOneItem,
+        shippingPriceInSubunitsAdditionalItems,
+        currency,
+        quantity
+      );
+    }
+  }
 
   // Add line-item for given delivery method.
   // Note: by default, pickup considered as free and, therefore, we don't add pickup fee line-item
-  const deliveryLineItem = !!shippingFee
+  const deliveryLineItem = !!totalShippingFee
     ? [
         {
           code: 'line-item/shipping-fee',
-          unitPrice: shippingFee,
+          unitPrice: totalShippingFee,
           quantity: 1,
           includeFor: ['customer', 'provider'],
         },
@@ -49,6 +96,7 @@ const getItemQuantityAndLineItems = (orderData, publicData, currency) => {
 
   return { quantity, extraLineItems: deliveryLineItem };
 };
+
 
 const getOfferQuantityAndLineItems = orderData => {
   return { quantity: 1, extraLineItems: [] };
@@ -133,9 +181,10 @@ const getDateRangeQuantityAndLineItems = (orderData, code) => {
  * @param {Money} [orderData.offer] - The offer for the offer (if transition intent is "make-offer")
  * @param {Object} providerCommission
  * @param {Object} customerCommission
+ * @param {Array} cartListings - Array of cart item listings for cart checkout
  * @returns {Array} lineItems
  */
-exports.transactionLineItems = (listing, orderData, providerCommission, customerCommission) => {
+exports.transactionLineItems = (listing, orderData, providerCommission, customerCommission, cartListings = []) => {
   const publicData = listing.attributes.publicData;
   // Note: the unitType needs to be one of the following:
   // day, night, hour, fixed, or item (these are related to payment processes)
@@ -177,7 +226,7 @@ exports.transactionLineItems = (listing, orderData, providerCommission, customer
   // E.g. by default, "shipping-fee" is tied to 'item' aka buying products.
   const quantityAndExtraLineItems =
     unitType === 'item'
-      ? getItemQuantityAndLineItems(orderData, publicData, currency)
+      ? getItemQuantityAndLineItems(orderData, publicData, currency, cartListings)
       : unitType === 'fixed'
       ? getFixedQuantityAndLineItems(orderData)
       : unitType === 'hour'
@@ -219,21 +268,76 @@ exports.transactionLineItems = (listing, orderData, providerCommission, customer
    *
    * By default OrderBreakdown prints line items inside LineItemUnknownItemsMaybe if the lineItem code is not recognized. */
 
-  const quantityOrSeats = !!units && !!seats ? { units, seats } : { quantity };
-  const order = {
+  const { cartItems, quantity: mainQuantity, stockReservationQuantity } = orderData || {};
+
+  // Determine the quantity for the main listing
+  const mainListingQuantity = mainQuantity || stockReservationQuantity || quantity;
+  const quantityOrSeats = !!units && !!seats
+    ? { units, seats }
+    : { quantity: mainListingQuantity };
+
+  // Main listing line item
+  const mainListingLineItem = {
     code,
     unitPrice,
     ...quantityOrSeats,
     includeFor: ['customer', 'provider'],
   };
 
+  // Create line items for cart items (each cart item becomes its own line item)
+  // Cart items use the pattern: line-item/cart-item-{listingId}
+  const hasCartItems = cartItems && cartItems.length > 0;
+  const cartItemLineItems = hasCartItems
+    ? cartItems
+        .filter(cartItem => {
+          // Validate cart item has required fields
+          if (!cartItem.id) {
+            console.error('Cart item missing ID, skipping:', cartItem);
+            return false;
+          }
+          if (!cartItem.price) {
+            console.error('Cart item missing price, skipping:', cartItem);
+            return false;
+          }
+          return true;
+        })
+        .map(cartItem => {
+          const itemPrice = cartItem.price;
+          const itemQuantity = cartItem.quantity || 1;
+          const listingId = cartItem.id;
+
+          return {
+            code: `line-item/cart-item-${listingId}`,
+            unitPrice: new Money(itemPrice.amount, itemPrice.currency),
+            quantity: itemQuantity,
+            includeFor: ['customer', 'provider'],
+          };
+        })
+    : [];
+
+  // Combine all order line items (main listing + cart items)
+  const orderLineItems = [mainListingLineItem, ...cartItemLineItems];
+
+  // Calculate total order amount for commission calculation
+  // This is used to determine the commission base
+  const totalOrderAmount = orderLineItems.reduce((sum, item) => {
+    const itemTotal = item.unitPrice.amount * (item.quantity || 1);
+    return sum + itemTotal;
+  }, 0);
+
+  const orderForCommission = {
+    ...mainListingLineItem,
+    unitPrice: new Money(totalOrderAmount, currency),
+    quantity: 1,
+  };
+
   // Let's keep the base price (order) as first line item and provider and customer commissions as last.
   // Note: the order matters only if OrderBreakdown component doesn't recognize line-item.
   const lineItems = [
-    order,
+    ...orderLineItems,
     ...extraLineItems,
-    ...getProviderCommissionMaybe(providerCommission, order, currency),
-    ...getCustomerCommissionMaybe(customerCommission, order, currency),
+    ...getProviderCommissionMaybe(providerCommission, orderForCommission, currency),
+    ...getCustomerCommissionMaybe(customerCommission, orderForCommission, currency),
   ];
 
   return lineItems;

@@ -44,6 +44,7 @@ const PanelHeading = props => {
     listingTitle,
     listingDeleted,
     isCustomerBanned,
+    cartItems = [],
   } = props;
 
   const isProvider = transactionRole === 'provider';
@@ -53,6 +54,7 @@ const PanelHeading = props => {
   const titleClasses = classNames(rootClassName || defaultRootClassName, className);
   const listingLink = createListingLink(listingId, listingTitle, listingDeleted);
   const breakline = <br />;
+  const cartItemsCount = cartItems.length;
 
   return (
     <>
@@ -60,7 +62,7 @@ const PanelHeading = props => {
         <span className={css.mainTitle}>
           <FormattedMessage
             id={`TransactionPage.${processName}.${transactionRole}.${processState}.title`}
-            values={{ customerName, providerName, breakline }}
+            values={{ customerName, providerName, listingTitle, cartItemsCount, breakline }}
           />
         </span>
       </H1>
@@ -83,7 +85,7 @@ const PanelHeading = props => {
         <p className={css.transactionInfoMessage}>
           <FormattedMessage
             id={`TransactionPage.${processName}.${transactionRole}.${processState}.extraInfo`}
-            values={{ customerName, providerName, deliveryMethod, breakline }}
+            values={{ customerName, providerName, listingTitle, cartItemsCount, deliveryMethod, breakline }}
           />
         </p>
       ) : null}

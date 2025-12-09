@@ -124,7 +124,8 @@
   transform: scale(0);
 }
 
-.favoritesBadge {
+.favoritesBadge,
+.cartBadge {
   /* Dimensions */
   width: 16px;
   height: 16px;

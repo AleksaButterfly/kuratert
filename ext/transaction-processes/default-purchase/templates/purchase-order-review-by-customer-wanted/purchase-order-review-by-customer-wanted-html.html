@@ -13,8 +13,8 @@
           <table align="center" role="presentation" cellSpacing="0" cellPadding="0" border="0" width="100%" style="max-width:600px;margin:0 auto">
             <tr style="width:100%">
               <td>
-                <h1 style="color:#484848;font-size:26px;line-height:1.3;font-weight:700">{{t "PurchaseOrderReviewByCustomerWanted.Title" "Review your experience with {listingTitle}"  listingTitle=listing.title}}</h1>
-                <p style="font-size:16px;line-height:1.4;margin:16px 0;color:#484848">{{t "PurchaseOrderReviewByCustomerWanted.Content" "You recently purchased {listingTitle} from {providerDisplayName}. Please leave a review to describe your experience" listingTitle=listing.title providerDisplayName=provider.display-name }}</p>
+                <h1 style="color:#484848;font-size:26px;line-height:1.3;font-weight:700">{{#if protected-data.cartItems}}{{t "PurchaseOrderReviewByCustomerWanted.CartTitle" "Review your experience"}}{{else}}{{t "PurchaseOrderReviewByCustomerWanted.Title" "Review your experience with {listingTitle}"  listingTitle=listing.title}}{{/if}}</h1>
+                <p style="font-size:16px;line-height:1.4;margin:16px 0;color:#484848">{{#if protected-data.cartItems}}{{t "PurchaseOrderReviewByCustomerWanted.CartContent" "You recently purchased items from {providerDisplayName}. Please leave a review to describe your experience" providerDisplayName=provider.display-name}}{{else}}{{t "PurchaseOrderReviewByCustomerWanted.Content" "You recently purchased {listingTitle} from {providerDisplayName}. Please leave a review to describe your experience" listingTitle=listing.title providerDisplayName=provider.display-name}}{{/if}}</p>
                 <table style="padding:16px 0 0" align="center" border="0" cellPadding="0" cellSpacing="0" role="presentation" width="100%">
                   <tbody>
                     <tr>

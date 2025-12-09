@@ -13,9 +13,9 @@
           <table align="center" role="presentation" cellSpacing="0" cellPadding="0" border="0" width="100%" style="max-width:600px;margin:0 auto">
             <tr style="width:100%">
               <td>
-                <h1 style="color:#484848;font-size:26px;line-height:1.3;font-weight:700">{{t "PurchaseNewOrder.Title" "New order for {listingTitle}" listingTitle=listing.title}}</h1>
+                <h1 style="color:#484848;font-size:26px;line-height:1.3;font-weight:700">{{#if protected-data.cartItems}}{{t "PurchaseNewOrder.CartTitle" "New order for multiple items"}}{{else}}{{t "PurchaseNewOrder.Title" "New order for {listingTitle}" listingTitle=listing.title}}{{/if}}</h1>
                 <p style="font-size:16px;line-height:1.4;margin:16px 0;color:#484848">
-                  {{t "PurchaseNewOrder.BreakdownLabel" "{customerDisplayName} just placed an order for {listingTitle}. Here's the breakdown." listingTitle=listing.title customerDisplayName=customer.display-name}}.</p>
+                  {{#if protected-data.cartItems}}{{t "PurchaseNewOrder.CartBreakdownLabel" "{customerDisplayName} just placed an order. The order includes:" customerDisplayName=customer.display-name}}{{else}}{{t "PurchaseNewOrder.BreakdownLabel" "{customerDisplayName} just placed an order for {listingTitle}. Here's the breakdown." listingTitle=listing.title customerDisplayName=customer.display-name}}{{/if}}</p>
                 <table style="color:#484848;font-size:16px;line-height:1.4;background-color:#FFF;padding:8px 24px;border-radius:8px;border:1px solid;border-color:#E1E1E1;margin:24px 0" align="center" border="0" cellPadding="0" cellSpacing="0" role="presentation" width="100%">
                   <tbody>
                     <tr>
@@ -25,7 +25,7 @@
                             <tr>
                               <td>
                                 <td>
-                                  <p style="font-size:16px;line-height:1.4;margin:16px 0;color:#484848;margin-bottom:1px">{{t "PurchaseNewOrder.UnitPriceLabel" "Unit price"}}</p>
+                                  <p style="font-size:16px;line-height:1.4;margin:16px 0;color:#484848;margin-bottom:1px">{{../listing.title}}</p>
                                 </td>
                                 <td style="text-align:right">
                                   <p style="font-size:16px;line-height:1.4;margin:16px 0;color:#484848;margin-bottom:1px">{{> format-money money=unit-price}}</p>
@@ -61,7 +61,49 @@
                               </td>
                             </tr>
                           </tbody>
-                        </table>{{/eq}}{{#eq "line-item/shipping-fee" code}}
+                        </table>{{/eq}}{{#each ../protected-data.cartItems}}{{#with this}}{{#eq ../../code (concat "line-item/cart-item-" id)}}
+                        <table align="center" border="0" cellPadding="0" cellSpacing="0" role="presentation" width="100%">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <td>
+                                  <p style="font-size:16px;line-height:1.4;margin:16px 0;color:#484848;margin-bottom:1px">{{title}}</p>
+                                </td>
+                                <td style="text-align:right">
+                                  <p style="font-size:16px;line-height:1.4;margin:16px 0;color:#484848;margin-bottom:1px">{{> format-money money=../../unit-price}}</p>
+                                </td>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                        <table align="center" border="0" cellPadding="0" cellSpacing="0" role="presentation" width="100%">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <td>
+                                  <p style="font-size:16px;line-height:1.4;margin:16px 0;color:#484848;margin-top:1px;margin-bottom:1px">{{t "PurchaseNewOrder.QuantityLabel" "Quantity"}}</p>
+                                </td>
+                                <td style="text-align:right">
+                                  <p style="font-size:16px;line-height:1.4;margin:16px 0;color:#484848;margin-top:1px;margin-bottom:1px">{{number ../../quantity}}</p>
+                                </td>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                        <table align="center" border="0" cellPadding="0" cellSpacing="0" role="presentation" width="100%">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <td>
+                                  <p style="font-size:16px;line-height:1.4;margin:16px 0;color:#484848;font-weight:700;margin-top:1px">{{t "PurchaseNewOrder.SubtotalLabel" "Subtotal"}}</p>
+                                </td>
+                                <td style="text-align:right">
+                                  <p style="font-size:16px;line-height:1.4;margin:16px 0;color:#484848;font-weight:700;margin-top:1px">{{> format-money money=../../line-total}}</p>
+                                </td>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>{{/eq}}{{/with}}{{/each}}{{#eq "line-item/shipping-fee" code}}
                         <table align="center" border="0" cellPadding="0" cellSpacing="0" role="presentation" width="100%">
                           <tbody>
                             <tr>
@@ -127,14 +169,14 @@
                   </tbody>
                 </table>{{#eq "shipping" protected-data.deliveryMethod}}
                 <p style="font-size:16px;line-height:1.4;margin:16px 0;color:#484848">
-                  {{t "PurchaseNewOrder.ShippingDetails" "You should now ship {listingTitle} to {customerDisplayName}. You can find the shipping address from order details. Once you've shipped it, remember to mark it as shipped from <salelink>order details</salelink> to receive your payment." listingTitle=listing.title customerDisplayName=customer.display-name salelink=(html-tag "a" target=(concat "_blank") style=(concat "text-decoration:none;color:" (asset "design/branding.json" "marketplaceColors.notificationPrimaryButton" "#007DF2")) href=(concat marketplace.url "/sale/" (url-encode id) "/"))}}
+                  {{#if protected-data.cartItems}}{{t "PurchaseNewOrder.CartShippingDetails" "You should now ship the items to {customerDisplayName}. You can find the shipping address in the order details. Once shipped, remember to mark the order as shipped from <salelink>order details</salelink> to receive your payment." customerDisplayName=customer.display-name salelink=(html-tag "a" target=(concat "_blank") style=(concat "text-decoration:none;color:" (asset "design/branding.json" "marketplaceColors.notificationPrimaryButton" "#007DF2")) href=(concat marketplace.url "/sale/" (url-encode id) "/"))}}{{else}}{{t "PurchaseNewOrder.ShippingDetails" "You should now ship {listingTitle} to {customerDisplayName}. You can find the shipping address from order details. Once you've shipped it, remember to mark it as shipped from <salelink>order details</salelink> to receive your payment." listingTitle=listing.title customerDisplayName=customer.display-name salelink=(html-tag "a" target=(concat "_blank") style=(concat "text-decoration:none;color:" (asset "design/branding.json" "marketplaceColors.notificationPrimaryButton" "#007DF2")) href=(concat marketplace.url "/sale/" (url-encode id) "/"))}}{{/if}}
                   </p>
                 <p style="font-size:16px;line-height:1.4;margin:16px 0;color:#484848;font-weight:700">
                   {{t "PurchaseNewOrder.MarkAsShipped" "If the order has not been marked as shipped within two weeks, it will expire automatically and you won't get paid."}}
                   </p>
                 {{else}}
                 <p style="font-size:16px;line-height:1.4;margin:16px 0;color:#484848">
-                  {{t "PurchaseNewOrder.DeliveryDetails" "Once {customerDisplayName} has picked up {listingTitle}, remember to mark it as delivered from <salelink>order details</salelink> to receive your payment." customerDisplayName=customer.display-name listingTitle=listing.title salelink=(html-tag "a" target=(concat "_blank") style=(concat "text-decoration:none;color:" (asset "design/branding.json" "marketplaceColors.notificationPrimaryButton" "#007DF2")) href=(concat marketplace.url "/sale/" (url-encode id) "/"))}}
+                  {{#if protected-data.cartItems}}{{t "PurchaseNewOrder.CartDeliveryDetails" "Once {customerDisplayName} has picked up the items, remember to mark the order as delivered from <salelink>order details</salelink> to receive your payment." customerDisplayName=customer.display-name salelink=(html-tag "a" target=(concat "_blank") style=(concat "text-decoration:none;color:" (asset "design/branding.json" "marketplaceColors.notificationPrimaryButton" "#007DF2")) href=(concat marketplace.url "/sale/" (url-encode id) "/"))}}{{else}}{{t "PurchaseNewOrder.DeliveryDetails" "Once {customerDisplayName} has picked up {listingTitle}, remember to mark it as delivered from <salelink>order details</salelink> to receive your payment." customerDisplayName=customer.display-name listingTitle=listing.title salelink=(html-tag "a" target=(concat "_blank") style=(concat "text-decoration:none;color:" (asset "design/branding.json" "marketplaceColors.notificationPrimaryButton" "#007DF2")) href=(concat marketplace.url "/sale/" (url-encode id) "/"))}}{{/if}}
 
                 <p style="font-size:16px;line-height:1.4;margin:16px 0;color:#484848;font-weight:700">{{t "PurchaseNewOrder.MarkAsDelivered" "If the order has not been marked as delivered within two weeks, it will expire automatically and you won't get paid."}}</p>
                 {{/eq}}

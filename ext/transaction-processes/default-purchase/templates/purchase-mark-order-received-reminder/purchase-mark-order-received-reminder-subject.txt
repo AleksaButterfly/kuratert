@@ -1,1 +1,1 @@
-{{set-translations (asset "content/email-texts.json")}}{{t "PurchaseMarkOrderReceivedReminder.Subject" "Did you receive {listingTitle}? Let us know." listingTitle=transaction.listing.title }}
+{{set-translations (asset "content/email-texts.json")}}{{#with transaction}}{{#if protected-data.cartItems}}{{t "PurchaseMarkOrderReceivedReminder.CartSubject" "Did you receive your order? Let us know."}}{{else}}{{t "PurchaseMarkOrderReceivedReminder.Subject" "Did you receive {listingTitle}? Let us know." listingTitle=listing.title}}{{/if}}{{/with}}

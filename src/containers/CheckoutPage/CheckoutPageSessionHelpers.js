@@ -77,12 +77,13 @@ export const isValidTransaction = transaction => {
   return validateProperties(transaction, props);
 };
 
-// Stores given bookinData, listing and transaction to sessionStorage
-export const storeData = (orderData, listing, transaction, storageKey) => {
+// Stores given bookinData, listing, cartItems and transaction to sessionStorage
+export const storeData = (orderData, listing, transaction, storageKey, cartItems = null) => {
   if (window && window.sessionStorage && listing && orderData) {
     const data = {
       orderData,
       listing,
+      cartItems,
       transaction,
       storedAt: new Date(),
     };
@@ -121,7 +122,7 @@ export const storedData = storageKey => {
     };
 
     // Note: orderData may contain bookingDates if booking process is used.
-    const { orderData, listing, transaction, storedAt } = checkoutPageData
+    const { orderData, listing, cartItems, transaction, storedAt } = checkoutPageData
       ? JSON.parse(checkoutPageData, reviver)
       : {};
 
@@ -145,7 +146,7 @@ export const storedData = storageKey => {
       isTransactionValid;
 
     if (isStoredDataValid) {
-      return { orderData, listing, transaction };
+      return { orderData, listing, cartItems, transaction };
     }
   }
   return {};
@@ -160,12 +161,12 @@ export const clearData = storageKey => {
 /**
  * Save page data to sessionstorage if the data is passed through navigation
  *
- * @param {Object} pageData an object containing orderData, listing and transaction entities.
+ * @param {Object} pageData an object containing orderData, listing, cartItems and transaction entities.
  * @param {String} storageKey key for the sessionStorage
  * @param {Object} history navigation related object with pushState action
  * @returns pageData
  */
-export const handlePageData = ({ orderData, listing, transaction }, storageKey, history) => {
+export const handlePageData = ({ orderData, listing, cartItems, transaction }, storageKey, history) => {
   // Browser's back navigation should not rewrite data in session store.
   // Action is 'POP' on both history.back() and page refresh cases.
   // Action is 'PUSH' when user has directed through a link
@@ -175,10 +176,10 @@ export const handlePageData = ({ orderData, listing, transaction }, storageKey, 
   const hasDataInProps = !!(orderData && listing && hasNavigatedThroughLink);
   if (hasDataInProps) {
     // Store data only if data is passed through props and user has navigated through a link.
-    storeData(orderData, listing, transaction, storageKey);
+    storeData(orderData, listing, transaction, storageKey, cartItems);
   }
 
   // NOTE: stored data can be empty if user has already successfully completed transaction.
-  const pageData = hasDataInProps ? { orderData, listing, transaction } : storedData(storageKey);
+  const pageData = hasDataInProps ? { orderData, listing, cartItems, transaction } : storedData(storageKey);
   return pageData;
 };

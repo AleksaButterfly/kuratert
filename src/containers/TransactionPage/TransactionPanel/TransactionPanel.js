@@ -219,22 +219,28 @@ export class TransactionPanelComponent extends Component {
     const deliveryMethod = protectedData?.deliveryMethod || 'none';
     const priceVariantName = protectedData?.priceVariantName;
 
+    // Check if this is a cart purchase (multiple items)
+    const cartItems = protectedData?.cartItems || [];
+    const hasCartItems = cartItems.length > 0;
+
     const classes = classNames(rootClassName || css.root, className);
 
     return (
       <div className={classes}>
         <div className={css.container}>
           <div className={css.txInfo}>
-            <DetailCardImage
-              rootClassName={css.imageWrapperMobile}
-              avatarWrapperClassName={css.avatarWrapperMobile}
-              listingTitle={listingTitle}
-              image={firstImage}
-              provider={provider}
-              isCustomer={isCustomer}
-              showListingImage={showListingImage}
-              listingImageConfig={config.layout.listingImage}
-            />
+            {!hasCartItems && (
+              <DetailCardImage
+                rootClassName={css.imageWrapperMobile}
+                avatarWrapperClassName={css.avatarWrapperMobile}
+                listingTitle={listingTitle}
+                image={firstImage}
+                provider={provider}
+                isCustomer={isCustomer}
+                showListingImage={showListingImage}
+                listingImageConfig={config.layout.listingImage}
+              />
+            )}
             {isProvider ? (
               <div className={css.avatarWrapperProviderDesktop}>
                 <AvatarLarge user={customer} className={css.avatarDesktop} />
@@ -257,6 +263,7 @@ export class TransactionPanelComponent extends Component {
               listingId={listing?.id?.uuid}
               listingTitle={listingTitle}
               listingDeleted={listingDeleted}
+              cartItems={cartItems}
             />
 
             <TextMaybe
