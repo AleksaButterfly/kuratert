@@ -37,8 +37,8 @@ const commandLimiter = sharetribeIntegrationSdk.util.createRateLimiter(
 
 // Initialize Integration SDK
 const integrationSdk = sharetribeIntegrationSdk.createInstance({
-  clientId: process.env.SHARETRIBE_INTEGRATION_CLIENT_ID,
-  clientSecret: process.env.SHARETRIBE_INTEGRATION_CLIENT_SECRET,
+  clientId: process.env.SHARETRIBE_INTEGRATION_API_CLIENT_ID,
+  clientSecret: process.env.SHARETRIBE_INTEGRATION_API_CLIENT_SECRET,
   queryLimiter,
   commandLimiter,
   baseUrl: process.env.SHARETRIBE_INTEGRATION_BASE_URL || 'https://flex-integ-api.sharetribe.com',

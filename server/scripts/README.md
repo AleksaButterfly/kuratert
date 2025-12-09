@@ -15,8 +15,8 @@ This script handles cart items stock adjustments by listening to transaction eve
 
 Environment variables in `.env`:
 ```bash
-SHARETRIBE_INTEGRATION_CLIENT_ID=your_integration_client_id
-SHARETRIBE_INTEGRATION_CLIENT_SECRET=your_integration_client_secret
+SHARETRIBE_INTEGRATION_API_CLIENT_ID=your_integration_client_id
+SHARETRIBE_INTEGRATION_API_CLIENT_SECRET=your_integration_client_secret
 ```
 
 ## Running
