@@ -111,9 +111,7 @@ const reduceCartItemsStock = async (cartItems, transactionId) => {
 /**
  * Update user's cart to remove purchased items
  */
-const updateUserCart = async (transaction, cartItems) => {
-  if (!cartItems || cartItems.length === 0) return;
-
+const updateUserCart = async (transaction, cartItems = []) => {
   try {
     const customerId = transaction.relationships.customer.data.id;
     const mainListingId = transaction.relationships.listing.data.id;
@@ -134,15 +132,18 @@ const updateUserCart = async (transaction, cartItems) => {
       return !purchasedListingIds.includes(item.listingId);
     });
 
-    // Update user profile
-    await integrationSdk.users.updateProfile({
-      id: customerId,
-      privateData: {
-        cartItems: updatedCartItems,
-      },
-    });
+    // Only update if there's a change
+    if (updatedCartItems.length !== currentCartItems.length) {
+      await integrationSdk.users.updateProfile({
+        id: customerId,
+        privateData: {
+          cartItems: updatedCartItems,
+        },
+      });
 
-    console.log(`[${transaction.id.uuid}] Updated user cart: removed ${cartItems.length + 1} items (main listing + cart items)`);
+      const removedCount = currentCartItems.length - updatedCartItems.length;
+      console.log(`[${transaction.id.uuid}] Updated user cart: removed ${removedCount} item(s)`);
+    }
   } catch (err) {
     console.error(`[${transaction.id.uuid}] Failed to update user cart:`, err);
   }
@@ -157,9 +158,11 @@ const analyzeEvent = async (event) => {
   const lastTransition = transaction.attributes.lastTransition;
   const protectedData = transaction.attributes.protectedData || {};
   const cartItems = protectedData.cartItems || [];
+  const hasCartItems = cartItems.length > 0;
 
-  // Only process events with cart items
-  if (cartItems.length === 0) {
+  // Only process confirm-payment for all purchases (to clear cart)
+  // and other transitions only if there are cart items
+  if (lastTransition !== 'transition/confirm-payment' && !hasCartItems) {
     return;
   }
 
@@ -167,9 +170,12 @@ const analyzeEvent = async (event) => {
 
   switch (lastTransition) {
     case 'transition/confirm-payment':
-      // Payment confirmed - reduce cart items stock and update user's cart
-      console.log(`[${transactionId}] Payment confirmed - processing cart items stock reduction`);
-      await reduceCartItemsStock(cartItems, transactionId);
+      // Payment confirmed - reduce cart items stock (if any) and update user's cart
+      console.log(`[${transactionId}] Payment confirmed - processing purchase`);
+      if (hasCartItems) {
+        await reduceCartItemsStock(cartItems, transactionId);
+      }
+      // Always remove purchased items from cart (main listing + cart items)
       await updateUserCart(transaction, cartItems);
       break;
 
