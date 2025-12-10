@@ -91,7 +91,7 @@ const InboxLink = ({ intl, notificationCount, inboxTab }) => {
     >
       <span className={css.topbarLinkLabel}>
         <IconInbox />
-        {notificationCount > 0 && <span className={css.notificationDot} />}
+        {notificationCount > 0 && <span className={css.inboxBadge}>{notificationCount}</span>}
       </span>
     </NamedLink>
   );

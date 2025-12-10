@@ -125,7 +125,8 @@
 }
 
 .favoritesBadge,
-.cartBadge {
+.cartBadge,
+.inboxBadge {
   /* Dimensions */
   width: 16px;
   height: 16px;
