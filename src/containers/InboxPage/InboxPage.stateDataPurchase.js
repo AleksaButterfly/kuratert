@@ -34,7 +34,7 @@ export const getStateDataForPurchaseProcess = (txInfo, processInfo) => {
       return { processName, processState, actionNeeded: true };
     })
     .cond([states.COMPLETED, _], () => {
-      return { processName, processState, actionNeeded: true };
+      return { processName, processState, isFinal: true };
     })
     .cond([states.REVIEWED_BY_PROVIDER, CUSTOMER], () => {
       return { processName, processState, actionNeeded: true };
