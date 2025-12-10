@@ -4,7 +4,7 @@ import classNames from 'classnames';
 import css from './IconInbox.module.css';
 
 /**
- * Inbox/Mail icon.
+ * Inbox icon.
  *
  * @component
  * @param {Object} props
@@ -19,21 +19,24 @@ const IconInbox = props => {
     <svg
       className={classes}
       xmlns="http://www.w3.org/2000/svg"
-      width={24}
-      height={24}
+      width={20}
+      height={20}
       fill="none"
-      viewBox="0 0 24 24"
+      viewBox="0 0 20 20"
     >
       <path
         stroke="currentColor"
-        strokeWidth={1.5}
-        d="M2 12c0-3.771 0-5.657 1.172-6.828C4.343 4 6.229 4 10 4h4c3.771 0 5.657 0 6.828 1.172C22 6.343 22 8.229 22 12c0 3.771 0 5.657-1.172 6.828C19.657 20 17.771 20 14 20h-4c-3.771 0-5.657 0-6.828-1.172C2 17.657 2 15.771 2 12Z"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.667}
+        d="M2.5 10h4.167a.833.833 0 0 1 .833.833 2.5 2.5 0 0 0 5 0 .833.833 0 0 1 .833-.833H17.5"
       />
       <path
         stroke="currentColor"
         strokeLinecap="round"
-        strokeWidth={1.5}
-        d="m6 8 2.159 1.8c1.837 1.53 2.755 2.295 3.841 2.295 1.086 0 2.005-.765 3.841-2.296L18 8"
+        strokeLinejoin="round"
+        strokeWidth={1.667}
+        d="M4.542 4.308 2.5 10v5a1.667 1.667 0 0 0 1.667 1.667h11.666A1.667 1.667 0 0 0 17.5 15v-5l-2.042-5.692a1.667 1.667 0 0 0-1.575-1.141H6.117a1.667 1.667 0 0 0-1.575 1.141Z"
       />
     </svg>
   );

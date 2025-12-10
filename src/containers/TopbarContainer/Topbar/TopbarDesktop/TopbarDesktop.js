@@ -19,6 +19,7 @@ import {
   NamedLink,
   IconCart,
   IconFavorites,
+  IconInbox,
   IconSearch,
   IconUser,
 } from '../../../../components';
@@ -75,6 +76,22 @@ const CartLink = ({ intl, count }) => {
       <span className={css.topbarLinkLabel}>
         <IconCart />
         {count > 0 && <span className={css.cartBadge}>{count}</span>}
+      </span>
+    </NamedLink>
+  );
+};
+
+const InboxLink = ({ intl, notificationCount, inboxTab }) => {
+  return (
+    <NamedLink
+      name="InboxPage"
+      params={{ tab: inboxTab }}
+      className={css.topbarLink}
+      aria-label={intl.formatMessage({ id: 'TopbarDesktop.inbox' })}
+    >
+      <span className={css.topbarLinkLabel}>
+        <IconInbox />
+        {notificationCount > 0 && <span className={css.notificationDot} />}
       </span>
     </NamedLink>
   );
@@ -177,9 +194,11 @@ const TopbarDesktop = props => {
     rootClassName,
     intl,
     isAuthenticated,
+    notificationCount = 0,
     onLogout,
     showCreateListingsLink,
     showSearchForm,
+    inboxTab,
   } = props;
   const [mounted, setMounted] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -240,6 +259,10 @@ const TopbarDesktop = props => {
   const favoritesLink = <FavoritesLink intl={intl} count={favoritesCount} />;
   const cartLink = <CartLink intl={intl} count={cartCount} />;
 
+  const inboxLinkMaybe = authenticatedOnClientSide ? (
+    <InboxLink intl={intl} notificationCount={notificationCount} inboxTab={inboxTab} />
+  ) : null;
+
   const profileMenuMaybe = authenticatedOnClientSide ? (
     <ProfileMenu
       currentPage={currentPage}
@@ -286,6 +309,7 @@ const TopbarDesktop = props => {
         {searchButton}
         {favoritesLink}
         {cartLink}
+        {inboxLinkMaybe}
         {profileMenuMaybe}
         {signupLinkMaybe}
       </div>
