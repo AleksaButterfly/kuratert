@@ -16,6 +16,7 @@ import {
   NEGOTIATION_PROCESS_NAME,
   PURCHASE_PROCESS_NAME,
 } from '../../transactions/transaction';
+import { clearCartOptimistic } from '../../ducks/user.duck';
 
 // Import shared components
 import { H3, H4, NamedLink, OrderBreakdown, Page, TopbarSimplified } from '../../components';
@@ -314,6 +315,14 @@ const handleSubmit = (values, process, props, stripe, submitting, setSubmitting)
     .then(response => {
       const { orderId, messageSuccess, paymentMethodSaved } = response;
       setSubmitting(false);
+
+      // Clear cart optimistically after successful purchase
+      // The actual cleanup is handled by the worker script
+      // This provides instant UI feedback for cart count
+      const hasCartItems = pageData.cartItems && pageData.cartItems.length > 0;
+      if (hasCartItems) {
+        dispatch(clearCartOptimistic());
+      }
 
       const initialMessageFailedToTransaction = messageSuccess ? null : orderId;
       const orderDetailsPath = pathByRouteName('OrderDetailsPage', routeConfiguration, {

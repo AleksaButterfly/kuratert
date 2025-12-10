@@ -571,6 +571,13 @@ const userSlice = createSlice({
     setCurrentUserHasOrders: state => {
       state.currentUserHasOrders = true;
     },
+    // Optimistic cart clear after purchase - only updates Redux state, no API call
+    // The actual cleanup is handled by the worker script
+    clearCartOptimistic: state => {
+      if (state.currentUser?.attributes?.profile?.privateData) {
+        state.currentUser.attributes.profile.privateData.cartItems = [];
+      }
+    },
   },
   extraReducers: builder => {
     builder
@@ -801,7 +808,7 @@ const userSlice = createSlice({
 
 export default userSlice.reducer;
 
-export const { clearCurrentUser, setCurrentUser, setCurrentUserHasOrders } = userSlice.actions;
+export const { clearCurrentUser, setCurrentUser, setCurrentUserHasOrders, clearCartOptimistic } = userSlice.actions;
 
 // ================ Selectors ================ //
 
