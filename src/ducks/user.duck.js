@@ -406,8 +406,8 @@ export const addListingToCartThunk = createAsyncThunk(
 );
 
 // Backward compatible wrapper for the thunk
-export const addListingToCart = (listingId, quantity = 1) => (dispatch, getState, sdk) => {
-  return dispatch(addListingToCartThunk({ listingId, quantity })).unwrap();
+export const addListingToCart = (listingId, quantity = 1, frameInfo = null) => (dispatch, getState, sdk) => {
+  return dispatch(addListingToCartThunk({ listingId, quantity, frameInfo })).unwrap();
 };
 
 ///////////////////////////////////////////////
@@ -709,14 +709,23 @@ const userSlice = createSlice({
         state.currentCartListingId = action.meta.arg.listingId;
 
         // Optimistic update: add to cart immediately
-        const { listingId, quantity } = action.meta.arg;
+        const { listingId, quantity, frameInfo } = action.meta.arg;
         if (state.currentUser?.attributes?.profile?.privateData) {
           const currentCartItems = state.currentUser.attributes.profile.privateData.cartItems || [];
           const existingItemIndex = currentCartItems.findIndex(item => item.listingId === listingId);
           if (existingItemIndex === -1) {
-            // Cart items only store listingId and quantity
+            // Cart items store listingId, quantity, and optional frame info
             // Delivery method is determined from listing data in CartPage
-            const cartItem = { listingId, quantity: quantity || 1 };
+            const cartItem = {
+              listingId,
+              quantity: quantity || 1,
+              // Include frame info if provided
+              ...(frameInfo ? {
+                selectedFrameColor: frameInfo.selectedFrameColor,
+                selectedFrameLabel: frameInfo.selectedFrameLabel,
+                framePriceInSubunits: frameInfo.framePriceInSubunits,
+              } : {}),
+            };
             state.currentUser.attributes.profile.privateData.cartItems = [
               ...currentCartItems,
               cartItem,

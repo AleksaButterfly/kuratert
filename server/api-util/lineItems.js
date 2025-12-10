@@ -202,12 +202,22 @@ exports.transactionLineItems = (listing, orderData, providerCommission, customer
   const { priceInSubunits } = priceVariantConfig || {};
   const isPriceInSubunitsValid = Number.isInteger(priceInSubunits) && priceInSubunits >= 0;
 
-  const unitPrice =
+  // Check if there's frame info for the main listing
+  const { frameInfo } = orderData || {};
+  const framePriceInSubunits = frameInfo?.framePriceInSubunits || 0;
+
+  // Calculate base unit price
+  const baseUnitPrice =
     isBookable && priceVariationsEnabled && isPriceInSubunitsValid
       ? new Money(priceInSubunits, currency)
       : offer instanceof Money && isNegotiationUnitType
       ? offer
       : priceAttribute;
+
+  // Add frame price to unit price if frame is selected
+  const unitPrice = framePriceInSubunits > 0 && baseUnitPrice
+    ? new Money(baseUnitPrice.amount + framePriceInSubunits, currency)
+    : baseUnitPrice;
 
   /**
    * Pricing starts with order's base price:

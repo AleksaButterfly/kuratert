@@ -17,12 +17,22 @@ import css from './EditListingPricingAndStockPanel.module.css';
 const { Money } = sdkTypes;
 const BILLIARD = 1000000000000000;
 
+// Frame color options available for sellers
+export const FRAME_COLOR_OPTIONS = [
+  { key: 'black', label: 'Black' },
+  { key: 'white', label: 'White' },
+  { key: 'natural', label: 'Natural Wood' },
+  { key: 'gold', label: 'Gold' },
+  { key: 'silver', label: 'Silver' },
+  { key: 'walnut', label: 'Walnut' },
+];
+
 const getListingTypeConfig = (publicData, listingTypes) => {
   const selectedListingType = publicData.listingType;
   return listingTypes.find(conf => conf.listingType === selectedListingType);
 };
 
-const getInitialValues = props => {
+const getInitialValues = (props, marketplaceCurrency) => {
   const { listing, listingTypes } = props;
   const isPublished = listing?.id && listing?.attributes?.state !== LISTING_STATE_DRAFT;
   const price = listing?.attributes?.price;
@@ -46,7 +56,16 @@ const getInitialValues = props => {
       : 1;
   const stockTypeInfinity = [];
 
-  return { price, stock, stockTypeInfinity };
+  // Frame options - convert from publicData format to form format
+  const frameOptions = publicData?.frameOptions;
+  const frameEnabled = frameOptions?.enabled || false;
+  const currency = marketplaceCurrency || price?.currency || 'EUR';
+  const frameVariants = frameOptions?.variants?.map(v => ({
+    color: v.color,
+    price: new Money(v.priceInSubunits, currency),
+  })) || [];
+
+  return { price, stock, stockTypeInfinity, frameEnabled, frameVariants };
 };
 
 /**
@@ -70,9 +89,6 @@ const getInitialValues = props => {
  * @returns {JSX.Element}
  */
 const EditListingPricingAndStockPanel = props => {
-  // State is needed since re-rendering would overwrite the values during XHR call.
-  const [state, setState] = useState({ initialValues: getInitialValues(props) });
-
   const {
     className,
     rootClassName,
@@ -90,6 +106,9 @@ const EditListingPricingAndStockPanel = props => {
     updatePageTitle: UpdatePageTitle,
     intl,
   } = props;
+
+  // State is needed since re-rendering would overwrite the values during XHR call.
+  const [state, setState] = useState({ initialValues: getInitialValues(props, marketplaceCurrency) });
 
   const classes = classNames(rootClassName || css.root, className);
   const initialValues = state.initialValues;
@@ -145,7 +164,7 @@ const EditListingPricingAndStockPanel = props => {
           className={css.form}
           initialValues={initialValues}
           onSubmit={values => {
-            const { price, stock, stockTypeInfinity } = values;
+            const { price, stock, stockTypeInfinity, frameEnabled, frameVariants } = values;
 
             // Update stock only if the value has changed, or stock is infinity in stockType,
             // but not current stock is a small number (might happen with old listings)
@@ -174,10 +193,26 @@ const EditListingPricingAndStockPanel = props => {
                   }
                 : {};
 
+            // Frame options - convert from form format to publicData format
+            // Money objects can't be stored in publicData, so we save priceInSubunits
+            const frameOptionsData = frameEnabled && frameVariants?.length > 0
+              ? {
+                  frameOptions: {
+                    enabled: true,
+                    variants: frameVariants.map(v => ({
+                      color: v.color,
+                      label: FRAME_COLOR_OPTIONS.find(o => o.key === v.color)?.label || v.color,
+                      priceInSubunits: v.price?.amount,
+                    })),
+                  },
+                }
+              : { frameOptions: { enabled: false, variants: [] } };
+
             // New values for listing attributes
             const updateValues = {
               price,
               ...stockUpdateMaybe,
+              publicData: frameOptionsData,
             };
             // Save the initialValues to state
             // Otherwise, re-rendering would overwrite the values during XHR call.
@@ -186,6 +221,8 @@ const EditListingPricingAndStockPanel = props => {
                 price,
                 stock: stockUpdateMaybe?.stockUpdate?.newTotal || stock,
                 stockTypeInfinity,
+                frameEnabled,
+                frameVariants,
               },
             });
             onSubmit(updateValues);

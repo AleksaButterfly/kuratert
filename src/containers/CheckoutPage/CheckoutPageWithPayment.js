@@ -120,12 +120,24 @@ const getOrderParams = (pageData, shippingDetails, optionalPaymentParams, config
   // Pass cart items to orderParams - will be transformed in CheckoutPage.duck.js
   const cartItemsMaybe = pageData.cartItems ? { cartItems: pageData.cartItems } : {};
 
+  // Frame info for the main listing
+  const frameInfo = pageData.orderData?.frameInfo;
+  const frameInfoMaybe = frameInfo ? { frameInfo } : {};
+
   const protectedDataMaybe = {
     protectedData: {
       ...getTransactionTypeData(listingType, unitType, config),
       ...deliveryMethodMaybe,
       ...shippingDetails,
       ...priceVariantMaybe,
+      // Include main listing's frame info in protectedData
+      ...(frameInfo ? {
+        mainListingFrameInfo: {
+          selectedFrameColor: frameInfo.selectedFrameColor,
+          selectedFrameLabel: frameInfo.selectedFrameLabel,
+          framePriceInSubunits: frameInfo.framePriceInSubunits,
+        },
+      } : {}),
     },
   };
 
@@ -146,6 +158,7 @@ const getOrderParams = (pageData, shippingDetails, optionalPaymentParams, config
     ...bookingDatesMaybe(pageData.orderData?.bookingDates),
     ...priceVariantNameMaybe,
     ...cartItemsMaybe,
+    ...frameInfoMaybe,
     ...protectedDataMaybe,
     ...optionalPaymentParams,
   };
@@ -461,6 +474,9 @@ export const CheckoutPageWithPayment = props => {
   // Cart items might be in raw format {listing, quantity} or already transformed {id, title, price, quantity}
   const cartItems = rawCartItems || tx.attributes.protectedData?.cartItems || [];
 
+  // Get main listing's frame info from orderData or protectedData
+  const mainListingFrameInfo = orderData?.frameInfo || tx.attributes.protectedData?.mainListingFrameInfo || null;
+
   const txBookingMaybe = tx?.booking?.id ? { booking: tx.booking, timeZone } : {};
 
   // Show breakdown only when (speculated?) transaction is loaded
@@ -477,6 +493,7 @@ export const CheckoutPageWithPayment = props => {
         cartItems={cartItems}
         listing={listing}
         listingQuantity={pageData.orderData?.quantity}
+        mainListingFrameInfo={mainListingFrameInfo}
       />
     ) : null;
 
@@ -544,7 +561,14 @@ export const CheckoutPageWithPayment = props => {
     orderData?.deliveryMethod === 'shipping' &&
     !hasTransactionPassedPendingPayment(existingTransaction, process);
 
-  const listingLocation = listing?.attributes?.publicData?.location;
+  // Get pickup location - try main listing first, then fall back to cart items
+  const mainListingLocation = listing?.attributes?.publicData?.location;
+  const cartItemWithLocation = rawCartItems?.find(item =>
+    item?.listing?.attributes?.publicData?.location?.address
+  );
+  const cartItemLocation = cartItemWithLocation?.listing?.attributes?.publicData?.location;
+  const listingLocation = mainListingLocation?.address ? mainListingLocation : cartItemLocation;
+
   const showPickUpLocation = isPurchase && orderData?.deliveryMethod === 'pickup';
   const showLocation = (isBooking || isNegotiation) && listingLocation?.address;
 

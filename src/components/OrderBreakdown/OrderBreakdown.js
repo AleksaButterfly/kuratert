@@ -53,6 +53,7 @@ export const OrderBreakdownComponent = props => {
     cartItems,
     listing,
     listingQuantity,
+    mainListingFrameInfo,
   } = props;
 
   const isCustomer = userRole === 'customer';
@@ -170,41 +171,59 @@ export const OrderBreakdownComponent = props => {
                 )
               : [];
 
+            // Get frame info for display
+            // For cart items: get from cartItem, for main listing: get from mainListingFrameInfo prop
+            const frameLabel = isMainListing
+              ? mainListingFrameInfo?.selectedFrameLabel
+              : cartItem?.selectedFrameLabel;
+
             return (
-              <div key={`${item.code}-${index}`} className={css.lineItem}>
-                {(firstImage || imageUrl) && (
-                  <div className={css.itemImageWrapper}>
-                    {firstImage ? (
-                      <AspectRatioWrapper
-                        className={css.itemAspectWrapper}
-                        width={1}
-                        height={1}
-                      >
-                        <ResponsiveImage
-                          rootClassName={css.itemImage}
-                          alt={itemTitle}
-                          image={firstImage}
-                          variants={variants}
-                          sizes="40px"
+              <div key={`${item.code}-${index}`} className={css.lineItemWrapper}>
+                <div className={css.lineItem}>
+                  {(firstImage || imageUrl) && (
+                    <div className={css.itemImageWrapper}>
+                      {firstImage ? (
+                        <AspectRatioWrapper
+                          className={css.itemAspectWrapper}
+                          width={1}
+                          height={1}
+                        >
+                          <ResponsiveImage
+                            rootClassName={css.itemImage}
+                            alt={itemTitle}
+                            image={firstImage}
+                            variants={variants}
+                            sizes="40px"
+                          />
+                        </AspectRatioWrapper>
+                      ) : imageUrl ? (
+                        <AspectRatioWrapper
+                          className={css.itemAspectWrapper}
+                          width={1}
+                          height={1}
+                        >
+                          <img
+                            src={imageUrl}
+                            alt={itemTitle}
+                            className={css.itemImage}
+                          />
+                        </AspectRatioWrapper>
+                      ) : null}
+                    </div>
+                  )}
+                  <div className={css.itemContent}>
+                    <span className={css.itemLabel}>{displayLabel}</span>
+                    {frameLabel && (
+                      <span className={css.itemFrameInfo}>
+                        <FormattedMessage
+                          id="OrderBreakdown.frameOption"
+                          values={{ frameLabel }}
                         />
-                      </AspectRatioWrapper>
-                    ) : imageUrl ? (
-                      <AspectRatioWrapper
-                        className={css.itemAspectWrapper}
-                        width={1}
-                        height={1}
-                      >
-                        <img
-                          src={imageUrl}
-                          alt={itemTitle}
-                          className={css.itemImage}
-                        />
-                      </AspectRatioWrapper>
-                    ) : null}
+                      </span>
+                    )}
                   </div>
-                )}
-                <span className={css.itemLabel}>{displayLabel}</span>
-                {formattedPrice && <span className={css.itemValue}>{formattedPrice}</span>}
+                  {formattedPrice && <span className={css.itemValue}>{formattedPrice}</span>}
+                </div>
               </div>
             );
           })}

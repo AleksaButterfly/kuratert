@@ -42,3 +42,70 @@
     margin-top: 100px;
   }
 }
+
+/* Frame Options */
+.frameOptionsSection {
+  padding-top: 24px;
+  border-top: 1px solid var(--colorGrey100);
+}
+
+.frameEnabledCheckbox {
+  margin-bottom: 16px;
+}
+
+.frameVariantsSection {
+  margin-top: 16px;
+  padding: 16px;
+  background-color: var(--colorGrey50);
+  border-radius: 8px;
+}
+
+.frameVariantRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+
+  @media (--viewportSmall) {
+    flex-wrap: wrap;
+  }
+}
+
+.frameColorSelect {
+  flex: 1;
+  min-width: 150px;
+}
+
+.framePriceInput {
+  flex: 1;
+  min-width: 120px;
+}
+
+.removeFrameButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin-top: 38px;
+  margin-bottom: 10px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background-color: var(--colorGrey100);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: var(--colorGrey200);
+  }
+}
+
+.addFrameButton {
+  color: var(--colorGrey900);
+  font-weight: var(--fontWeightMedium);
+}
+
+.removeIcon {
+  stroke: none;
+}

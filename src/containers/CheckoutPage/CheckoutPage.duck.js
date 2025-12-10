@@ -19,11 +19,12 @@ const initiateOrderPayloadCreator = (
   const isTransition = !!transactionId;
 
   // Extract cartItems along with other order params
-  const { deliveryMethod, quantity, bookingDates, cartItems, ...otherOrderParams } = orderParams;
+  const { deliveryMethod, quantity, bookingDates, cartItems, frameInfo, ...otherOrderParams } = orderParams;
   const quantityMaybe = quantity ? { stockReservationQuantity: quantity } : {};
   const bookingParamsMaybe = bookingDates || {};
+  const frameInfoMaybe = frameInfo ? { frameInfo } : {};
 
-  // Transform cartItems to extract essential data (id, title, price, imageUrl, quantity)
+  // Transform cartItems to extract essential data (id, title, price, imageUrl, quantity, frameInfo)
   const transformedCartItems = cartItems?.map(item => {
     // If item doesn't have a listing object, it's already transformed - just return it
     if (!item?.listing) {
@@ -35,16 +36,28 @@ const initiateOrderPayloadCreator = (
     const imageVariants = firstImage?.attributes?.variants;
     const imageUrl = imageVariants?.['listing-card']?.url;
     const itemQuantity = item.quantity || 1;
+    const frameInfo = item.frameInfo;
+
+    // Add frame price to listing price if frame is selected
+    const basePrice = listing?.attributes?.price?.amount || 0;
+    const framePrice = frameInfo?.framePriceInSubunits || 0;
+    const price = {
+      amount: basePrice + framePrice,
+      currency: listing?.attributes?.price?.currency,
+    };
 
     return {
       id: listing.id.uuid,
       title: listing?.attributes?.title,
-      price: {
-        amount: listing?.attributes?.price?.amount,
-        currency: listing?.attributes?.price?.currency,
-      },
+      price,
       quantity: itemQuantity,
       ...(imageUrl ? { imageUrl } : {}),
+      // Include frame info in the cart item for display purposes
+      ...(frameInfo ? {
+        selectedFrameColor: frameInfo.selectedFrameColor,
+        selectedFrameLabel: frameInfo.selectedFrameLabel,
+        framePriceInSubunits: frameInfo.framePriceInSubunits,
+      } : {}),
     };
   });
 
@@ -54,6 +67,7 @@ const initiateOrderPayloadCreator = (
     ...(deliveryMethod ? { deliveryMethod } : {}),
     ...(quantity ? { quantity } : {}),
     ...(transformedCartItems ? { cartItems: transformedCartItems } : {}),
+    ...frameInfoMaybe,
   };
 
   // Parameters for Marketplace API
@@ -62,11 +76,12 @@ const initiateOrderPayloadCreator = (
     ...quantityMaybe,
     ...bookingParamsMaybe,
     ...otherOrderParams,
-    ...(transformedCartItems || quantity ? {
+    ...(transformedCartItems || quantity || frameInfo ? {
       protectedData: {
         ...otherOrderParams.protectedData,
         ...(transformedCartItems ? { cartItems: transformedCartItems } : {}),
         ...(quantity ? { stockReservationQuantity: quantity } : {}),
+        ...(frameInfo ? { mainListingFrameInfo: frameInfo } : {}),
       },
     } : {}),
   };
@@ -332,12 +347,14 @@ const speculateTransactionPayloadCreator = (
     quantity,
     bookingDates,
     cartItems,
+    frameInfo,
     ...otherOrderParams
   } = orderParams;
   const quantityMaybe = quantity ? { stockReservationQuantity: quantity } : {};
   const bookingParamsMaybe = bookingDates || {};
+  const frameInfoMaybe = frameInfo ? { frameInfo } : {};
 
-  // Transform cartItems to extract only essential data (id, title, price, quantity, imageUrl)
+  // Transform cartItems to extract only essential data (id, title, price, quantity, imageUrl, frameInfo)
   // Serialize SDK types (UUID, Money) to plain values for protectedData
   const transformedCartItems = cartItems?.map(item => {
     // If item doesn't have a listing object, it's already transformed - just return it
@@ -350,16 +367,28 @@ const speculateTransactionPayloadCreator = (
     const imageVariants = firstImage?.attributes?.variants;
     const imageUrl = imageVariants?.['listing-card']?.url;
     const itemQuantity = item.quantity || 1;
+    const frameInfo = item.frameInfo;
+
+    // Add frame price to listing price if frame is selected
+    const basePrice = listing?.attributes?.price?.amount || 0;
+    const framePrice = frameInfo?.framePriceInSubunits || 0;
+    const price = {
+      amount: basePrice + framePrice,
+      currency: listing?.attributes?.price?.currency,
+    };
 
     return {
       id: listing.id.uuid, // Serialize UUID to string
       title: listing?.attributes?.title,
-      price: {
-        amount: listing?.attributes?.price?.amount,
-        currency: listing?.attributes?.price?.currency,
-      },
+      price,
       quantity: itemQuantity,
       ...(imageUrl ? { imageUrl } : {}),
+      // Include frame info in the cart item for display purposes
+      ...(frameInfo ? {
+        selectedFrameColor: frameInfo.selectedFrameColor,
+        selectedFrameLabel: frameInfo.selectedFrameLabel,
+        framePriceInSubunits: frameInfo.framePriceInSubunits,
+      } : {}),
     };
   });
 
@@ -369,6 +398,7 @@ const speculateTransactionPayloadCreator = (
     ...(deliveryMethod ? { deliveryMethod } : {}),
     ...(priceVariantName ? { priceVariantName } : {}),
     ...(transformedCartItems ? { cartItems: transformedCartItems } : {}),
+    ...frameInfoMaybe,
   };
 
   // Parameters for Marketplace API

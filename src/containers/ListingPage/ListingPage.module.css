@@ -1176,12 +1176,12 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 16px 0;
-  border-top: 1px solid var(--colorGrey100);
+  padding-top: 16px;
 }
 
 .quantitySelectorWrapper,
-.deliverySelectorWrapper {
+.deliverySelectorWrapper,
+.frameSelectorWrapper {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -1193,10 +1193,12 @@
   font-weight: 500;
   line-height: 20px;
   color: var(--colorGrey700);
+  padding: 0;
 }
 
 .quantitySelect,
-.deliverySelect {
+.deliverySelect,
+.frameSelect {
   width: 100%;
   height: 44px;
   padding: 0 16px;

@@ -315,6 +315,7 @@ export const ListingPageComponent = props => {
   const [copied, setCopied] = useState(false);
   // Cart related state
   const [selectedQuantity, setSelectedQuantity] = useState(1);
+  const [selectedFrameColor, setSelectedFrameColor] = useState(null);
 
   useEffect(() => {
     setMounted(true);
@@ -420,12 +421,16 @@ export const ListingPageComponent = props => {
   const isOwnListing =
     userAndListingAuthorAvailable && currentListing.author.id.uuid === currentUser.id.uuid;
 
-  const { listingType, transactionProcessAlias, unitType } = publicData;
+  const { listingType, transactionProcessAlias, unitType, frameOptions } = publicData;
   if (!(listingType && transactionProcessAlias && unitType)) {
     return (
       <ErrorPage topbar={topbar} scrollingDisabled={scrollingDisabled} intl={intl} invalidListing />
     );
   }
+
+  // Frame options
+  const hasFrameOptions = frameOptions?.enabled && frameOptions?.variants?.length > 0;
+  const frameVariants = frameOptions?.variants || [];
 
   const processName = resolveLatestProcessName(transactionProcessAlias.split('/')[0]);
   const isBooking = isBookingProcess(processName);
@@ -573,7 +578,18 @@ export const ListingPageComponent = props => {
   const handleAddToCart = () => {
     if (onAddListingToCart) {
       // Delivery method is selected in CartPage, not here
-      onAddListingToCart(listingId.uuid, selectedQuantity);
+      // Pass frame info if selected
+      const selectedFrame = selectedFrameColor
+        ? frameVariants.find(v => v.color === selectedFrameColor)
+        : null;
+      const frameInfo = selectedFrame
+        ? {
+            selectedFrameColor: selectedFrame.color,
+            selectedFrameLabel: selectedFrame.label,
+            framePriceInSubunits: selectedFrame.priceInSubunits,
+          }
+        : null;
+      onAddListingToCart(listingId.uuid, selectedQuantity, frameInfo);
     }
   };
 
@@ -786,6 +802,35 @@ export const ListingPageComponent = props => {
                 </div>
               </div>
             </div>
+
+            {/* Frame options selector */}
+            {isPurchase && hasStock && !isInCart && hasFrameOptions && (
+              <div className={css.purchaseOptionsSection}>
+                <div className={css.frameSelectorWrapper}>
+                  <label className={css.selectorLabel}>
+                    <FormattedMessage id="ListingPage.frameOptionLabel" />
+                  </label>
+                  <select
+                    className={css.frameSelect}
+                    value={selectedFrameColor || ''}
+                    onChange={e => setSelectedFrameColor(e.target.value || null)}
+                    disabled={isOwnListing}
+                  >
+                    <option value="">
+                      {intl.formatMessage({ id: 'ListingPage.noFrame' })}
+                    </option>
+                    {frameVariants.map(variant => (
+                      <option key={variant.color} value={variant.color}>
+                        {variant.label} (+{intl.formatNumber(variant.priceInSubunits / 100, {
+                          style: 'currency',
+                          currency: price?.currency || 'EUR',
+                        })})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
 
             {/* Quantity selector - only show if multiple items allowed */}
             {isPurchase && hasStock && !isInCart && allowOrdersOfMultipleItems && maxQuantity > 1 && (
@@ -1079,7 +1124,7 @@ const mapDispatchToProps = dispatch => ({
   onAddListingToFavorites: listingId => dispatch(addListingToFavorites(listingId)),
   onRemoveListingFromFavorites: listingId => dispatch(removeListingFromFavorites(listingId)),
   // Cart
-  onAddListingToCart: (listingId, quantity) => dispatch(addListingToCart(listingId, quantity)),
+  onAddListingToCart: (listingId, quantity, frameInfo) => dispatch(addListingToCart(listingId, quantity, frameInfo)),
 });
 
 const ListingPage = compose(

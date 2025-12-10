@@ -1,5 +1,6 @@
 import React from 'react';
 import { Field, Form as FinalForm } from 'react-final-form';
+import { FieldArray } from 'react-final-form-arrays';
 import arrayMutators from 'final-form-arrays';
 import classNames from 'classnames';
 
@@ -17,11 +18,16 @@ import {
   Button,
   Form,
   FieldCurrencyInput,
+  FieldCheckbox,
   FieldCheckboxGroup,
+  FieldSelect,
   FieldTextInput,
+  InlineTextButton,
+  IconClose,
 } from '../../../../components';
 
 // Import modules from this directory
+import { FRAME_COLOR_OPTIONS } from './EditListingPricingAndStockPanel';
 import css from './EditListingPricingAndStockForm.module.css';
 
 const { Money } = sdkTypes;
@@ -234,6 +240,118 @@ export const EditListingPricingAndStockForm = props => (
             </Field>
           )}
           {setStockError ? <p className={css.error}>{stockErrorMessage}</p> : null}
+
+          {/* Frame Options Section */}
+          <div className={css.frameOptionsSection}>
+            <FieldCheckbox
+              id={`${formId}.frameEnabled`}
+              name="frameEnabled"
+              label={intl.formatMessage({
+                id: 'EditListingPricingAndStockForm.frameEnabledLabel',
+              })}
+              className={css.frameEnabledCheckbox}
+            />
+
+            {values.frameEnabled ? (
+              <div className={css.frameVariantsSection}>
+                <FieldArray name="frameVariants">
+                  {({ fields }) => {
+                    // Get already selected colors to filter them out from options
+                    const selectedColors = fields?.value?.map(v => v.color) || [];
+
+                    return (
+                      <>
+                        {fields.map((name, index) => {
+                          const currentColor = fields?.value?.[index]?.color;
+                          // Available colors: not yet selected OR the current one
+                          const availableOptions = FRAME_COLOR_OPTIONS.filter(
+                            opt => !selectedColors.includes(opt.key) || opt.key === currentColor
+                          );
+
+                          return (
+                            <div key={index} className={css.frameVariantRow}>
+                              <FieldSelect
+                                id={`${formId}.${name}.color`}
+                                name={`${name}.color`}
+                                className={css.frameColorSelect}
+                                label={intl.formatMessage({
+                                  id: 'EditListingPricingAndStockForm.frameColorLabel',
+                                })}
+                                validate={validators.required(
+                                  intl.formatMessage({
+                                    id: 'EditListingPricingAndStockForm.frameColorRequired',
+                                  })
+                                )}
+                              >
+                                <option value="">
+                                  {intl.formatMessage({
+                                    id: 'EditListingPricingAndStockForm.frameColorPlaceholder',
+                                  })}
+                                </option>
+                                {availableOptions.map(opt => (
+                                  <option key={opt.key} value={opt.key}>
+                                    {opt.label}
+                                  </option>
+                                ))}
+                              </FieldSelect>
+
+                              <FieldCurrencyInput
+                                id={`${formId}.${name}.price`}
+                                name={`${name}.price`}
+                                className={css.framePriceInput}
+                                label={intl.formatMessage({
+                                  id: 'EditListingPricingAndStockForm.framePriceLabel',
+                                })}
+                                placeholder={intl.formatMessage({
+                                  id: 'EditListingPricingAndStockForm.framePricePlaceholder',
+                                })}
+                                currencyConfig={appSettings.getCurrencyFormatting(marketplaceCurrency)}
+                                validate={validators.composeValidators(
+                                  validators.required(
+                                    intl.formatMessage({
+                                      id: 'EditListingPricingAndStockForm.framePriceRequired',
+                                    })
+                                  ),
+                                  validators.moneySubUnitAmountAtLeast(
+                                    intl.formatMessage({
+                                      id: 'EditListingPricingAndStockForm.framePriceTooLow',
+                                    }),
+                                    0
+                                  )
+                                )}
+                              />
+
+                              <button
+                                type="button"
+                                className={css.removeFrameButton}
+                                onClick={() => fields.remove(index)}
+                                title={intl.formatMessage({
+                                  id: 'EditListingPricingAndStockForm.removeFrameColor',
+                                })}
+                              >
+                                <IconClose size="small" className={css.removeIcon} />
+                              </button>
+                            </div>
+                          );
+                        })}
+
+                        {/* Add button - only show if there are colors left to add */}
+                        {selectedColors.length < FRAME_COLOR_OPTIONS.length ? (
+                          <InlineTextButton
+                            type="button"
+                            className={css.addFrameButton}
+                            onClick={() => fields.push({ color: '', price: null })}
+                          >
+                            <FormattedMessage id="EditListingPricingAndStockForm.addFrameColor" />
+                          </InlineTextButton>
+                        ) : null}
+                      </>
+                    );
+                  }}
+                </FieldArray>
+              </div>
+            ) : null}
+          </div>
 
           <Button
             className={css.submitButton}

@@ -48,6 +48,7 @@ export const getCartItemFromLineItem = (code, cartItems = []) => {
 
 /**
  * Get display title for a line item (with fallback)
+ * Includes frame info if available
  *
  * @param {string} code - Line item code
  * @param {Array} cartItems - Array of cart items from protectedData
@@ -59,7 +60,11 @@ export const getLineItemTitle = (code, cartItems = [], mainListing = null) => {
   if (isCartItemLineItem(code)) {
     const cartItem = getCartItemFromLineItem(code, cartItems);
     if (cartItem?.title) {
-      return cartItem.title;
+      // Include frame info in title if present
+      const frameInfo = cartItem.selectedFrameLabel
+        ? ` (${cartItem.selectedFrameLabel} Frame)`
+        : '';
+      return `${cartItem.title}${frameInfo}`;
     }
     // Fallback if cart item not found
     const listingId = extractCartItemId(code);

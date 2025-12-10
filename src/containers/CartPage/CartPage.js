@@ -176,6 +176,19 @@ export const CartPageComponent = props => {
     return cartItem?.quantity || 1;
   };
 
+  // Get frame info for a listing from cartItems
+  const getFrameInfoForListing = listingId => {
+    const cartItem = cartItems?.find(item => item.listingId === listingId);
+    if (cartItem?.selectedFrameColor) {
+      return {
+        selectedFrameColor: cartItem.selectedFrameColor,
+        selectedFrameLabel: cartItem.selectedFrameLabel,
+        framePriceInSubunits: cartItem.framePriceInSubunits,
+      };
+    }
+    return null;
+  };
+
   // Check if listing allows multiple quantity (based on stock type)
   const allowsMultipleQuantity = listing => {
     const publicData = listing?.attributes?.publicData;
@@ -224,6 +237,7 @@ export const CartPageComponent = props => {
 
     const firstListing = listings[0];
     const firstListingQuantity = getQuantityForListing(firstListing.id.uuid);
+    const firstListingFrameInfo = getFrameInfoForListing(firstListing.id.uuid);
 
     // Prepare initial values for CheckoutPage
     const initialValues = {
@@ -231,16 +245,23 @@ export const CartPageComponent = props => {
       orderData: {
         quantity: firstListingQuantity,
         deliveryMethod: selectedDeliveryMethod || 'shipping',
+        // Include frame info for the main listing
+        ...(firstListingFrameInfo ? { frameInfo: firstListingFrameInfo } : {}),
       },
       confirmPaymentError: null,
     };
 
-    // Add cartItems with their quantities (if multiple items from same seller)
+    // Add cartItems with their quantities and frame info (if multiple items from same seller)
     if (listings.length > 1) {
-      initialValues.cartItems = listings.slice(1).map(listing => ({
-        listing: listing,
-        quantity: getQuantityForListing(listing.id.uuid),
-      }));
+      initialValues.cartItems = listings.slice(1).map(listing => {
+        const listingId = listing.id.uuid;
+        const frameInfo = getFrameInfoForListing(listingId);
+        return {
+          listing: listing,
+          quantity: getQuantityForListing(listingId),
+          ...(frameInfo ? { frameInfo } : {}),
+        };
+      });
     }
 
     const saveToSessionStorage = !currentUser;
@@ -325,13 +346,19 @@ export const CartPageComponent = props => {
                   const authorLocation = sellerGroup.author?.attributes?.profile?.publicData?.location?.address;
                   const { listings } = sellerGroup;
 
-                  // Calculate subtotal for items (with quantities)
+                  // Calculate subtotal for items (with quantities and frame prices)
                   const currency = listings[0]?.attributes?.price?.currency || 'USD';
                   const itemsSubtotal = listings.reduce((sum, listing) => {
                     const price = listing?.attributes?.price;
                     const quantity = getQuantityForListing(listing.id.uuid);
+                    const frameInfo = getFrameInfoForListing(listing.id.uuid);
+
                     if (price) {
-                      return new Money(sum.amount + (price.amount * quantity), sum.currency);
+                      // Add frame price to listing price if frame is selected
+                      const basePrice = price.amount;
+                      const framePrice = frameInfo?.framePriceInSubunits || 0;
+                      const itemPrice = basePrice + framePrice;
+                      return new Money(sum.amount + (itemPrice * quantity), sum.currency);
                     }
                     return sum;
                   }, new Money(0, currency));
@@ -400,15 +427,25 @@ export const CartPageComponent = props => {
                               const categoryLabel = getCategoryLabel(publicData, config.categoryConfiguration);
                               const currentStock = listing.currentStock?.attributes?.quantity;
                               const quantity = getQuantityForListing(listingId);
+                              const frameInfo = getFrameInfoForListing(listingId);
                               const canChangeQuantity = allowsMultipleQuantity(listing);
                               const maxQuantity = getMaxQuantity(listing);
 
-                              // Calculate total price for this item
+                              // Calculate prices for this item
+                              const basePriceAmount = price?.amount || 0;
+                              const framePriceAmount = frameInfo?.framePriceInSubunits || 0;
+                              const itemUnitPrice = basePriceAmount + framePriceAmount;
                               const totalItemPrice = price
-                                ? new Money(price.amount * quantity, price.currency)
+                                ? new Money(itemUnitPrice * quantity, price.currency)
                                 : null;
-                              const formattedPrice = totalItemPrice
+                              const formattedTotalPrice = totalItemPrice
                                 ? formatMoney(intl, totalItemPrice)
+                                : null;
+                              const formattedBasePrice = price
+                                ? formatMoney(intl, new Money(basePriceAmount, price.currency))
+                                : null;
+                              const formattedFramePrice = frameInfo && price
+                                ? formatMoney(intl, new Money(framePriceAmount, price.currency))
                                 : null;
 
                               const firstImage = listing?.images?.[0];
@@ -496,7 +533,32 @@ export const CartPageComponent = props => {
                                           <FormattedMessage id="CartPage.singleItem" />
                                         </span>
                                       )}
-                                      <span className={css.itemPrice}>{formattedPrice}</span>
+                                      <div className={css.itemPriceSection}>
+                                        {frameInfo ? (
+                                          <>
+                                            <div className={css.priceBreakdown}>
+                                              <span className={css.priceBreakdownRow}>
+                                                <span className={css.priceBreakdownLabel}>
+                                                  <FormattedMessage id="CartPage.basePrice" />
+                                                </span>
+                                                <span className={css.priceBreakdownValue}>{formattedBasePrice}</span>
+                                              </span>
+                                              <span className={css.priceBreakdownRow}>
+                                                <span className={css.priceBreakdownLabel}>
+                                                  <FormattedMessage
+                                                    id="CartPage.framePriceWithColor"
+                                                    values={{ frameColor: frameInfo.selectedFrameLabel }}
+                                                  />
+                                                </span>
+                                                <span className={css.priceBreakdownValue}>{formattedFramePrice}</span>
+                                              </span>
+                                            </div>
+                                            <span className={css.itemTotalPrice}>{formattedTotalPrice}</span>
+                                          </>
+                                        ) : (
+                                          <span className={css.itemPrice}>{formattedTotalPrice}</span>
+                                        )}
+                                      </div>
                                     </div>
                                   </div>
                                 </div>

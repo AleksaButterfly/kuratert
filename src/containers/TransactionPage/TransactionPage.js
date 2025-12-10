@@ -614,6 +614,9 @@ export const TransactionPageComponent = props => {
   const cartItems = transaction?.attributes?.protectedData?.cartItems || [];
   const hasCartItems = cartItems.length > 0;
 
+  // Get main listing's frame info from protectedData
+  const mainListingFrameInfo = transaction?.attributes?.protectedData?.mainListingFrameInfo || null;
+
   const orderBreakdownMaybe = hasLineItems
     ? {
         orderBreakdown: (
@@ -626,6 +629,7 @@ export const TransactionPageComponent = props => {
             marketplaceName={config.marketplaceName}
             cartItems={hasCartItems ? cartItems : null}
             listing={listing}
+            mainListingFrameInfo={mainListingFrameInfo}
           />
         ),
       }
