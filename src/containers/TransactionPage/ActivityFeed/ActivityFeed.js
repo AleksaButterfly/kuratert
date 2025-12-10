@@ -127,18 +127,8 @@ const TransitionMessage = props => {
       ? transition.by
       : otherUsersName;
 
-  const reviewLink = showReviewAsFirstLink ? (
-    <InlineTextButton onClick={onOpenReviewModal} rootClassName={css.reviewLink}>
-      <FormattedMessage id="TransactionPage.ActivityFeed.reviewLink" values={{ otherUsersName }} />
-    </InlineTextButton>
-  ) : showReviewAsSecondLink ? (
-    <InlineTextButton onClick={onOpenReviewModal} rootClassName={css.reviewLink}>
-      <FormattedMessage
-        id="TransactionPage.ActivityFeed.reviewAsSecondLink"
-        values={{ otherUsersName }}
-      />
-    </InlineTextButton>
-  ) : null;
+  // Reviews have been removed from the transaction process
+  const reviewLink = null;
 
   // Format listing title with cart items count if there are additional items
   const listingTitleWithCount = cartItemsCount > 0
