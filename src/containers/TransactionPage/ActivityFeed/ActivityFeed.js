@@ -112,10 +112,9 @@ const TransitionMessage = props => {
     negotiationOffer = '-',
     ownRole,
     otherUsersName,
-    onOpenReviewModal,
     intl,
   } = props;
-  const { processName, processState, showReviewAsFirstLink, showReviewAsSecondLink } = stateData;
+  const { processName, processState } = stateData;
   const stateStatus = nextState === processState ? 'current' : 'past';
   const transitionName = transition.transition;
 
@@ -127,8 +126,6 @@ const TransitionMessage = props => {
       ? transition.by
       : otherUsersName;
 
-  // Reviews have been removed from the transaction process
-  const reviewLink = null;
 
   // Format listing title with cart items count if there are additional items
   const listingTitleWithCount = cartItemsCount > 0
@@ -147,7 +144,6 @@ const TransitionMessage = props => {
           actor,
           otherUsersName,
           listingTitle: listingTitleWithCount,
-          reviewLink,
           deliveryMethod,
           stateStatus,
           negotiationOffer,
@@ -163,7 +159,6 @@ const TransitionMessage = props => {
       actor,
       otherUsersName,
       listingTitle: listingTitleWithCount,
-      reviewLink,
       deliveryMethod,
       stateStatus,
       negotiationOffer,
@@ -362,7 +357,6 @@ export const ActivityFeed = props => {
               negotiationOffer={negotiationOffer}
               ownRole={ownRole}
               otherUsersName={<UserDisplayName user={otherUser} intl={intl} />}
-              onOpenReviewModal={onOpenReviewModal}
               intl={intl}
             />
           }
