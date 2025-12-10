@@ -500,6 +500,32 @@
   border-radius: 4px;
 }
 
+.deliveryWarningBanner {
+  background-color: rgba(225, 113, 0, 0.1);
+  border: 1px solid rgba(225, 113, 0, 0.3);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+
+.deliveryWarningText {
+  font-family: var(--fontFamily);
+  font-size: 13px;
+  line-height: 1.5;
+  color: #b35900;
+  margin: 0;
+}
+
+.pickupLocationsNotice {
+  font-family: var(--fontFamily);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--colorGrey700);
+  margin: 8px 0 0 0;
+  padding: 0;
+  font-style: italic;
+}
+
 .summaryRows {
   display: flex;
   flex-direction: column;

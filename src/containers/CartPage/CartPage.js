@@ -368,6 +368,21 @@ export const CartPageComponent = props => {
                   const pickupAvailable = isDeliveryMethodAvailable(listings, 'pickup');
                   const hasMultipleDeliveryMethods = shippingAvailable && pickupAvailable;
                   const hasSingleDeliveryMethod = (shippingAvailable || pickupAvailable) && !hasMultipleDeliveryMethods;
+                  const noDeliveryMethodAvailable = !shippingAvailable && !pickupAvailable;
+
+                  // Check if items have incompatible delivery methods (some only shipping, some only pickup)
+                  const hasIncompatibleDeliveryMethods = listings.length > 1 && noDeliveryMethodAvailable && listings.some(l => {
+                    const pd = l?.attributes?.publicData;
+                    return pd?.shippingEnabled || pd?.pickupEnabled;
+                  });
+
+                  // Check if pickup locations differ across listings
+                  const pickupLocations = listings
+                    .filter(l => l?.attributes?.publicData?.pickupEnabled)
+                    .map(l => l?.attributes?.publicData?.location?.address)
+                    .filter(Boolean);
+                  const uniquePickupLocations = [...new Set(pickupLocations)];
+                  const hasMultiplePickupLocations = uniquePickupLocations.length > 1;
 
                   // Determine selected delivery method
                   const selectedDeliveryMethod = deliveryMethodBySeller[authorId] ||
@@ -573,6 +588,15 @@ export const CartPageComponent = props => {
                             <FormattedMessage id="CartPage.orderSummary" />
                           </h3>
 
+                          {/* Incompatible delivery methods warning */}
+                          {hasIncompatibleDeliveryMethods && (
+                            <div className={css.deliveryWarningBanner}>
+                              <p className={css.deliveryWarningText}>
+                                <FormattedMessage id="CartPage.incompatibleDeliveryMethods" />
+                              </p>
+                            </div>
+                          )}
+
                           {/* Delivery method selector */}
                           {(shippingAvailable || pickupAvailable) && (
                             <div className={css.deliveryMethodSection}>
@@ -610,6 +634,12 @@ export const CartPageComponent = props => {
                                     ? intl.formatMessage({ id: 'CartPage.deliveryShipping' })
                                     : intl.formatMessage({ id: 'CartPage.deliveryPickup' })}
                                 </span>
+                              )}
+                              {/* Multiple pickup locations notice */}
+                              {selectedDeliveryMethod === 'pickup' && hasMultiplePickupLocations && (
+                                <p className={css.pickupLocationsNotice}>
+                                  <FormattedMessage id="CartPage.multiplePickupLocationsNotice" />
+                                </p>
                               )}
                             </div>
                           )}

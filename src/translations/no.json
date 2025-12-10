@@ -110,6 +110,8 @@
   "CartPage.deliveryShipping": "Shipping",
   "CartPage.deliveryPickup": "Pickup",
   "CartPage.deliveryMethodRequired": "Please select a delivery method",
+  "CartPage.incompatibleDeliveryMethods": "These items have different delivery options and cannot be purchased together. Please remove some items or contact the seller.",
+  "CartPage.multiplePickupLocationsNotice": "Items have different pickup locations. The seller will share all pickup details in chat after purchase.",
   "CartPage.basePrice": "Base price",
   "CartPage.framePrice": "Frame",
   "CartPage.framePriceWithColor": "Frame ({frameColor})",

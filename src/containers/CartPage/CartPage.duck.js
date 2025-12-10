@@ -57,6 +57,9 @@ const queryCartListingsPayloadCreator = (config, thunkAPI) => {
       'publicData.categoryLevel1',
       'publicData.categoryLevel2',
       'publicData.categoryLevel3',
+      'publicData.location',
+      'publicData.stockType',
+      'publicData.frameOptions',
     ],
     'fields.user': ['profile.displayName', 'profile.abbreviatedName', 'profile.publicData'],
     'fields.image': [
