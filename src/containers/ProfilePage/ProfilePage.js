@@ -1,15 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
-import classNames from 'classnames';
 
 import { useConfiguration } from '../../context/configurationContext';
 import { FormattedMessage, useIntl } from '../../util/reactIntl';
-import {
-  REVIEW_TYPE_OF_PROVIDER,
-  REVIEW_TYPE_OF_CUSTOMER,
-  propTypes,
-} from '../../util/types';
+import { propTypes } from '../../util/types';
 import {
   NO_ACCESS_PAGE_USER_PENDING_APPROVAL,
   NO_ACCESS_PAGE_VIEW_LISTINGS,
@@ -32,7 +27,6 @@ import { getMarketplaceEntities } from '../../ducks/marketplaceData.duck';
 import {
   Page,
   ListingCard,
-  Reviews,
   NamedRedirect,
 } from '../../components';
 
@@ -45,21 +39,6 @@ import css from './ProfilePage.module.css';
 
 const MAX_MOBILE_SCREEN_WIDTH = 768;
 
-// Tab constants
-const TAB_LISTINGS = 'listings';
-const TAB_REVIEWS_SELLER = 'reviews-seller';
-const TAB_REVIEWS_BUYER = 'reviews-buyer';
-const TAB_REVIEWS = 'reviews';
-
-export const ReviewsErrorMaybe = props => {
-  const { queryReviewsError } = props;
-  return queryReviewsError ? (
-    <p className={css.error}>
-      <FormattedMessage id="ProfilePage.loadingReviewsFailed" />
-    </p>
-  ) : null;
-};
-
 export const MainContent = props => {
   const {
     user,
@@ -68,10 +47,7 @@ export const MainContent = props => {
     displayName,
     listings,
     queryListingsError,
-    reviews = [],
-    queryReviewsError,
     intl,
-    hideReviews,
     userTypeRoles,
     isCurrentUser,
     onManageDisableScrolling,
@@ -80,44 +56,12 @@ export const MainContent = props => {
 
   const { provider: isSeller } = userTypeRoles;
 
-  // For sellers: default to listings tab, for buyers: default to reviews tab
-  const defaultTab = isSeller ? TAB_LISTINGS : TAB_REVIEWS;
-  const [activeTab, setActiveTab] = useState(defaultTab);
-
-  const reviewsOfProvider = reviews.filter(r => r.attributes.type === REVIEW_TYPE_OF_PROVIDER);
-  const reviewsOfCustomer = reviews.filter(r => r.attributes.type === REVIEW_TYPE_OF_CUSTOMER);
-
   if (userShowError || queryListingsError) {
     return (
       <p className={css.error}>
         <FormattedMessage id="ProfilePage.loadingDataFailed" />
       </p>
     );
-  }
-
-  // Build tabs based on user type
-  const tabs = [];
-
-  if (isSeller) {
-    // Seller tabs: Active Listings, Reviews as Seller, Reviews as Buyer
-    tabs.push({
-      id: TAB_LISTINGS,
-      label: intl.formatMessage({ id: 'ProfilePage.tabActiveListings' }, { count: listings.length }),
-    });
-    tabs.push({
-      id: TAB_REVIEWS_SELLER,
-      label: intl.formatMessage({ id: 'ProfilePage.tabReviewsAsSeller' }, { count: reviewsOfProvider.length }),
-    });
-    tabs.push({
-      id: TAB_REVIEWS_BUYER,
-      label: intl.formatMessage({ id: 'ProfilePage.tabReviewsAsBuyer' }, { count: reviewsOfCustomer.length }),
-    });
-  } else {
-    // Buyer tabs: just Reviews
-    tabs.push({
-      id: TAB_REVIEWS,
-      label: intl.formatMessage({ id: 'ProfilePage.tabReviews' }, { count: reviewsOfCustomer.length }),
-    });
   }
 
   return (
@@ -129,93 +73,29 @@ export const MainContent = props => {
         displayName={displayName}
         isCurrentUser={isCurrentUser}
         listings={listings}
-        reviews={reviews}
         onManageDisableScrolling={onManageDisableScrolling}
         isSeller={isSeller}
         userStats={userStats}
       />
 
-      {/* Tabs Section for Sellers */}
+      {/* Active Listings Section */}
       {isSeller && (
-        <div className={css.tabsSection}>
-          {/* Tab Navigation */}
-          <div className={css.tabsNav}>
-            {tabs.map(tab => (
-              <button
-                key={tab.id}
-                className={classNames(css.tab, { [css.tabActive]: activeTab === tab.id })}
-                onClick={() => setActiveTab(tab.id)}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Tab Content */}
-          <div className={css.tabContent}>
-            {/* Active Listings Tab */}
-            {activeTab === TAB_LISTINGS && (
-              <ul className={css.listings}>
-                {listings.map(l => (
-                  <li className={css.listing} key={l.id.uuid}>
-                    <ListingCard listing={l} showAuthorInfo={false} />
-                  </li>
-                ))}
-                {listings.length === 0 && (
-                  <p className={css.noContent}>
-                    <FormattedMessage id="ProfilePage.noListings" />
-                  </p>
-                )}
-              </ul>
-            )}
-
-            {/* Reviews as Seller Tab */}
-            {activeTab === TAB_REVIEWS_SELLER && !hideReviews && (
-              <div className={css.reviewsContent}>
-                <ReviewsErrorMaybe queryReviewsError={queryReviewsError} />
-                {reviewsOfProvider.length > 0 ? (
-                  <Reviews reviews={reviewsOfProvider} />
-                ) : (
-                  <p className={css.noContent}>
-                    <FormattedMessage id="ProfilePage.noReviewsAsSeller" />
-                  </p>
-                )}
-              </div>
-            )}
-
-            {/* Reviews as Buyer Tab */}
-            {activeTab === TAB_REVIEWS_BUYER && !hideReviews && (
-              <div className={css.reviewsContent}>
-                <ReviewsErrorMaybe queryReviewsError={queryReviewsError} />
-                {reviewsOfCustomer.length > 0 ? (
-                  <Reviews reviews={reviewsOfCustomer} />
-                ) : (
-                  <p className={css.noContent}>
-                    <FormattedMessage id="ProfilePage.noReviewsAsBuyer" />
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Reviews Section for Buyers (no tabs, just section title) */}
-      {!isSeller && !hideReviews && (
-        <div className={css.buyerReviewsSection}>
+        <div className={css.listingsSection}>
           <h2 className={css.sectionTitle}>
-            <FormattedMessage id="ProfilePage.tabReviews" values={{ count: reviewsOfCustomer.length }} />
+            <FormattedMessage id="ProfilePage.activeListingsTitle" values={{ count: listings.length }} />
           </h2>
-          <div className={css.reviewsContent}>
-            <ReviewsErrorMaybe queryReviewsError={queryReviewsError} />
-            {reviewsOfCustomer.length > 0 ? (
-              <Reviews reviews={reviewsOfCustomer} />
-            ) : (
+          <ul className={css.listings}>
+            {listings.map(l => (
+              <li className={css.listing} key={l.id.uuid}>
+                <ListingCard listing={l} showAuthorInfo={false} />
+              </li>
+            ))}
+            {listings.length === 0 && (
               <p className={css.noContent}>
-                <FormattedMessage id="ProfilePage.noReviews" />
+                <FormattedMessage id="ProfilePage.noListings" />
               </p>
             )}
-          </div>
+          </ul>
         </div>
       )}
     </div>
@@ -334,7 +214,6 @@ export const ProfilePageComponent = props => {
           bio={bio}
           displayName={displayName}
           userShowError={userShowError}
-          hideReviews={hasNoViewingRightsOnPrivateMarketplace}
           intl={intl}
           userTypeRoles={userTypeRoles}
           isCurrentUser={mounted && isCurrentUser}
@@ -354,8 +233,6 @@ const mapStateToProps = state => {
     userShowError,
     queryListingsError,
     userListingRefs,
-    reviews = [],
-    queryReviewsError,
     userStats,
   } = state.ProfilePage;
   const userMatches = getMarketplaceEntities(state, [{ type: 'user', id: userId }]);
@@ -373,8 +250,6 @@ const mapStateToProps = state => {
     userShowError,
     queryListingsError,
     listings: getMarketplaceEntities(state, userListingRefs),
-    reviews,
-    queryReviewsError,
     userStats,
   };
 };

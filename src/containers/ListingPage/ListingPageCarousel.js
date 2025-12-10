@@ -904,11 +904,6 @@ export const ListingPageComponent = props => {
                       {authorDisplayName}
                     </NamedLink>
                   </h4>
-                  <div className={css.authorCardMeta}>
-                    <span className={css.authorCardMetaText}>
-                      ⭐ {averageRating || '0'} ({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})
-                    </span>
-                  </div>
                 </div>
               </div>
               {authorBio && (

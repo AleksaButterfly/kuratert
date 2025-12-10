@@ -103,7 +103,7 @@
 }
 
 .listing {
-  /* Reset any default list styling */
+  padding: 0;
 }
 
 /* Reviews Content */
@@ -120,13 +120,17 @@
 
 .sectionTitle {
   font-family: var(--fontFamily);
-  font-size: 16px;
-  line-height: 25.6px;
+  font-size: 24px;
+  line-height: 32px;
   font-weight: var(--fontWeightRegular);
   color: var(--colorGrey900);
-  margin: 0;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--colorGrey100);
+  margin: 0 0 24px 0;
+  padding: 0;
+}
+
+.listingsSection {
+  display: flex;
+  flex-direction: column;
 }
 
 /* No Content Message */

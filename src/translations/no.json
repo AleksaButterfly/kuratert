@@ -1053,6 +1053,7 @@
   "ProfilePage.tabReviews": "Reviews ({count})",
   "ProfilePage.tabReviewsAsBuyer": "Reviews as Buyer ({count})",
   "ProfilePage.tabReviewsAsSeller": "Reviews as Seller ({count})",
+  "ProfilePage.activeListingsTitle": "Active Listings ({count})",
   "ProfileSettingsForm.addYourProfilePicture": "+ Add your profile picture…",
   "ProfileSettingsForm.addYourProfilePictureMobile": "+ Add",
   "ProfileSettingsForm.bioHeading": "Your profile bio",

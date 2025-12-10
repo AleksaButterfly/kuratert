@@ -22,46 +22,12 @@ const IconVerified = () => (
   </svg>
 );
 
-const IconLocation = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path
-      d="M8 8.5C9.10457 8.5 10 7.60457 10 6.5C10 5.39543 9.10457 4.5 8 4.5C6.89543 4.5 6 5.39543 6 6.5C6 7.60457 6.89543 8.5 8 8.5Z"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      fill="none"
-    />
-    <path
-      d="M8 14.5C8 14.5 13 10.5 13 6.5C13 3.73858 10.7614 1.5 8 1.5C5.23858 1.5 3 3.73858 3 6.5C3 10.5 8 14.5 8 14.5Z"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      fill="none"
-    />
-  </svg>
-);
-
 const IconCalendar = () => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="2" y="3" width="12" height="11" rx="1" stroke="currentColor" strokeWidth="1.5" fill="none" />
     <path d="M2 6H14" stroke="currentColor" strokeWidth="1.5" fill="none" />
     <path d="M5 1.5V3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none" />
     <path d="M11 1.5V3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none" />
-  </svg>
-);
-
-const IconStar = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path
-      d="M8 1L10.163 5.27865L15 6.02786L11.5 9.32164L12.326 14L8 11.7787L3.674 14L4.5 9.32164L1 6.02786L5.837 5.27865L8 1Z"
-      fill="#C9A961"
-      stroke="#C9A961"
-      strokeWidth="1.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
   </svg>
 );
 
@@ -140,7 +106,6 @@ const ProfileHero = props => {
     displayName,
     isCurrentUser,
     listings = [],
-    reviews = [],
     onManageDisableScrolling,
     isSeller = true,
     userStats,
@@ -152,7 +117,6 @@ const ProfileHero = props => {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const publicData = user?.attributes?.profile?.publicData || {};
   const metadata = user?.attributes?.metadata || {};
   const createdAt = user?.attributes?.createdAt;
   const isVerified = metadata?.verified === true;
@@ -175,17 +139,6 @@ const ProfileHero = props => {
   // Stats - calculated dynamically
   const activeListings = listings.length || 0;
   const totalSales = userStats?.salesCount ?? 0;
-  const reviewCount = reviews.length || 0;
-
-  // Calculate average rating from reviews
-  const calculateAverageRating = () => {
-    if (!reviews || reviews.length === 0) return null;
-    const totalRating = reviews.reduce((sum, review) => {
-      return sum + (review.attributes?.rating || 0);
-    }, 0);
-    return (totalRating / reviews.length).toFixed(1);
-  };
-  const averageRating = calculateAverageRating();
 
   // Response rate and time from server stats
   const responseRate = userStats?.responseRate != null ? `${userStats.responseRate}%` : null;
@@ -328,16 +281,6 @@ const ProfileHero = props => {
                 <span className={css.statValue}>{totalSales}</span>
                 <span className={css.statLabel}>
                   <FormattedMessage id="ProfileHero.sales" />
-                </span>
-              </div>
-
-              <div className={css.statItem}>
-                <div className={css.statValueWithIcon}>
-                  <IconStar />
-                  <span className={css.statValue}>{averageRating || '0'}</span>
-                </div>
-                <span className={css.statLabel}>
-                  <FormattedMessage id="ProfileHero.reviews" values={{ count: reviewCount }} />
                 </span>
               </div>
 
