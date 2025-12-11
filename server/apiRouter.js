@@ -20,6 +20,7 @@ const usersQuery = require('./api/users-query');
 const userStats = require('./api/user-stats');
 const sellersQuery = require('./api/sellers-query');
 const { getFeaturedArticles, getAllArticles, getArticleBySlug } = require('./api/articles');
+const newsletterSignup = require('./api/newsletter-signup');
 
 const createUserWithIdp = require('./api/auth/createUserWithIdp');
 
@@ -68,6 +69,9 @@ router.get('/sellers-query', sellersQuery);
 router.get('/articles/featured', getFeaturedArticles);
 router.get('/articles', getAllArticles);
 router.get('/articles/:slug', getArticleBySlug);
+
+// Newsletter signup endpoint (Brevo)
+router.post('/newsletter-signup', newsletterSignup);
 
 // Create user with identity provider (e.g. Facebook or Google)
 // This endpoint is called to create a new user after user has confirmed

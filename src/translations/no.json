@@ -529,6 +529,7 @@
   "FetchLineItemsError.unknownError": "Oops, something went wrong. Please refresh the page and try again.",
   "Footer.newsletterText": "Subscribe to our newsletter and be the first to know about new artworks, exclusive offers, and curated collections.",
   "Footer.newsletterTitle": "Stay Updated",
+  "Footer.newsletterSuccess": "Thank you for subscribing! You'll receive our latest updates soon.",
   "Footer.privacyPolicy": "Privacy Policy",
   "Footer.termsOfService": "Terms of Service",
   "FieldBoolean.no": "No",

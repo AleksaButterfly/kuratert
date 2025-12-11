@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import classNames from 'classnames';
 
 import { useIntl } from '../../../util/reactIntl';
@@ -74,6 +74,40 @@ const Footer = props => {
   const intl = useIntl();
   const classes = classNames(rootClassName || css.root, className);
 
+  // Newsletter state
+  const [newsletterInProgress, setNewsletterInProgress] = useState(false);
+  const [newsletterSuccess, setNewsletterSuccess] = useState(false);
+  const [newsletterError, setNewsletterError] = useState(null);
+
+  const handleNewsletterSubmit = async values => {
+    setNewsletterInProgress(true);
+    setNewsletterError(null);
+    setNewsletterSuccess(false);
+
+    try {
+      const response = await fetch('/api/newsletter-signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: values.email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setNewsletterSuccess(true);
+      } else {
+        setNewsletterError(data.error || 'Something went wrong. Please try again.');
+      }
+    } catch (error) {
+      console.error('Newsletter signup error:', error);
+      setNewsletterError('Something went wrong. Please try again.');
+    } finally {
+      setNewsletterInProgress(false);
+    }
+  };
+
   // Determine grid column class
   const gridColClass = numberOfColumns === 4
     ? css.gridCol4
@@ -146,12 +180,22 @@ const Footer = props => {
               {intl.formatMessage({ id: 'Footer.newsletterText' })}
             </p>
           </div>
-          <NewsletterForm
-            className={css.newsletterForm}
-            onSubmit={values => {
-              console.log('Newsletter subscription:', values);
-            }}
-          />
+          {newsletterSuccess ? (
+            <div className={css.newsletterSuccess}>
+              {intl.formatMessage({ id: 'Footer.newsletterSuccess' })}
+            </div>
+          ) : (
+            <div className={css.newsletterFormWrapper}>
+              <NewsletterForm
+                className={css.newsletterForm}
+                onSubmit={handleNewsletterSubmit}
+                inProgress={newsletterInProgress}
+              />
+              {newsletterError && (
+                <p className={css.newsletterError}>{newsletterError}</p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Bottom Section */}
