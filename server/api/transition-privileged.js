@@ -29,7 +29,12 @@ const getListingRelationShip = transactionShowAPIData => {
 const getFullOrderData = (orderData, bodyParams, currency, offers, transaction) => {
   const { offerInSubunits } = orderData || {};
   const transitionName = bodyParams.transition;
-  const orderDataAndParams = { ...orderData, ...bodyParams.params, currency };
+
+  // Include unitType from transaction's protectedData for negotiated-purchase transactions
+  const transactionUnitType = transaction?.attributes?.protectedData?.unitType;
+  const unitTypeMaybe = transactionUnitType ? { unitType: transactionUnitType } : {};
+
+  const orderDataAndParams = { ...orderData, ...bodyParams.params, currency, ...unitTypeMaybe };
 
   // For REQUEST_PAYMENT in negotiated-purchase, get the accepted offer from metadata
   const isRequestPaymentInNegotiatedPurchase = transitionName === 'transition/request-payment' &&
