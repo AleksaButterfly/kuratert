@@ -38,6 +38,7 @@ const NewsletterForm = props => {
               <PrimaryButton
                 type="submit"
                 className={css.submitButton}
+                spinnerClassName={css.buttonSpinner}
                 inProgress={inProgress}
                 disabled={submitDisabled}
               >

@@ -5,6 +5,7 @@ import { useIntl } from '../../../util/reactIntl';
 import { LinkedLogo, ExternalLink, NamedLink } from '../../../components';
 import BlockBuilder from '../../PageBuilder/BlockBuilder';
 import NewsletterForm from './NewsletterForm';
+import { subscribeToNewsletter } from '../../../util/api';
 
 import css from './Footer.module.css';
 
@@ -85,24 +86,16 @@ const Footer = props => {
     setNewsletterSuccess(false);
 
     try {
-      const response = await fetch('/api/newsletter-signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: values.email }),
-      });
+      const data = await subscribeToNewsletter({ email: values.email });
 
-      const data = await response.json();
-
-      if (response.ok && data.success) {
+      if (data.success) {
         setNewsletterSuccess(true);
       } else {
         setNewsletterError(data.error || 'Something went wrong. Please try again.');
       }
     } catch (error) {
       console.error('Newsletter signup error:', error);
-      setNewsletterError('Something went wrong. Please try again.');
+      setNewsletterError(error.error || 'Something went wrong. Please try again.');
     } finally {
       setNewsletterInProgress(false);
     }

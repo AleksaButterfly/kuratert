@@ -58,3 +58,10 @@
     max-width: 120px;
   }
 }
+
+.buttonSpinner {
+  width: 18px;
+  height: 18px;
+  stroke: var(--colorWhite);
+  stroke-width: 3px;
+}

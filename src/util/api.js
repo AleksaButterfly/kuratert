@@ -203,3 +203,10 @@ export const fetchArticleBySlug = slug => {
     method: methods.GET,
   });
 };
+
+// ================ Newsletter API (Brevo) ================ //
+
+// Subscribe to newsletter via Brevo.
+export const subscribeToNewsletter = body => {
+  return post('/api/newsletter-signup', body);
+};
