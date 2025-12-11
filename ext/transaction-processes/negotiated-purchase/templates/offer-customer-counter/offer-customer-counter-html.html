@@ -4,7 +4,7 @@
   {{set-locale (asset "general/localization.json" "locale" "en_US")}}
   <head>
     <meta http-equiv="Content-Type" content="text/html charset=UTF-8" />
-  </head>{{~#*inline "format-money"~}}{{money-amount money}} {{money.currency}}{{~/inline~}}{{#with transaction}}
+  </head>{{~#*inline "format-money"~}}{{format-text "{amount,number,::.00} {currency}" amount=money.amount currency=money.currency}}{{~/inline~}}{{#with transaction}}
   <table style="background-color:#FFF;margin:0 auto;padding:24px 12px 0;font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif" align="center" border="0" cellPadding="0" cellSpacing="0" role="presentation" width="100%">
     <tbody>
       <tr>
@@ -24,10 +24,21 @@
                             <tr>
                               <td>
                                 <td>
-                                  <p style="font-size:16px;line-height:1.4;margin:16px 0;color:#484848;margin-bottom:1px">{{t "OfferCustomerCounter.CounterOfferLabel" "Counter offer amount"}}</p>
+                                  <p style="font-size:16px;line-height:1.4;margin:16px 0;color:#484848;margin-bottom:1px">{{../listing.title}}</p>
+                                </td>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                        <table align="center" border="0" cellPadding="0" cellSpacing="0" role="presentation" width="100%">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <td>
+                                  <p style="font-size:16px;line-height:1.4;margin:16px 0;color:#484848;font-weight:700;margin-top:1px">{{t "OfferCustomerCounter.CounterOfferLabel" "Counter offer amount"}}</p>
                                 </td>
                                 <td style="text-align:right">
-                                  <p style="font-size:16px;line-height:1.4;margin:16px 0;color:#484848;margin-bottom:1px">{{> format-money money=line-total}}</p>
+                                  <p style="font-size:16px;line-height:1.4;margin:16px 0;color:#484848;font-weight:700;margin-top:1px">{{> format-money money=line-total}}</p>
                                 </td>
                               </td>
                             </tr>
