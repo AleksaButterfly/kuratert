@@ -124,9 +124,38 @@ const getOrderParams = (pageData, shippingDetails, optionalPaymentParams, config
   const frameInfo = pageData.orderData?.frameInfo;
   const frameInfoMaybe = frameInfo ? { frameInfo } : {};
 
+  // For negotiated-purchase, get the offer amount from the transaction
+  const transactionUnitType = pageData.transaction?.attributes?.protectedData?.unitType;
+  const isNegotiatedPurchase = transactionUnitType === 'negotiatedItem';
+
+  // Get offer from transaction's metadata or line items
+  let offerInSubunitsMaybe = {};
+  if (isNegotiatedPurchase && pageData.transaction) {
+    // First try metadata.offers (most reliable)
+    const metadataOffers = pageData.transaction.attributes?.metadata?.offers || [];
+    const latestOffer = metadataOffers[metadataOffers.length - 1];
+
+    if (latestOffer?.offerInSubunits) {
+      offerInSubunitsMaybe = { offerInSubunits: latestOffer.offerInSubunits };
+    } else {
+      // Fallback: get from line items
+      const negotiatedLineItem = pageData.transaction.attributes?.lineItems?.find(
+        item => item.code === 'line-item/negotiatedItem' && !item.reversal
+      );
+      if (negotiatedLineItem?.unitPrice?.amount) {
+        offerInSubunitsMaybe = { offerInSubunits: negotiatedLineItem.unitPrice.amount };
+      }
+    }
+  }
+
+  // For negotiated-purchase, use the transaction's unitType instead of listing's
+  const effectiveUnitType = isNegotiatedPurchase ? transactionUnitType : unitType;
+
   const protectedDataMaybe = {
     protectedData: {
-      ...getTransactionTypeData(listingType, unitType, config),
+      ...getTransactionTypeData(listingType, effectiveUnitType || unitType, config),
+      // For negotiated-purchase, explicitly set the unitType
+      ...(isNegotiatedPurchase ? { unitType: 'negotiatedItem' } : {}),
       ...deliveryMethodMaybe,
       ...shippingDetails,
       ...priceVariantMaybe,
@@ -161,6 +190,7 @@ const getOrderParams = (pageData, shippingDetails, optionalPaymentParams, config
     ...frameInfoMaybe,
     ...protectedDataMaybe,
     ...optionalPaymentParams,
+    ...offerInSubunitsMaybe,
   };
   return orderParams;
 };

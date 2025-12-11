@@ -8,6 +8,7 @@ import {
   LINE_ITEM_NIGHT,
   LINE_ITEM_OFFER,
   LINE_ITEM_REQUEST,
+  LINE_ITEM_NEGOTIATED_ITEM,
   propTypes,
 } from '../../util/types';
 
@@ -31,6 +32,7 @@ const LineItemBasePriceMaybe = props => {
   const isFixed = code === LINE_ITEM_FIXED;
   const isRequest = code === LINE_ITEM_REQUEST;
   const isOffer = code === LINE_ITEM_OFFER;
+  const isNegotiatedItem = code === LINE_ITEM_NEGOTIATED_ITEM;
   const translationKey = isNightly
     ? 'OrderBreakdown.baseUnitNight'
     : isDaily
@@ -43,6 +45,8 @@ const LineItemBasePriceMaybe = props => {
     ? 'OrderBreakdown.baseUnitRequest'
     : isOffer
     ? 'OrderBreakdown.baseUnitOffer'
+    : isNegotiatedItem
+    ? 'OrderBreakdown.baseUnitNegotiatedItem'
     : 'OrderBreakdown.baseUnitQuantity';
 
   // Find correct line-item for given code prop.

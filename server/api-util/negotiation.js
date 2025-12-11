@@ -3,12 +3,17 @@ const makeOfferTransitions = [
   'transition/make-offer',
   'transition/make-offer-after-inquiry',
   'transition/make-offer-from-request',
+  // negotiated-purchase process: customer initiates with offer
+  'transition/customer-offer',
 ];
 
 // default-negotiation process: transitions that make a counter offer
 const counterOfferTransitions = [
   'transition/customer-make-counter-offer',
   'transition/provider-make-counter-offer',
+  // negotiated-purchase process: counter offers
+  'transition/provider-counter-offer',
+  'transition/customer-counter-offer',
 ];
 
 // default-negotiation process: transitions that revoke a counter offer

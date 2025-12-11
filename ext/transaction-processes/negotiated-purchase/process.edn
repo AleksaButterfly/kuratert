@@ -1,0 +1,502 @@
+{:format :v3,
+ :transitions
+ ;; ============================================================
+ ;; NEGOTIATION PHASE - Customer initiates offer, provider responds
+ ;; ============================================================
+
+ ;; Customer makes initial offer with price
+ [{:name :transition/customer-offer,
+   :actor :actor.role/customer,
+   :actions
+   [{:name :action/privileged-set-line-items}
+    {:name :action/update-protected-data}
+    {:name :action/privileged-update-metadata}],
+   :to :state/offer-pending,
+   :privileged? true}
+
+  ;; Provider accepts customer's offer - ready for payment
+  {:name :transition/accept-offer,
+   :actor :actor.role/provider,
+   :actions [],
+   :from :state/offer-pending,
+   :to :state/accepted}
+
+  ;; Provider declines customer's offer
+  {:name :transition/decline-offer,
+   :actor :actor.role/provider,
+   :actions [],
+   :from :state/offer-pending,
+   :to :state/declined}
+
+  ;; Provider makes counter offer
+  {:name :transition/provider-counter-offer,
+   :actor :actor.role/provider,
+   :actions
+   [{:name :action/privileged-set-line-items}
+    {:name :action/update-protected-data}
+    {:name :action/privileged-update-metadata}],
+   :from :state/offer-pending,
+   :to :state/counter-pending,
+   :privileged? true}
+
+  ;; Customer accepts provider's counter offer - ready for payment
+  {:name :transition/accept-counter-offer,
+   :actor :actor.role/customer,
+   :actions [],
+   :from :state/counter-pending,
+   :to :state/accepted}
+
+  ;; Customer declines provider's counter offer
+  {:name :transition/decline-counter-offer,
+   :actor :actor.role/customer,
+   :actions [],
+   :from :state/counter-pending,
+   :to :state/declined}
+
+  ;; Customer makes another counter offer
+  {:name :transition/customer-counter-offer,
+   :actor :actor.role/customer,
+   :actions
+   [{:name :action/privileged-set-line-items}
+    {:name :action/update-protected-data}
+    {:name :action/privileged-update-metadata}],
+   :from :state/counter-pending,
+   :to :state/offer-pending,
+   :privileged? true}
+
+  ;; Customer withdraws their offer
+  {:name :transition/withdraw-offer,
+   :actor :actor.role/customer,
+   :actions [],
+   :from :state/offer-pending,
+   :to :state/declined}
+
+  ;; Provider withdraws their counter offer
+  {:name :transition/withdraw-counter-offer,
+   :actor :actor.role/provider,
+   :actions [],
+   :from :state/counter-pending,
+   :to :state/declined}
+
+  ;; Operator can decline from any negotiation state
+  {:name :transition/operator-decline-from-offer,
+   :actor :actor.role/operator,
+   :actions [],
+   :from :state/offer-pending,
+   :to :state/declined}
+
+  {:name :transition/operator-decline-from-counter,
+   :actor :actor.role/operator,
+   :actions [],
+   :from :state/counter-pending,
+   :to :state/declined}
+
+  ;; Auto-expire offer after 14 days
+  {:name :transition/expire-offer,
+   :at
+   {:fn/plus
+    [{:fn/timepoint [:time/first-entered-state :state/offer-pending]}
+     {:fn/period ["P14D"]}]},
+   :actions [],
+   :from :state/offer-pending,
+   :to :state/declined}
+
+  ;; Auto-expire counter offer after 14 days
+  {:name :transition/expire-counter-offer,
+   :at
+   {:fn/plus
+    [{:fn/timepoint [:time/first-entered-state :state/counter-pending]}
+     {:fn/period ["P14D"]}]},
+   :actions [],
+   :from :state/counter-pending,
+   :to :state/declined}
+
+  ;; ============================================================
+  ;; PAYMENT PHASE - After offer is accepted
+  ;; ============================================================
+
+  ;; Customer initiates payment after offer accepted
+  {:name :transition/request-payment,
+   :actor :actor.role/customer,
+   :actions
+   [{:name :action/update-protected-data}
+    {:name :action/create-pending-stock-reservation}
+    {:name :action/privileged-set-line-items}
+    {:name :action/stripe-create-payment-intent}],
+   :from :state/accepted,
+   :to :state/pending-payment,
+   :privileged? true}
+
+  ;; Customer confirms payment
+  {:name :transition/confirm-payment,
+   :actor :actor.role/customer,
+   :actions
+   [{:name :action/accept-stock-reservation}
+    {:name :action/stripe-confirm-payment-intent}
+    {:name :action/stripe-capture-payment-intent}],
+   :from :state/pending-payment,
+   :to :state/purchased}
+
+  ;; Payment expires after 15 minutes
+  {:name :transition/expire-payment,
+   :at
+   {:fn/plus
+    [{:fn/timepoint [:time/first-entered-state :state/pending-payment]}
+     {:fn/period ["PT15M"]}]},
+   :actions
+   [{:name :action/calculate-full-refund}
+    {:name :action/stripe-refund-payment}
+    {:name :action/decline-stock-reservation}],
+   :from :state/pending-payment,
+   :to :state/payment-expired}
+
+  ;; Accepted state expires after 7 days if customer doesn't pay
+  {:name :transition/expire-accepted,
+   :at
+   {:fn/plus
+    [{:fn/timepoint [:time/first-entered-state :state/accepted]}
+     {:fn/period ["P7D"]}]},
+   :actions [],
+   :from :state/accepted,
+   :to :state/declined}
+
+  ;; ============================================================
+  ;; FULFILLMENT PHASE - Same as default-purchase
+  ;; ============================================================
+
+  ;; Customer marks received directly from purchased
+  {:name :transition/mark-received-from-purchased,
+   :actor :actor.role/customer,
+   :actions [{:name :action/stripe-create-payout}],
+   :from :state/purchased,
+   :to :state/received}
+
+  ;; Provider marks as delivered/shipped
+  {:name :transition/mark-delivered,
+   :actor :actor.role/provider,
+   :actions [],
+   :from :state/purchased,
+   :to :state/delivered}
+
+  ;; Operator marks as delivered
+  {:name :transition/operator-mark-delivered,
+   :actor :actor.role/operator,
+   :actions [],
+   :from :state/purchased,
+   :to :state/delivered}
+
+  ;; Customer marks as received
+  {:name :transition/mark-received,
+   :actor :actor.role/customer,
+   :actions [{:name :action/stripe-create-payout}],
+   :from :state/delivered,
+   :to :state/received}
+
+  ;; Auto mark received after 14 days of delivered
+  {:name :transition/auto-mark-received,
+   :at
+   {:fn/plus
+    [{:fn/timepoint [:time/first-entered-state :state/delivered]}
+     {:fn/period ["P14D"]}]},
+   :actions [{:name :action/stripe-create-payout}],
+   :from :state/delivered,
+   :to :state/received}
+
+  ;; Customer disputes delivery
+  {:name :transition/dispute,
+   :actor :actor.role/customer,
+   :actions [{:name :action/update-protected-data}],
+   :from :state/delivered,
+   :to :state/disputed}
+
+  ;; Operator disputes delivery
+  {:name :transition/operator-dispute,
+   :actor :actor.role/operator,
+   :actions [],
+   :from :state/delivered,
+   :to :state/disputed}
+
+  ;; Operator resolves dispute by marking received
+  {:name :transition/mark-received-from-disputed,
+   :actor :actor.role/operator,
+   :actions [{:name :action/stripe-create-payout}],
+   :from :state/disputed,
+   :to :state/received}
+
+  ;; ============================================================
+  ;; CANCELLATION
+  ;; ============================================================
+
+  ;; Operator cancels from purchased
+  {:name :transition/cancel,
+   :actor :actor.role/operator,
+   :actions
+   [{:name :action/calculate-full-refund}
+    {:name :action/stripe-refund-payment}
+    {:name :action/cancel-stock-reservation}],
+   :from :state/purchased,
+   :to :state/canceled}
+
+  ;; Auto cancel if not shipped in 14 days
+  {:name :transition/auto-cancel,
+   :at
+   {:fn/plus
+    [{:fn/timepoint [:time/first-entered-state :state/purchased]}
+     {:fn/period ["P14D"]}]},
+   :actions
+   [{:name :action/calculate-full-refund}
+    {:name :action/stripe-refund-payment}
+    {:name :action/cancel-stock-reservation}],
+   :from :state/purchased,
+   :to :state/canceled}
+
+  ;; Cancel from disputed
+  {:name :transition/cancel-from-disputed,
+   :actor :actor.role/operator,
+   :actions
+   [{:name :action/calculate-full-refund}
+    {:name :action/stripe-refund-payment}
+    {:name :action/cancel-stock-reservation}],
+   :from :state/disputed,
+   :to :state/canceled}
+
+  ;; Auto cancel from disputed after 60 days
+  {:name :transition/auto-cancel-from-disputed,
+   :at
+   {:fn/plus
+    [{:fn/timepoint [:time/first-entered-state :state/disputed]}
+     {:fn/period ["P60D"]}]},
+   :actions
+   [{:name :action/calculate-full-refund}
+    {:name :action/stripe-refund-payment}
+    {:name :action/cancel-stock-reservation}],
+   :from :state/disputed,
+   :to :state/canceled}
+
+  ;; ============================================================
+  ;; COMPLETION
+  ;; ============================================================
+
+  ;; Auto complete immediately after received
+  {:name :transition/auto-complete,
+   :at {:fn/timepoint [:time/first-entered-state :state/received]},
+   :actions [],
+   :from :state/received,
+   :to :state/completed}],
+
+ ;; ============================================================
+ ;; NOTIFICATIONS
+ ;; ============================================================
+ :notifications
+ [;; Negotiation notifications
+  {:name :notification/new-offer-to-provider,
+   :on :transition/customer-offer,
+   :to :actor.role/provider,
+   :template :offer-new-offer}
+
+  {:name :notification/offer-accepted-to-customer,
+   :on :transition/accept-offer,
+   :to :actor.role/customer,
+   :template :offer-accepted}
+
+  {:name :notification/offer-declined-to-customer,
+   :on :transition/decline-offer,
+   :to :actor.role/customer,
+   :template :offer-declined}
+
+  {:name :notification/counter-offer-to-customer,
+   :on :transition/provider-counter-offer,
+   :to :actor.role/customer,
+   :template :offer-counter-offer}
+
+  {:name :notification/counter-accepted-to-provider,
+   :on :transition/accept-counter-offer,
+   :to :actor.role/provider,
+   :template :offer-counter-accepted}
+
+  {:name :notification/counter-declined-to-provider,
+   :on :transition/decline-counter-offer,
+   :to :actor.role/provider,
+   :template :offer-counter-declined}
+
+  {:name :notification/customer-counter-to-provider,
+   :on :transition/customer-counter-offer,
+   :to :actor.role/provider,
+   :template :offer-customer-counter}
+
+  {:name :notification/offer-withdrawn-to-provider,
+   :on :transition/withdraw-offer,
+   :to :actor.role/provider,
+   :template :offer-withdrawn}
+
+  {:name :notification/counter-withdrawn-to-customer,
+   :on :transition/withdraw-counter-offer,
+   :to :actor.role/customer,
+   :template :offer-counter-withdrawn}
+
+  {:name :notification/offer-expired-to-customer,
+   :on :transition/expire-offer,
+   :to :actor.role/customer,
+   :template :offer-expired}
+
+  {:name :notification/offer-expired-to-provider,
+   :on :transition/expire-offer,
+   :to :actor.role/provider,
+   :template :offer-expired}
+
+  {:name :notification/counter-expired-to-customer,
+   :on :transition/expire-counter-offer,
+   :to :actor.role/customer,
+   :template :offer-counter-expired}
+
+  {:name :notification/counter-expired-to-provider,
+   :on :transition/expire-counter-offer,
+   :to :actor.role/provider,
+   :template :offer-counter-expired}
+
+  {:name :notification/accepted-expired-to-customer,
+   :on :transition/expire-accepted,
+   :to :actor.role/customer,
+   :template :offer-accepted-expired}
+
+  {:name :notification/accepted-expired-to-provider,
+   :on :transition/expire-accepted,
+   :to :actor.role/provider,
+   :template :offer-accepted-expired}
+
+  ;; Payment notifications (same as purchase)
+  {:name :notification/order-receipt,
+   :on :transition/confirm-payment,
+   :at
+   {:fn/plus
+    [{:fn/timepoint [:time/first-entered-state :state/purchased]}
+     {:fn/period ["PT15M"]}]},
+   :to :actor.role/customer,
+   :template :offer-order-receipt}
+
+  {:name :notification/new-order,
+   :on :transition/confirm-payment,
+   :to :actor.role/provider,
+   :template :offer-new-order}
+
+  {:name :notification/shipping-reminder,
+   :on :transition/confirm-payment,
+   :at
+   {:fn/plus
+    [{:fn/timepoint [:time/first-entered-state :state/purchased]}
+     {:fn/period ["P3D"]}]},
+   :to :actor.role/provider,
+   :template :offer-shipping-reminder}
+
+  ;; Delivery notifications
+  {:name :notification/order-marked-as-delivered,
+   :on :transition/mark-delivered,
+   :to :actor.role/customer,
+   :template :offer-order-marked-as-delivered}
+
+  {:name :notification/order-operator-marked-as-delivered-to-customer,
+   :on :transition/operator-mark-delivered,
+   :to :actor.role/customer,
+   :template :offer-order-marked-as-delivered}
+
+  {:name :notification/order-operator-marked-as-delivered-to-provider,
+   :on :transition/operator-mark-delivered,
+   :to :actor.role/provider,
+   :template :offer-order-operator-marked-as-delivered}
+
+  {:name :notification/mark-order-received-reminder,
+   :on :transition/mark-delivered,
+   :at
+   {:fn/plus
+    [{:fn/timepoint [:time/first-entered-state :state/delivered]}
+     {:fn/period ["P12D"]}]},
+   :to :actor.role/customer,
+   :template :offer-mark-order-received-reminder}
+
+  ;; Received notifications
+  {:name :notification/order-marked-as-received-from-purchased,
+   :on :transition/mark-received-from-purchased,
+   :to :actor.role/provider,
+   :template :offer-order-marked-as-received}
+
+  {:name :notification/order-marked-as-received,
+   :on :transition/mark-received,
+   :to :actor.role/provider,
+   :template :offer-order-marked-as-received}
+
+  {:name :notification/order-auto-marked-as-received-customer,
+   :on :transition/auto-mark-received,
+   :to :actor.role/customer,
+   :template :offer-order-auto-marked-as-received-customer}
+
+  {:name :notification/order-auto-marked-as-received-provider,
+   :on :transition/auto-mark-received,
+   :to :actor.role/provider,
+   :template :offer-order-auto-marked-as-received-provider}
+
+  ;; Cancellation notifications
+  {:name :notification/shipping-time-expired-customer,
+   :on :transition/auto-cancel,
+   :to :actor.role/customer,
+   :template :offer-shipping-time-expired-customer}
+
+  {:name :notification/shipping-time-expired-provider,
+   :on :transition/auto-cancel,
+   :to :actor.role/provider,
+   :template :offer-shipping-time-expired-provider}
+
+  {:name :notification/order-canceled-to-customer,
+   :on :transition/cancel,
+   :to :actor.role/customer,
+   :template :offer-order-canceled-to-customer}
+
+  {:name :notification/order-canceled-to-provider,
+   :on :transition/cancel,
+   :to :actor.role/provider,
+   :template :offer-order-canceled-to-provider}
+
+  ;; Dispute notifications
+  {:name :notification/order-disputed,
+   :on :transition/dispute,
+   :to :actor.role/provider,
+   :template :offer-order-disputed}
+
+  {:name :notification/order-operator-disputed-to-customer,
+   :on :transition/operator-dispute,
+   :to :actor.role/customer,
+   :template :offer-order-operator-disputed}
+
+  {:name :notification/order-operator-disputed-to-provider,
+   :on :transition/operator-dispute,
+   :to :actor.role/provider,
+   :template :offer-order-disputed}
+
+  {:name :notification/order-received-from-disputed-customer,
+   :on :transition/mark-received-from-disputed,
+   :to :actor.role/customer,
+   :template :offer-order-received-from-disputed-customer}
+
+  {:name :notification/order-received-from-disputed-provider,
+   :on :transition/mark-received-from-disputed,
+   :to :actor.role/provider,
+   :template :offer-order-received-from-disputed-provider}
+
+  {:name :notification/canceled-from-disputed-customer,
+   :on :transition/cancel-from-disputed,
+   :to :actor.role/customer,
+   :template :offer-order-canceled-from-disputed-customer}
+
+  {:name :notification/canceled-from-disputed-provider,
+   :on :transition/cancel-from-disputed,
+   :to :actor.role/provider,
+   :template :offer-order-canceled-from-disputed-provider}
+
+  {:name :notification/auto-canceled-from-disputed-customer,
+   :on :transition/auto-cancel-from-disputed,
+   :to :actor.role/customer,
+   :template :offer-order-auto-canceled-from-disputed-customer}
+
+  {:name :notification/auto-canceled-from-disputed-provider,
+   :on :transition/auto-cancel-from-disputed,
+   :to :actor.role/provider,
+   :template :offer-order-auto-canceled-from-disputed-provider}]}

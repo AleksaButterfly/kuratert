@@ -1,0 +1,1 @@
+{{set-translations (asset "content/email-texts.json")}}{{t "OfferOrderAutoCanceledFromDisputedCustomer.Subject" "Dispute auto-resolved - order canceled for {listingTitle}" listingTitle=transaction.listing.title }}

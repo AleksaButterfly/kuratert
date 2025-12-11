@@ -19,10 +19,11 @@ const initiateOrderPayloadCreator = (
   const isTransition = !!transactionId;
 
   // Extract cartItems along with other order params
-  const { deliveryMethod, quantity, bookingDates, cartItems, frameInfo, ...otherOrderParams } = orderParams;
+  const { deliveryMethod, quantity, bookingDates, cartItems, frameInfo, offerInSubunits, ...otherOrderParams } = orderParams;
   const quantityMaybe = quantity ? { stockReservationQuantity: quantity } : {};
   const bookingParamsMaybe = bookingDates || {};
   const frameInfoMaybe = frameInfo ? { frameInfo } : {};
+  const offerInSubunitsMaybe = offerInSubunits ? { offerInSubunits } : {};
 
   // Transform cartItems to extract essential data (id, title, price, imageUrl, quantity, frameInfo)
   const transformedCartItems = cartItems?.map(item => {
@@ -68,6 +69,7 @@ const initiateOrderPayloadCreator = (
     ...(quantity ? { quantity } : {}),
     ...(transformedCartItems ? { cartItems: transformedCartItems } : {}),
     ...frameInfoMaybe,
+    ...offerInSubunitsMaybe,
   };
 
   // Parameters for Marketplace API
@@ -348,11 +350,13 @@ const speculateTransactionPayloadCreator = (
     bookingDates,
     cartItems,
     frameInfo,
+    offerInSubunits,
     ...otherOrderParams
   } = orderParams;
   const quantityMaybe = quantity ? { stockReservationQuantity: quantity } : {};
   const bookingParamsMaybe = bookingDates || {};
   const frameInfoMaybe = frameInfo ? { frameInfo } : {};
+  const offerInSubunitsMaybe = offerInSubunits ? { offerInSubunits } : {};
 
   // Transform cartItems to extract only essential data (id, title, price, quantity, imageUrl, frameInfo)
   // Serialize SDK types (UUID, Money) to plain values for protectedData
@@ -399,6 +403,7 @@ const speculateTransactionPayloadCreator = (
     ...(priceVariantName ? { priceVariantName } : {}),
     ...(transformedCartItems ? { cartItems: transformedCartItems } : {}),
     ...frameInfoMaybe,
+    ...offerInSubunitsMaybe,
   };
 
   // Parameters for Marketplace API

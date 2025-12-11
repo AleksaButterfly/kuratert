@@ -1,0 +1,1 @@
+{{set-translations (asset "content/email-texts.json")}}{{t "OfferOrderAutoMarkedAsReceivedProvider.Subject" "Order for {listingTitle} was automatically completed" listingTitle=transaction.listing.title }}

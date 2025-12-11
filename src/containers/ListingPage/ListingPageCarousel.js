@@ -81,6 +81,7 @@ import NotFoundPage from '../NotFoundPage/NotFoundPage';
 
 import {
   sendInquiry,
+  sendOffer,
   setInitialValues,
   fetchTimeSlots,
   fetchTransactionLineItems,
@@ -99,6 +100,8 @@ import {
 import ActionBarMaybe from './ActionBarMaybe';
 import ListingImageGallery from './ListingImageGallery/ListingImageGallery';
 import InquiryForm from './InquiryForm/InquiryForm';
+import MakeOfferForm from './MakeOfferForm/MakeOfferForm';
+import { pathByRouteName } from '../../util/routes';
 
 import css from './ListingPage.module.css';
 
@@ -310,6 +313,7 @@ export const ListingPageComponent = props => {
   const [inquiryModalOpen, setInquiryModalOpen] = useState(
     props.inquiryModalOpenForListingId === props.params.id
   );
+  const [makeOfferModalOpen, setMakeOfferModalOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -336,9 +340,12 @@ export const ListingPageComponent = props => {
     fetchReviewsError,
     sendInquiryInProgress,
     sendInquiryError,
+    sendOfferInProgress,
+    sendOfferError,
     history,
     callSetInitialValues,
     onSendInquiry,
+    onSendOffer,
     onInitializeCardPaymentData,
     config,
     routeConfiguration,
@@ -874,7 +881,20 @@ export const ListingPageComponent = props => {
                   )}
                 </button>
               )}
-              <button className={css.makeOfferButton} disabled={isOwnListing}>
+              <button
+                className={css.makeOfferButton}
+                onClick={() => {
+                  if (isAuthenticated) {
+                    setMakeOfferModalOpen(true);
+                  } else {
+                    history.push({
+                      pathname: '/login',
+                      state: { from: location.pathname },
+                    });
+                  }
+                }}
+                disabled={isOwnListing || !hasStock}
+              >
                 <FormattedMessage id="ListingPage.makeAnOffer" />
               </button>
               <button
@@ -984,6 +1004,38 @@ export const ListingPageComponent = props => {
           inProgress={sendInquiryInProgress}
         />
       </Modal>
+
+      {/* Make Offer Modal */}
+      <Modal
+        id="ListingPage.makeOffer"
+        contentClassName={css.inquiryModalContent}
+        isOpen={isAuthenticated && makeOfferModalOpen}
+        onClose={() => setMakeOfferModalOpen(false)}
+        usePortal
+        onManageDisableScrolling={onManageDisableScrolling}
+      >
+        <MakeOfferForm
+          className={css.inquiryForm}
+          listingTitle={title}
+          listingPrice={price}
+          authorDisplayName={authorDisplayName}
+          submitError={sendOfferError}
+          marketplaceCurrency={config.currency}
+          inProgress={sendOfferInProgress}
+          onSubmit={values => {
+            const { offerPrice, message } = values;
+            onSendOffer(currentListing, offerPrice, message).then(transactionId => {
+              if (transactionId) {
+                setMakeOfferModalOpen(false);
+                const orderDetailsPath = pathByRouteName('OrderDetailsPage', routeConfiguration, {
+                  id: transactionId?.uuid,
+                });
+                history.push(orderDetailsPath);
+              }
+            });
+          }}
+        />
+      </Modal>
     </Page>
   );
 };
@@ -1054,6 +1106,8 @@ const mapStateToProps = state => {
     timeSlotsForDate,
     sendInquiryInProgress,
     sendInquiryError,
+    sendOfferInProgress,
+    sendOfferError,
     lineItems,
     fetchLineItemsInProgress,
     fetchLineItemsError,
@@ -1096,6 +1150,8 @@ const mapStateToProps = state => {
     fetchLineItemsError,
     sendInquiryInProgress,
     sendInquiryError,
+    sendOfferInProgress,
+    sendOfferError,
     // Favorites
     addListingToFavoritesInProgress,
     removeListingFromFavoritesInProgress,
@@ -1112,6 +1168,7 @@ const mapDispatchToProps = dispatch => ({
     dispatch(setInitialValues(values, saveToSessionStorage)),
   onFetchTransactionLineItems: params => dispatch(fetchTransactionLineItems(params)),
   onSendInquiry: (listing, message) => dispatch(sendInquiry(listing, message)),
+  onSendOffer: (listing, offerPrice, message) => dispatch(sendOffer(listing, offerPrice, message)),
   onInitializeCardPaymentData: () => dispatch(initializeCardPaymentData()),
   onFetchTimeSlots: (listingId, start, end, timeZone, options) =>
     dispatch(fetchTimeSlots(listingId, start, end, timeZone, options)),

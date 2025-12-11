@@ -26,10 +26,41 @@ const getListingRelationShip = transactionShowAPIData => {
   return included.find(i => i.id.uuid === listingRef.data.id.uuid);
 };
 
-const getFullOrderData = (orderData, bodyParams, currency, offers) => {
+const getFullOrderData = (orderData, bodyParams, currency, offers, transaction) => {
   const { offerInSubunits } = orderData || {};
   const transitionName = bodyParams.transition;
   const orderDataAndParams = { ...orderData, ...bodyParams.params, currency };
+
+  // For REQUEST_PAYMENT in negotiated-purchase, get the accepted offer from metadata
+  const isRequestPaymentInNegotiatedPurchase = transitionName === 'transition/request-payment' &&
+    transaction?.attributes?.protectedData?.unitType === 'negotiatedItem';
+
+  if (isRequestPaymentInNegotiatedPurchase) {
+    // Get the latest offer price from metadata.offers (more reliable than line items)
+    const metadataOffers = transaction?.attributes?.metadata?.offers || [];
+    const latestOffer = metadataOffers[metadataOffers.length - 1];
+    const existingOfferAmount = latestOffer?.offerInSubunits;
+
+    if (existingOfferAmount) {
+      return {
+        ...orderDataAndParams,
+        offer: new Money(existingOfferAmount, currency),
+      };
+    }
+
+    // Fallback: try to get from existing line items
+    const negotiatedLineItem = transaction?.attributes?.lineItems?.find(
+      item => item.code === 'line-item/negotiatedItem' && !item.reversal
+    );
+    const lineItemOfferAmount = negotiatedLineItem?.unitPrice?.amount;
+
+    if (lineItemOfferAmount) {
+      return {
+        ...orderDataAndParams,
+        offer: new Money(lineItemOfferAmount, currency),
+      };
+    }
+  }
 
   return isIntentionToMakeOffer(offerInSubunits, transitionName) ||
     isIntentionToMakeCounterOffer(offerInSubunits, transitionName)
@@ -101,7 +132,7 @@ module.exports = (req, res) => {
 
       lineItems = transactionLineItems(
         listing,
-        getFullOrderData(orderData, bodyParams, currency, existingOffers),
+        getFullOrderData(orderData, bodyParams, currency, existingOffers, transaction),
         providerCommission,
         customerCommission
       );

@@ -1,0 +1,47 @@
+.root {
+}
+
+.icon {
+  display: block;
+  margin-bottom: 24px;
+}
+
+.heading {
+  margin-top: 0;
+  margin-bottom: 12px;
+  padding: 0;
+}
+
+.currentPrice {
+  margin-bottom: 24px;
+  color: var(--colorGrey700);
+}
+
+.currentPriceLabel {
+  font-size: 14px;
+}
+
+.currentPriceValue {
+  font-weight: var(--fontWeightSemiBold);
+  font-size: 18px;
+  color: var(--marketplaceColor);
+}
+
+.field {
+  margin-bottom: 24px;
+}
+
+.messageField {
+  margin-bottom: 24px;
+}
+
+.errorPlaceholder {
+  min-height: 24px;
+  color: var(--colorFail);
+  font-size: 14px;
+  margin: 0 0 12px 0;
+}
+
+.submitButton {
+  min-height: 48px;
+}

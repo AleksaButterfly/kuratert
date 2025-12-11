@@ -12,6 +12,7 @@ import { createResourceLocatorString, findRouteByRouteName } from '../../util/ro
 import {
   LINE_ITEM_OFFER,
   LINE_ITEM_REQUEST,
+  LINE_ITEM_NEGOTIATED_ITEM,
   LISTING_UNIT_TYPES,
   propTypes,
 } from '../../util/types';
@@ -761,15 +762,20 @@ export const TransactionPageComponent = props => {
   const counterOffers = [
     process?.transitions?.CUSTOMER_MAKE_COUNTER_OFFER,
     process?.transitions?.PROVIDER_MAKE_COUNTER_OFFER,
-  ];
+    // negotiated-purchase process uses different transition names
+    process?.transitions?.CUSTOMER_COUNTER_OFFER,
+    process?.transitions?.PROVIDER_COUNTER_OFFER,
+  ].filter(Boolean);
   const negotiationOfferLineItem = transaction?.attributes?.lineItems?.find(item =>
-    [LINE_ITEM_REQUEST, LINE_ITEM_OFFER].includes(item.code)
+    [LINE_ITEM_REQUEST, LINE_ITEM_OFFER, LINE_ITEM_NEGOTIATED_ITEM].includes(item.code)
   );
   const currentOffer = negotiationOfferLineItem?.unitPrice;
   const showMakeCounterOfferModal =
     currencyConfig &&
     (process?.transitions?.CUSTOMER_MAKE_COUNTER_OFFER ||
-      process?.transitions?.PROVIDER_MAKE_COUNTER_OFFER);
+      process?.transitions?.PROVIDER_MAKE_COUNTER_OFFER ||
+      process?.transitions?.CUSTOMER_COUNTER_OFFER ||
+      process?.transitions?.PROVIDER_COUNTER_OFFER);
 
   const pageHeading = isDataAvailable
     ? intl.formatMessage(
@@ -851,8 +857,8 @@ export const TransactionPageComponent = props => {
             onMakeCounterOffer={onMakeCounterOffer(
               transaction?.id,
               transactionRole === CUSTOMER
-                ? process?.transitions?.CUSTOMER_MAKE_COUNTER_OFFER
-                : process?.transitions?.PROVIDER_MAKE_COUNTER_OFFER,
+                ? (process?.transitions?.CUSTOMER_MAKE_COUNTER_OFFER || process?.transitions?.CUSTOMER_COUNTER_OFFER)
+                : (process?.transitions?.PROVIDER_MAKE_COUNTER_OFFER || process?.transitions?.PROVIDER_COUNTER_OFFER),
               onTransition,
               transactionRole,
               currency,

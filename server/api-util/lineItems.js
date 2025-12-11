@@ -103,6 +103,36 @@ const getOfferQuantityAndLineItems = orderData => {
 };
 
 /**
+ * Get quantity and line items for negotiated purchase (customer makes offer on provider's listing)
+ * @param {Object} orderData
+ * @param {Object} publicData - listing's publicData
+ * @param {string} currency
+ */
+const getNegotiatedItemQuantityAndLineItems = (orderData, publicData, currency) => {
+  const deliveryMethod = orderData && orderData.deliveryMethod;
+  const isShipping = deliveryMethod === 'shipping';
+  const { shippingPriceInSubunitsOneItem } = publicData || {};
+
+  // Single item with shipping support
+  const totalShippingFee = isShipping && shippingPriceInSubunitsOneItem
+    ? new Money(shippingPriceInSubunitsOneItem, currency)
+    : null;
+
+  const deliveryLineItem = !!totalShippingFee
+    ? [
+        {
+          code: 'line-item/shipping-fee',
+          unitPrice: totalShippingFee,
+          quantity: 1,
+          includeFor: ['customer', 'provider'],
+        },
+      ]
+    : [];
+
+  return { quantity: 1, extraLineItems: deliveryLineItem };
+};
+
+/**
  * Get quantity for fixed bookings with seats.
  * @param {Object} orderData
  * @param {number} [orderData.seats]
@@ -188,10 +218,16 @@ exports.transactionLineItems = (listing, orderData, providerCommission, customer
   const publicData = listing.attributes.publicData;
   // Note: the unitType needs to be one of the following:
   // day, night, hour, fixed, or item (these are related to payment processes)
-  const { unitType, priceVariants, priceVariationsEnabled } = publicData;
+  const { unitType: listingUnitType, priceVariants, priceVariationsEnabled } = publicData;
+
+  // For negotiated-purchase, the unitType comes from orderData (transaction's protectedData)
+  // not from the listing's publicData
+  const orderDataUnitType = orderData?.protectedData?.unitType || orderData?.unitType;
+  const unitType = orderDataUnitType || listingUnitType;
 
   const isBookable = ['day', 'night', 'hour', 'fixed'].includes(unitType);
   const isNegotiationUnitType = ['offer', 'request'].includes(unitType);
+  const isNegotiatedItem = unitType === 'negotiatedItem';
   const priceAttribute = listing.attributes.price;
   const currency = priceAttribute?.currency || orderData.currency;
 
@@ -206,12 +242,23 @@ exports.transactionLineItems = (listing, orderData, providerCommission, customer
   const { frameInfo } = orderData || {};
   const framePriceInSubunits = frameInfo?.framePriceInSubunits || 0;
 
+  // Check if offer is valid (either Money instance or object with amount/currency)
+  const isValidOffer = offer && (
+    offer instanceof Money ||
+    (typeof offer.amount === 'number' && offer.currency)
+  );
+  // Normalize offer to Money if it's a plain object
+  const normalizedOffer = isValidOffer
+    ? (offer instanceof Money ? offer : new Money(offer.amount, offer.currency))
+    : null;
+
   // Calculate base unit price
+  // For negotiated items, use the offer price if available
   const baseUnitPrice =
     isBookable && priceVariationsEnabled && isPriceInSubunitsValid
       ? new Money(priceInSubunits, currency)
-      : offer instanceof Money && isNegotiationUnitType
-      ? offer
+      : normalizedOffer && (isNegotiationUnitType || isNegotiatedItem)
+      ? normalizedOffer
       : priceAttribute;
 
   // Add frame price to unit price if frame is selected
@@ -245,6 +292,8 @@ exports.transactionLineItems = (listing, orderData, providerCommission, customer
       ? getDateRangeQuantityAndLineItems(orderData, code)
       : isNegotiationUnitType
       ? getOfferQuantityAndLineItems(orderData)
+      : isNegotiatedItem
+      ? getNegotiatedItemQuantityAndLineItems(orderData, publicData, currency)
       : {};
 
   const { quantity, units, seats, extraLineItems } = quantityAndExtraLineItems;

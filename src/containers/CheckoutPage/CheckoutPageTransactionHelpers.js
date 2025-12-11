@@ -3,7 +3,7 @@ import { findRouteByRouteName } from '../../util/routes';
 import { ensureStripeCustomer, ensureTransaction } from '../../util/data';
 import { minutesBetween } from '../../util/dates';
 import { formatMoney } from '../../util/currency';
-import { NEGOTIATION_PROCESS_NAME, resolveLatestProcessName } from '../../transactions/transaction';
+import { NEGOTIATION_PROCESS_NAME, NEGOTIATED_PURCHASE_PROCESS_NAME, resolveLatestProcessName } from '../../transactions/transaction';
 import { storeData } from './CheckoutPageSessionHelpers';
 
 /**
@@ -210,15 +210,23 @@ export const processCheckoutWithPayment = (orderParams, extraPaymentParams) => {
     // fnParams should be { listingId, deliveryMethod?, quantity?, bookingDates?, paymentMethod?.setupPaymentMethodForSaving?, protectedData }
     const hasPaymentIntents = storedTx.attributes.protectedData?.stripePaymentIntents;
 
+    const processName = resolveLatestProcessName(processAlias.split('/')[0]);
     const isOfferPendingInNegotiationProcess =
-      resolveLatestProcessName(processAlias.split('/')[0]) === NEGOTIATION_PROCESS_NAME &&
+      processName === NEGOTIATION_PROCESS_NAME &&
       storedTx.attributes.state === `state/${process.states.OFFER_PENDING}`;
+
+    // For negotiated-purchase process, the customer pays after offer is accepted
+    const isAcceptedInNegotiatedPurchaseProcess =
+      processName === NEGOTIATED_PURCHASE_PROCESS_NAME &&
+      storedTx.attributes.state === `state/${process.states.ACCEPTED}`;
 
     const requestTransition =
       storedTx?.attributes?.lastTransition === process.transitions.INQUIRE
         ? process.transitions.REQUEST_PAYMENT_AFTER_INQUIRY
         : isOfferPendingInNegotiationProcess
         ? process.transitions.REQUEST_PAYMENT_TO_ACCEPT_OFFER
+        : isAcceptedInNegotiatedPurchaseProcess
+        ? process.transitions.REQUEST_PAYMENT
         : process.transitions.REQUEST_PAYMENT;
     const isPrivileged = process.isPrivileged(requestTransition);
 

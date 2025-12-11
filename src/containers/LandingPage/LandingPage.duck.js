@@ -25,6 +25,7 @@ const queryListingsPayloadCreator = (
   return sdk.listings
     .query({
       perPage,
+      minStock: 1,
       include: ['author', 'images'],
       'fields.image': [`variants.${variantPrefix}`, `variants.${variantPrefix}-2x`],
       ...createImageVariantConfig(`${variantPrefix}`, 400, aspectRatio),

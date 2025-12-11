@@ -1,0 +1,1 @@
+{{set-translations (asset "content/email-texts.json")}}{{t "OfferShippingTimeExpiredProvider.Subject" "Shipping time expired for {listingTitle}" listingTitle=transaction.listing.title }}

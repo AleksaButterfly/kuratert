@@ -1,0 +1,1 @@
+{{set-translations (asset "content/email-texts.json")}}{{t "OfferCounterExpired.Subject" "Counter offer for {listingTitle} has expired" listingTitle=transaction.listing.title }}

@@ -3,7 +3,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { types as sdkTypes, createImageVariantConfig } from '../../util/sdkLoader';
 import { storableError } from '../../util/errors';
 import { addMarketplaceEntities } from '../../ducks/marketplaceData.duck';
-import { transactionLineItems } from '../../util/api';
+import { transactionLineItems, initiatePrivileged } from '../../util/api';
 import * as log from '../../util/log';
 import { denormalisedResponseEntities } from '../../util/data';
 import {
@@ -22,7 +22,7 @@ import {
   LISTING_PAGE_DRAFT_VARIANT,
   LISTING_PAGE_PENDING_APPROVAL_VARIANT,
 } from '../../util/urlHelpers';
-import { getProcess, isBookingProcessAlias } from '../../transactions/transaction';
+import { getProcess, isBookingProcessAlias, NEGOTIATED_ITEM } from '../../transactions/transaction';
 import { fetchCurrentUser, setCurrentUserHasOrders } from '../../ducks/user.duck';
 
 const { UUID } = sdkTypes;
@@ -254,6 +254,89 @@ export const sendInquiry = (listing, message) => (dispatch, getState, sdk) => {
   return dispatch(sendInquiryThunk({ listing, message })).unwrap();
 };
 
+////////////////
+// Send Offer //
+////////////////
+const NEGOTIATED_PURCHASE_PROCESS_ALIAS = 'negotiated-purchase/release-1';
+
+const sendOfferPayloadCreator = (
+  { listing, offerPrice, message },
+  { dispatch, rejectWithValue, extra: sdk }
+) => {
+  const listingId = listing?.id;
+  const processAlias = NEGOTIATED_PURCHASE_PROCESS_ALIAS;
+  const process = getProcess('negotiated-purchase');
+  const transitions = process?.transitions;
+
+  if (!transitions) {
+    const error = new Error('Negotiated-purchase process not found');
+    log.error(error, 'negotiated-purchase-process-missing');
+    return rejectWithValue(storableError(error));
+  }
+
+  // Convert offer price to subunits
+  const offerInSubunits = offerPrice?.amount;
+  const currency = offerPrice?.currency;
+
+  const bodyParams = {
+    transition: transitions.CUSTOMER_OFFER,
+    processAlias,
+    params: {
+      listingId,
+      protectedData: {
+        unitType: NEGOTIATED_ITEM,
+        ...(message ? { customerMessage: message } : {}),
+      },
+    },
+  };
+
+  const orderData = {
+    offerInSubunits,
+    currency,
+    quantity: 1,
+    stockReservationQuantity: 1,
+    actor: 'customer',
+  };
+
+  return initiatePrivileged({
+    isSpeculative: false,
+    orderData,
+    bodyParams,
+    queryParams: {
+      include: ['booking', 'provider'],
+      expand: true,
+    },
+  })
+    .then(response => {
+      const transactionId = response?.data?.data?.id;
+      dispatch(setCurrentUserHasOrders());
+
+      // Send message if provided
+      if (message && transactionId) {
+        return sdk.messages.send({ transactionId, content: message }).then(() => {
+          return transactionId;
+        });
+      }
+      return transactionId;
+    })
+    .catch(e => {
+      log.error(e, 'send-offer-failed', {
+        listingId: listingId?.uuid,
+        offerInSubunits,
+      });
+      return rejectWithValue(storableError(e));
+    });
+};
+
+export const sendOfferThunk = createAsyncThunk(
+  'ListingPage/sendOffer',
+  sendOfferPayloadCreator
+);
+// Backward compatible wrapper for the thunk
+export const sendOffer = (listing, offerPrice, message) => (dispatch, getState, sdk) => {
+  return dispatch(sendOfferThunk({ listing, offerPrice, message })).unwrap();
+};
+
 // Helper function for loadData call.
 // Note: listing could be ownListing entity too
 const fetchMonthlyTimeSlots = (dispatch, listing) => {
@@ -377,6 +460,8 @@ const initialState = {
   sendInquiryInProgress: false,
   sendInquiryError: null,
   inquiryModalOpenForListingId: null,
+  sendOfferInProgress: false,
+  sendOfferError: null,
 };
 
 const listingPageSlice = createSlice({
@@ -495,6 +580,17 @@ const listingPageSlice = createSlice({
       .addCase(fetchTransactionLineItemsThunk.rejected, (state, action) => {
         state.fetchLineItemsInProgress = false;
         state.fetchLineItemsError = action.payload;
+      })
+      .addCase(sendOfferThunk.pending, state => {
+        state.sendOfferInProgress = true;
+        state.sendOfferError = null;
+      })
+      .addCase(sendOfferThunk.fulfilled, state => {
+        state.sendOfferInProgress = false;
+      })
+      .addCase(sendOfferThunk.rejected, (state, action) => {
+        state.sendOfferInProgress = false;
+        state.sendOfferError = action.payload;
       });
   },
 });
