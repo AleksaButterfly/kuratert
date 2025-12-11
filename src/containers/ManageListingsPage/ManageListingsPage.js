@@ -254,8 +254,6 @@ export const ManageListingsPageComponent = props => {
     salesTransactions = [],
   } = props;
 
-  console.log(listings);
-
   useEffect(() => {
     if (isErrorNoPermissionToPostListings(openingListingError?.error)) {
       const noAccessPagePath = pathByRouteName('NoAccessPage', routeConfiguration, {
