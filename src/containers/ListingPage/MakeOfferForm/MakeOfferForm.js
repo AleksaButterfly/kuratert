@@ -203,17 +203,20 @@ const MakeOfferForm = props => {
                           <option value="">
                             {intl.formatMessage({ id: 'MakeOfferForm.noFrame' })}
                           </option>
-                          {frameVariants.map(frame => {
-                            const frameId = frame.id || frame.color;
-                            const framePrice = frame.priceInSubunits
-                              ? formatMoney(intl, new Money(frame.priceInSubunits, marketplaceCurrency))
-                              : null;
-                            return (
-                              <option key={frameId} value={frameId}>
-                                {frame.label}{framePrice ? ` (+${framePrice})` : ''}
-                              </option>
-                            );
-                          })}
+                          {/* Sort recommended frame first */}
+                          {[...frameVariants]
+                            .sort((a, b) => (b.isRecommended ? 1 : 0) - (a.isRecommended ? 1 : 0))
+                            .map(frame => {
+                              const frameId = frame.id || frame.color;
+                              const framePrice = frame.priceInSubunits
+                                ? formatMoney(intl, new Money(frame.priceInSubunits, marketplaceCurrency))
+                                : null;
+                              return (
+                                <option key={frameId} value={frameId}>
+                                  {frame.isRecommended ? '⭐ ' : ''}{frame.label}{framePrice ? ` (+${framePrice})` : ''}
+                                </option>
+                              );
+                            })}
                         </select>
                         {selectedFrame && framePriceFormatted && (
                           <p className={css.framePriceNote}>
