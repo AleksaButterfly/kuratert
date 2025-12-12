@@ -40,7 +40,6 @@
   font-weight: var(--fontWeightSemiBold);
   font-size: 14px;
   line-height: 18px;
-  margin-bottom: 8px;
 }
 
 .deliveryMethodSelect {
@@ -86,7 +85,6 @@
   font-weight: var(--fontWeightSemiBold);
   font-size: 14px;
   line-height: 18px;
-  margin-bottom: 8px;
 }
 
 .frameSelect {
