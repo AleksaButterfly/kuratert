@@ -91,9 +91,15 @@ const ViewInSpaceModal = props => {
         backgroundColor: '#f5f5f5',
         selection: true,
         preserveObjectStacking: true,
-        interactive: true,
         allowTouchScrolling: false,
+        containerClass: 'canvas-container',
       });
+
+      // Ensure canvas is interactive
+      canvas.selection = true;
+      canvas.defaultCursor = 'default';
+      canvas.hoverCursor = 'move';
+      canvas.moveCursor = 'move';
 
       fabricCanvasRef.current = canvas;
       setCanvasReady(true);
@@ -172,19 +178,28 @@ const ViewInSpaceModal = props => {
     // Remove existing product if any
     if (productObjectRef.current) {
       canvas.remove(productObjectRef.current);
+      productObjectRef.current = null;
     }
 
-    FabricImage.fromURL(productImage, { crossOrigin: 'anonymous' }).then(img => {
-      // Scale product to reasonable size (30% of canvas width)
-      const targetWidth = canvas.width * 0.3;
-      const scale = targetWidth / img.width;
+    // Use native Image to handle CORS better
+    const imgElement = new Image();
+    imgElement.crossOrigin = 'anonymous';
 
-      img.scale(scale * productScale);
-      img.set({
+    imgElement.onload = () => {
+      const img = new FabricImage(imgElement, {
         left: canvas.width / 2,
         top: canvas.height / 2,
         originX: 'center',
         originY: 'center',
+      });
+
+      // Scale product to reasonable size (30% of canvas width)
+      const targetWidth = canvas.width * 0.3;
+      const scale = targetWidth / img.width;
+      img.scale(scale * productScale);
+
+      // Set interactive properties
+      img.set({
         selectable: true,
         evented: true,
         hasControls: true,
@@ -204,11 +219,16 @@ const ViewInSpaceModal = props => {
 
       productObjectRef.current = img;
       canvas.add(img);
+      canvas.bringObjectToFront(img);
       canvas.setActiveObject(img);
-      canvas.renderAll();
-    }).catch(err => {
+      canvas.requestRenderAll();
+    };
+
+    imgElement.onerror = (err) => {
       console.error('Error loading product image:', err);
-    });
+    };
+
+    imgElement.src = productImage;
   }, [productImage, productScale]);
 
   // Handle room image upload

@@ -37,10 +37,16 @@
   background-color: var(--colorGrey50);
   border-radius: 8px;
   overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   position: relative;
+}
+
+/* Fabric.js canvas wrapper needs proper styling for interactions */
+.canvasContainer :global(.canvas-container) {
+  margin: 0 auto;
+}
+
+.canvasContainer canvas {
+  display: block !important;
 }
 
 .uploadArea {
