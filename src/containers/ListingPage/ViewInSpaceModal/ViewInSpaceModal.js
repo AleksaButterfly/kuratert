@@ -321,7 +321,9 @@ const ViewInSpaceModal = props => {
         </p>
 
         <div className={css.canvasContainer}>
-          {!roomImage ? (
+          <canvas ref={canvasRef} className={css.canvas} style={{ display: roomImage ? 'block' : 'none' }} />
+
+          {!roomImage && (
             <div
               className={css.uploadArea}
               onClick={() => fileInputRef.current?.click()}
@@ -340,8 +342,6 @@ const ViewInSpaceModal = props => {
                 </>
               )}
             </div>
-          ) : (
-            <canvas ref={canvasRef} className={css.canvas} />
           )}
 
           <input
