@@ -67,6 +67,7 @@
 .uploadArea svg {
   color: var(--colorGrey400);
   margin-bottom: 16px;
+  fill: none;
 }
 
 .uploadText {
