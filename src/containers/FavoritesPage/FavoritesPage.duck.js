@@ -1,8 +1,10 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { createImageVariantConfig } from '../../util/sdkLoader';
+import { types as sdkTypes, createImageVariantConfig } from '../../util/sdkLoader';
 import { addMarketplaceEntities } from '../../ducks/marketplaceData.duck';
 import { storableError } from '../../util/errors';
 import { getFavoriteListingIds } from '../../util/userHelpers';
+
+const { UUID } = sdkTypes;
 
 // ================ Helper Functions ================ //
 
@@ -13,11 +15,37 @@ const resultIds = data => {
 
 // ================ Async Thunks ================ //
 
+// Fetch a user by ID (for shared favorites page)
+export const fetchUserThunk = createAsyncThunk(
+  'FavoritesPage/fetchUser',
+  ({ userId }, { dispatch, rejectWithValue, extra: sdk }) => {
+    return sdk.users
+      .show({
+        id: new UUID(userId),
+        include: ['profileImage'],
+        'fields.image': ['variants.square-small', 'variants.square-small2x'],
+        'fields.user': [
+          'profile.displayName',
+          'profile.abbreviatedName',
+          'profile.publicData',
+        ],
+      })
+      .then(response => {
+        dispatch(addMarketplaceEntities(response));
+        return response;
+      })
+      .catch(e => {
+        return rejectWithValue(storableError(e));
+      });
+  }
+);
+
 export const queryFavoriteListingsThunk = createAsyncThunk(
   'FavoritesPage/queryFavoriteListings',
-  ({ config }, { dispatch, getState, rejectWithValue, extra: sdk }) => {
-    const { currentUser } = getState().user;
-    const favoriteListingIds = getFavoriteListingIds(currentUser);
+  ({ config, user }, { dispatch, getState, rejectWithValue, extra: sdk }) => {
+    // Use provided user or fall back to currentUser
+    const userToQuery = user || getState().user.currentUser;
+    const favoriteListingIds = getFavoriteListingIds(userToQuery);
 
     if (!favoriteListingIds || favoriteListingIds.length === 0) {
       return { data: { data: [] } };
@@ -76,8 +104,8 @@ export const queryFavoriteListingsThunk = createAsyncThunk(
 );
 
 // Backward compatible wrapper for the thunk
-export const queryFavoriteListings = config => (dispatch, getState, sdk) => {
-  return dispatch(queryFavoriteListingsThunk({ config })).unwrap();
+export const queryFavoriteListings = (config, user) => (dispatch, getState, sdk) => {
+  return dispatch(queryFavoriteListingsThunk({ config, user })).unwrap();
 };
 
 // ================ Reducer ================ //
@@ -86,14 +114,29 @@ const initialState = {
   queryInProgress: false,
   queryError: null,
   favoriteListingIds: [],
+  userId: null, // The user whose favorites we're viewing (null = current user)
+  userShowError: null,
 };
 
 const favoritesPageSlice = createSlice({
   name: 'FavoritesPage',
   initialState,
-  reducers: {},
+  reducers: {
+    setUserId: (state, action) => {
+      state.userId = action.payload;
+    },
+  },
   extraReducers: builder => {
     builder
+      .addCase(fetchUserThunk.pending, state => {
+        state.userShowError = null;
+      })
+      .addCase(fetchUserThunk.fulfilled, (state, action) => {
+        state.userShowError = null;
+      })
+      .addCase(fetchUserThunk.rejected, (state, action) => {
+        state.userShowError = action.payload;
+      })
       .addCase(queryFavoriteListingsThunk.pending, state => {
         state.queryInProgress = true;
         state.queryError = null;
@@ -109,10 +152,30 @@ const favoritesPageSlice = createSlice({
   },
 });
 
+export const { setUserId } = favoritesPageSlice.actions;
+
 export default favoritesPageSlice.reducer;
 
 // ================ Exported Actions ================ //
 
-export const loadData = (params, search, config) => dispatch => {
-  return dispatch(queryFavoriteListings(config));
+export const loadData = (params, search, config) => async dispatch => {
+  const userId = params?.id; // From route /u/:id/favorites
+
+  // Set userId in state (null means own favorites)
+  dispatch(setUserId(userId || null));
+
+  if (userId) {
+    // Fetch the user first, then their favorites
+    try {
+      const userResponse = await dispatch(fetchUserThunk({ userId })).unwrap();
+      const user = userResponse?.data?.data;
+      return dispatch(queryFavoriteListings(config, user));
+    } catch (e) {
+      // User fetch failed, don't continue
+      return Promise.reject(e);
+    }
+  } else {
+    // Own favorites - use currentUser
+    return dispatch(queryFavoriteListings(config, null));
+  }
 };

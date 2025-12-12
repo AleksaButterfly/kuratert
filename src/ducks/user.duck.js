@@ -304,7 +304,7 @@ const addListingToFavoritesPayloadCreator = (listingId, thunkAPI) => {
   // Just send the current state to the server
   return sdk.currentUser
     .updateProfile({
-      privateData: {
+      publicData: {
         favoriteListingIds: currentFavorites,
       },
     })
@@ -344,7 +344,7 @@ const removeListingFromFavoritesPayloadCreator = (listingId, thunkAPI) => {
   // Just send the current state to the server
   return sdk.currentUser
     .updateProfile({
-      privateData: {
+      publicData: {
         favoriteListingIds: currentFavorites,
       },
     })

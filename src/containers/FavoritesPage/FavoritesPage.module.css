@@ -32,6 +32,74 @@
   padding: 0;
 }
 
+/* User info for shared favorites */
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+}
+
+.userLink {
+  font-size: 16px;
+  font-weight: var(--fontWeightSemiBold);
+  color: var(--colorGrey900);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--marketplaceColor);
+  }
+}
+
+/* Share section */
+.shareSection {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.shareLabel {
+  font-size: 14px;
+  color: var(--colorGrey700);
+}
+
+.shareButtons {
+  display: flex;
+  gap: 8px;
+}
+
+.shareButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--colorGrey100);
+  border-radius: 50%;
+  background-color: var(--colorWhite);
+  color: var(--colorGrey700);
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: var(--colorGrey50);
+    color: var(--colorGrey900);
+    border-color: var(--colorGrey200);
+  }
+
+  & svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
 .listingCards {
   display: grid;
   grid-template-columns: repeat(1, 1fr);
