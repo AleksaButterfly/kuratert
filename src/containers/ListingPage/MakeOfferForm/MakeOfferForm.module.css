@@ -77,6 +77,46 @@
   color: var(--colorGrey700);
 }
 
+.frameSection {
+  margin-bottom: 24px;
+}
+
+.frameLabel {
+  display: block;
+  font-weight: var(--fontWeightSemiBold);
+  font-size: 14px;
+  line-height: 18px;
+  margin-bottom: 8px;
+}
+
+.frameSelect {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 16px;
+  line-height: 24px;
+  border: 1px solid var(--colorGrey100);
+  border-radius: var(--borderRadiusMedium);
+  background-color: var(--colorWhite);
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+    border-color: var(--colorGrey300);
+  }
+}
+
+.framePriceNote {
+  margin: 8px 0 0 0;
+  font-size: 14px;
+  color: var(--colorGrey700);
+}
+
 .messageField {
   margin-bottom: 24px;
 }

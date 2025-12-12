@@ -1036,9 +1036,25 @@ export const ListingPageComponent = props => {
           shippingEnabled={shippingEnabled}
           pickupEnabled={pickupEnabled}
           shippingPriceInSubunits={shippingPriceInSubunitsOneItem}
+          hasFrameOptions={hasFrameOptions}
+          frameVariants={frameVariants}
           onSubmit={values => {
-            const { offerPrice, message, deliveryMethod } = values;
-            onSendOffer(currentListing, offerPrice, message, deliveryMethod).then(transactionId => {
+            const { offerPrice, message, deliveryMethod, selectedFrameId } = values;
+
+            // Build frameInfo if a frame is selected
+            const selectedFrame = selectedFrameId
+              ? frameVariants.find(v => (v.id || v.color) === selectedFrameId)
+              : null;
+            const frameInfo = selectedFrame
+              ? {
+                  selectedFrameId: selectedFrame.id || selectedFrame.color,
+                  selectedFrameColor: selectedFrame.color || null,
+                  selectedFrameLabel: selectedFrame.label,
+                  framePriceInSubunits: selectedFrame.priceInSubunits,
+                }
+              : null;
+
+            onSendOffer(currentListing, offerPrice, message, deliveryMethod, frameInfo).then(transactionId => {
               if (transactionId) {
                 setMakeOfferModalOpen(false);
                 const orderDetailsPath = pathByRouteName('OrderDetailsPage', routeConfiguration, {
@@ -1194,7 +1210,7 @@ const mapDispatchToProps = dispatch => ({
     dispatch(setInitialValues(values, saveToSessionStorage)),
   onFetchTransactionLineItems: params => dispatch(fetchTransactionLineItems(params)),
   onSendInquiry: (listing, message) => dispatch(sendInquiry(listing, message)),
-  onSendOffer: (listing, offerPrice, message, deliveryMethod) => dispatch(sendOffer(listing, offerPrice, message, deliveryMethod)),
+  onSendOffer: (listing, offerPrice, message, deliveryMethod, frameInfo) => dispatch(sendOffer(listing, offerPrice, message, deliveryMethod, frameInfo)),
   onInitializeCardPaymentData: () => dispatch(initializeCardPaymentData()),
   onFetchTimeSlots: (listingId, start, end, timeZone, options) =>
     dispatch(fetchTimeSlots(listingId, start, end, timeZone, options)),

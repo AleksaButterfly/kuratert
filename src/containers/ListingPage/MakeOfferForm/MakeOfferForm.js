@@ -41,6 +41,8 @@ const MakeOfferForm = props => {
     shippingEnabled,
     pickupEnabled,
     shippingPriceInSubunits,
+    frameVariants,
+    hasFrameOptions,
     ...restProps
   } = props;
 
@@ -176,6 +178,55 @@ const MakeOfferForm = props => {
                     />
                   </p>
                 )}
+              </div>
+            )}
+
+            {/* Frame Selection */}
+            {hasFrameOptions && frameVariants?.length > 0 && (
+              <div className={css.frameSection}>
+                <label className={css.frameLabel}>
+                  <FormattedMessage id="MakeOfferForm.frameLabel" />
+                </label>
+                <Field name="selectedFrameId">
+                  {({ input }) => {
+                    const selectedFrame = frameVariants.find(v => (v.id || v.color) === input.value);
+                    const framePriceFormatted = selectedFrame?.priceInSubunits
+                      ? formatMoney(intl, new Money(selectedFrame.priceInSubunits, marketplaceCurrency))
+                      : null;
+
+                    return (
+                      <>
+                        <select
+                          {...input}
+                          className={css.frameSelect}
+                        >
+                          <option value="">
+                            {intl.formatMessage({ id: 'MakeOfferForm.noFrame' })}
+                          </option>
+                          {frameVariants.map(frame => {
+                            const frameId = frame.id || frame.color;
+                            const framePrice = frame.priceInSubunits
+                              ? formatMoney(intl, new Money(frame.priceInSubunits, marketplaceCurrency))
+                              : null;
+                            return (
+                              <option key={frameId} value={frameId}>
+                                {frame.label}{framePrice ? ` (+${framePrice})` : ''}
+                              </option>
+                            );
+                          })}
+                        </select>
+                        {selectedFrame && framePriceFormatted && (
+                          <p className={css.framePriceNote}>
+                            <FormattedMessage
+                              id="MakeOfferForm.framePriceNote"
+                              values={{ framePrice: framePriceFormatted }}
+                            />
+                          </p>
+                        )}
+                      </>
+                    );
+                  }}
+                </Field>
               </div>
             )}
 
