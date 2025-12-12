@@ -36,10 +36,6 @@
 }
 
 .deliveryMethodLabel {
-  display: block;
-  font-weight: var(--fontWeightSemiBold);
-  font-size: 14px;
-  line-height: 18px;
 }
 
 .deliveryMethodSelect {
@@ -81,10 +77,6 @@
 }
 
 .frameLabel {
-  display: block;
-  font-weight: var(--fontWeightSemiBold);
-  font-size: 14px;
-  line-height: 18px;
 }
 
 .frameSelect {
