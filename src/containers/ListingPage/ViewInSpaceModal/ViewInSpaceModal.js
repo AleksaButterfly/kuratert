@@ -91,6 +91,8 @@ const ViewInSpaceModal = props => {
         backgroundColor: '#f5f5f5',
         selection: true,
         preserveObjectStacking: true,
+        interactive: true,
+        allowTouchScrolling: false,
       });
 
       fabricCanvasRef.current = canvas;
@@ -187,8 +189,14 @@ const ViewInSpaceModal = props => {
         originX: 'center',
         originY: 'center',
         selectable: true,
+        evented: true,
         hasControls: true,
         hasBorders: true,
+        lockMovementX: false,
+        lockMovementY: false,
+        lockRotation: false,
+        lockScalingX: false,
+        lockScalingY: false,
         cornerColor: '#000000',
         cornerStyle: 'circle',
         cornerSize: 12,
@@ -201,6 +209,8 @@ const ViewInSpaceModal = props => {
       canvas.add(img);
       canvas.setActiveObject(img);
       canvas.renderAll();
+    }).catch(err => {
+      console.error('Error loading product image:', err);
     });
   }, [productImage, productScale]);
 
