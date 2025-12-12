@@ -147,3 +147,7 @@
 .additionalFramesSection {
   margin: 0;
 }
+
+.additionalFramesSection .frameSubheading {
+  margin-bottom: 16px;
+}
