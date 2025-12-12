@@ -275,25 +275,6 @@ export const EditListingPricingAndStockForm = props => (
                         id: 'EditListingPricingAndStockForm.recommendedFrameLabelPlaceholder',
                       })}
                     />
-                    <FieldSelect
-                      id={`${formId}.recommendedFrameColor`}
-                      name="recommendedFrameColor"
-                      className={css.frameColorSelect}
-                      label={intl.formatMessage({
-                        id: 'EditListingPricingAndStockForm.frameColorLabel',
-                      })}
-                    >
-                      <option value="">
-                        {intl.formatMessage({
-                          id: 'EditListingPricingAndStockForm.frameColorPlaceholder',
-                        })}
-                      </option>
-                      {FRAME_COLOR_OPTIONS.map(opt => (
-                        <option key={opt.key} value={opt.key}>
-                          {opt.label}
-                        </option>
-                      ))}
-                    </FieldSelect>
                     <FieldCurrencyInput
                       id={`${formId}.recommendedFramePrice`}
                       name="recommendedFramePrice"
@@ -318,21 +299,14 @@ export const EditListingPricingAndStockForm = props => (
                     {({ fields }) => {
                       // Get already selected colors to filter them out from options
                       const selectedColors = fields?.value?.map(v => v.color) || [];
-                      // Also exclude recommended frame color if set
-                      const recommendedColor = values.recommendedFrameColor;
-                      const allUsedColors = recommendedColor
-                        ? [...selectedColors, recommendedColor]
-                        : selectedColors;
 
                       return (
                         <>
                           {fields.map((name, index) => {
                             const currentColor = fields?.value?.[index]?.color;
-                            // Available colors: not yet selected OR the current one (excluding recommended)
+                            // Available colors: not yet selected OR the current one
                             const availableOptions = FRAME_COLOR_OPTIONS.filter(
-                              opt =>
-                                (!allUsedColors.includes(opt.key) || opt.key === currentColor) &&
-                                opt.key !== recommendedColor
+                              opt => !selectedColors.includes(opt.key) || opt.key === currentColor
                             );
 
                             return (
@@ -403,7 +377,7 @@ export const EditListingPricingAndStockForm = props => (
                           })}
 
                           {/* Add button - only show if there are colors left to add */}
-                          {allUsedColors.length < FRAME_COLOR_OPTIONS.length ? (
+                          {selectedColors.length < FRAME_COLOR_OPTIONS.length ? (
                             <InlineTextButton
                               type="button"
                               className={css.addFrameButton}

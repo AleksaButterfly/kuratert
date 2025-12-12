@@ -319,7 +319,7 @@ export const ListingPageComponent = props => {
   const [copied, setCopied] = useState(false);
   // Cart related state
   const [selectedQuantity, setSelectedQuantity] = useState(1);
-  const [selectedFrameColor, setSelectedFrameColor] = useState(null);
+  const [selectedFrameId, setSelectedFrameId] = useState(null);
 
   useEffect(() => {
     setMounted(true);
@@ -586,12 +586,13 @@ export const ListingPageComponent = props => {
     if (onAddListingToCart) {
       // Delivery method is selected in CartPage, not here
       // Pass frame info if selected
-      const selectedFrame = selectedFrameColor
-        ? frameVariants.find(v => v.color === selectedFrameColor)
+      const selectedFrame = selectedFrameId
+        ? frameVariants.find(v => (v.id || v.color) === selectedFrameId)
         : null;
       const frameInfo = selectedFrame
         ? {
-            selectedFrameColor: selectedFrame.color,
+            selectedFrameId: selectedFrame.id || selectedFrame.color,
+            selectedFrameColor: selectedFrame.color || null,
             selectedFrameLabel: selectedFrame.label,
             framePriceInSubunits: selectedFrame.priceInSubunits,
           }
@@ -819,8 +820,8 @@ export const ListingPageComponent = props => {
                   </label>
                   <select
                     className={css.frameSelect}
-                    value={selectedFrameColor || ''}
-                    onChange={e => setSelectedFrameColor(e.target.value || null)}
+                    value={selectedFrameId || ''}
+                    onChange={e => setSelectedFrameId(e.target.value || null)}
                     disabled={isOwnListing}
                   >
                     <option value="">
@@ -830,7 +831,7 @@ export const ListingPageComponent = props => {
                     {[...frameVariants]
                       .sort((a, b) => (b.isRecommended ? 1 : 0) - (a.isRecommended ? 1 : 0))
                       .map(variant => (
-                        <option key={variant.id || variant.color} value={variant.color}>
+                        <option key={variant.id || variant.color} value={variant.id || variant.color}>
                           {variant.isRecommended ? '⭐ ' : ''}{variant.label} (+{intl.formatNumber(variant.priceInSubunits / 100, {
                             style: 'currency',
                             currency: price?.currency || 'EUR',

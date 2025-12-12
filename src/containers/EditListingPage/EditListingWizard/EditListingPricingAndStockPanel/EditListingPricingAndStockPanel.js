@@ -64,7 +64,6 @@ const getInitialValues = (props, marketplaceCurrency) => {
   // Find recommended frame (has isRecommended: true flag)
   const recommendedFrame = frameOptions?.variants?.find(v => v.isRecommended);
   const recommendedFrameLabel = recommendedFrame?.label || '';
-  const recommendedFrameColor = recommendedFrame?.color || '';
   const recommendedFramePrice = recommendedFrame?.priceInSubunits
     ? new Money(recommendedFrame.priceInSubunits, currency)
     : null;
@@ -84,7 +83,6 @@ const getInitialValues = (props, marketplaceCurrency) => {
     frameEnabled,
     frameVariants,
     recommendedFrameLabel,
-    recommendedFrameColor,
     recommendedFramePrice,
   };
 };
@@ -192,7 +190,6 @@ const EditListingPricingAndStockPanel = props => {
               frameEnabled,
               frameVariants,
               recommendedFrameLabel,
-              recommendedFrameColor,
               recommendedFramePrice,
             } = values;
 
@@ -228,13 +225,12 @@ const EditListingPricingAndStockPanel = props => {
             const allVariants = [];
 
             // Add recommended frame first if it has all required fields
-            const hasRecommendedFrame = recommendedFrameLabel && recommendedFrameColor && recommendedFramePrice?.amount;
+            const hasRecommendedFrame = recommendedFrameLabel && recommendedFramePrice?.amount;
             if (hasRecommendedFrame) {
               // Generate ID from label: lowercase, replace spaces with dashes
               const recommendedId = `recommended-${recommendedFrameLabel.toLowerCase().replace(/\s+/g, '-')}`;
               allVariants.push({
                 id: recommendedId,
-                color: recommendedFrameColor,
                 label: recommendedFrameLabel,
                 priceInSubunits: recommendedFramePrice.amount,
                 isRecommended: true,
@@ -281,7 +277,6 @@ const EditListingPricingAndStockPanel = props => {
                 frameEnabled,
                 frameVariants,
                 recommendedFrameLabel,
-                recommendedFrameColor,
                 recommendedFramePrice,
               },
             });
