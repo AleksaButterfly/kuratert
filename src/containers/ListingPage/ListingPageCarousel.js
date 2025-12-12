@@ -826,14 +826,17 @@ export const ListingPageComponent = props => {
                     <option value="">
                       {intl.formatMessage({ id: 'ListingPage.noFrame' })}
                     </option>
-                    {frameVariants.map(variant => (
-                      <option key={variant.color} value={variant.color}>
-                        {variant.label} (+{intl.formatNumber(variant.priceInSubunits / 100, {
-                          style: 'currency',
-                          currency: price?.currency || 'EUR',
-                        })})
-                      </option>
-                    ))}
+                    {/* Sort recommended frame first, then others */}
+                    {[...frameVariants]
+                      .sort((a, b) => (b.isRecommended ? 1 : 0) - (a.isRecommended ? 1 : 0))
+                      .map(variant => (
+                        <option key={variant.id || variant.color} value={variant.color}>
+                          {variant.isRecommended ? '⭐ ' : ''}{variant.label} (+{intl.formatNumber(variant.priceInSubunits / 100, {
+                            style: 'currency',
+                            currency: price?.currency || 'EUR',
+                          })})
+                        </option>
+                      ))}
                   </select>
                 </div>
               </div>

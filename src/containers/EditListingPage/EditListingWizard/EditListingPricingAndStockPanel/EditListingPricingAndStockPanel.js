@@ -60,12 +60,33 @@ const getInitialValues = (props, marketplaceCurrency) => {
   const frameOptions = publicData?.frameOptions;
   const frameEnabled = frameOptions?.enabled || false;
   const currency = marketplaceCurrency || price?.currency || 'EUR';
-  const frameVariants = frameOptions?.variants?.map(v => ({
-    color: v.color,
-    price: new Money(v.priceInSubunits, currency),
-  })) || [];
 
-  return { price, stock, stockTypeInfinity, frameEnabled, frameVariants };
+  // Find recommended frame (has isRecommended: true flag)
+  const recommendedFrame = frameOptions?.variants?.find(v => v.isRecommended);
+  const recommendedFrameLabel = recommendedFrame?.label || '';
+  const recommendedFrameColor = recommendedFrame?.color || '';
+  const recommendedFramePrice = recommendedFrame?.priceInSubunits
+    ? new Money(recommendedFrame.priceInSubunits, currency)
+    : null;
+
+  // Get non-recommended frame variants
+  const frameVariants = frameOptions?.variants
+    ?.filter(v => !v.isRecommended)
+    ?.map(v => ({
+      color: v.color,
+      price: new Money(v.priceInSubunits, currency),
+    })) || [];
+
+  return {
+    price,
+    stock,
+    stockTypeInfinity,
+    frameEnabled,
+    frameVariants,
+    recommendedFrameLabel,
+    recommendedFrameColor,
+    recommendedFramePrice,
+  };
 };
 
 /**
@@ -164,7 +185,16 @@ const EditListingPricingAndStockPanel = props => {
           className={css.form}
           initialValues={initialValues}
           onSubmit={values => {
-            const { price, stock, stockTypeInfinity, frameEnabled, frameVariants } = values;
+            const {
+              price,
+              stock,
+              stockTypeInfinity,
+              frameEnabled,
+              frameVariants,
+              recommendedFrameLabel,
+              recommendedFrameColor,
+              recommendedFramePrice,
+            } = values;
 
             // Update stock only if the value has changed, or stock is infinity in stockType,
             // but not current stock is a small number (might happen with old listings)
@@ -195,15 +225,42 @@ const EditListingPricingAndStockPanel = props => {
 
             // Frame options - convert from form format to publicData format
             // Money objects can't be stored in publicData, so we save priceInSubunits
-            const frameOptionsData = frameEnabled && frameVariants?.length > 0
+            const allVariants = [];
+
+            // Add recommended frame first if it has all required fields
+            const hasRecommendedFrame = recommendedFrameLabel && recommendedFrameColor && recommendedFramePrice?.amount;
+            if (hasRecommendedFrame) {
+              // Generate ID from label: lowercase, replace spaces with dashes
+              const recommendedId = `recommended-${recommendedFrameLabel.toLowerCase().replace(/\s+/g, '-')}`;
+              allVariants.push({
+                id: recommendedId,
+                color: recommendedFrameColor,
+                label: recommendedFrameLabel,
+                priceInSubunits: recommendedFramePrice.amount,
+                isRecommended: true,
+              });
+            }
+
+            // Add additional frame variants
+            if (frameVariants?.length > 0) {
+              frameVariants.forEach(v => {
+                if (v.color && v.price?.amount) {
+                  allVariants.push({
+                    id: v.color,
+                    color: v.color,
+                    label: FRAME_COLOR_OPTIONS.find(o => o.key === v.color)?.label || v.color,
+                    priceInSubunits: v.price.amount,
+                    isRecommended: false,
+                  });
+                }
+              });
+            }
+
+            const frameOptionsData = frameEnabled && allVariants.length > 0
               ? {
                   frameOptions: {
                     enabled: true,
-                    variants: frameVariants.map(v => ({
-                      color: v.color,
-                      label: FRAME_COLOR_OPTIONS.find(o => o.key === v.color)?.label || v.color,
-                      priceInSubunits: v.price?.amount,
-                    })),
+                    variants: allVariants,
                   },
                 }
               : { frameOptions: { enabled: false, variants: [] } };
@@ -223,6 +280,9 @@ const EditListingPricingAndStockPanel = props => {
                 stockTypeInfinity,
                 frameEnabled,
                 frameVariants,
+                recommendedFrameLabel,
+                recommendedFrameColor,
+                recommendedFramePrice,
               },
             });
             onSubmit(updateValues);

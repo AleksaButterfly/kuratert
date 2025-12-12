@@ -109,3 +109,39 @@
 .removeIcon {
   stroke: none;
 }
+
+/* Recommended Frame Section */
+.recommendedFrameSection {
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--colorGrey100);
+}
+
+.frameSubheading {
+  font-size: 16px;
+  font-weight: var(--fontWeightSemiBold);
+  margin: 0 0 8px 0;
+  color: var(--colorGrey900);
+}
+
+.frameHelpText {
+  font-size: 14px;
+  color: var(--colorGrey500);
+  margin: 0 0 16px 0;
+}
+
+.recommendedFrameRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.recommendedFrameLabelInput {
+  flex: 2;
+  min-width: 180px;
+}
+
+.additionalFramesSection {
+  margin-top: 8px;
+}
