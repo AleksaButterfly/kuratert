@@ -868,6 +868,35 @@
   flex-direction: column;
 }
 
+/* View in Your Space button */
+.viewInSpaceButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  margin-top: 12px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 4px;
+  box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  font-family: var(--fontFamily);
+  font-size: 14px;
+  font-weight: var(--fontWeightMedium);
+  color: var(--colorGrey900);
+  transition: all 0.2s ease;
+  align-self: flex-start;
+}
+
+.viewInSpaceButton:hover {
+  background-color: var(--colorWhite);
+  box-shadow: 0px 4px 12px 0px rgba(0, 0, 0, 0.1);
+}
+
+.viewInSpaceButton svg {
+  flex-shrink: 0;
+}
+
 /* Right column - Content */
 .contentColumn {
   display: flex;

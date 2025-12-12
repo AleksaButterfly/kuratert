@@ -573,6 +573,7 @@
   "ListingPage.reviewsTitle": "Reviews ({count})",
   "ListingPage.schemaTitle": "{title} | {marketplaceName}",
   "ListingPage.viewImagesButton": "View photos ({count})",
+  "ListingPage.viewInYourSpace": "View in Your Space",
   "LoadableComponentErrorBoundaryPage.description": "It looks like the app needs to be updated! Please refresh the page or go back to {link}.",
   "LoadableComponentErrorBoundaryPage.heading": "Oops, we couldn't fetch the page.",
   "LoadableComponentErrorBoundaryPage.landingPageLink": "landing page",
@@ -1397,5 +1398,19 @@
   "UserNav.accountSettings": "Account settings",
   "UserNav.profileSettings": "Profile settings",
   "UserNav.screenreader.userNav": "User profile navigation",
-  "UserNav.yourListings": "Your listings"
+  "UserNav.yourListings": "Your listings",
+  "ViewInSpaceModal.title": "View in Your Space",
+  "ViewInSpaceModal.subtitle": "See how this item looks in your room",
+  "ViewInSpaceModal.uploadPrompt": "Upload a photo of your room",
+  "ViewInSpaceModal.uploadHint": "Take a photo or choose from your gallery",
+  "ViewInSpaceModal.rotateLeft": "Rotate left",
+  "ViewInSpaceModal.rotateRight": "Rotate right",
+  "ViewInSpaceModal.flip": "Flip",
+  "ViewInSpaceModal.zoomIn": "Zoom in",
+  "ViewInSpaceModal.zoomOut": "Zoom out",
+  "ViewInSpaceModal.reset": "Reset",
+  "ViewInSpaceModal.download": "Download",
+  "ViewInSpaceModal.save": "Save",
+  "ViewInSpaceModal.changeRoom": "Change room photo",
+  "ViewInSpaceModal.tip": "Drag to move, use corners to resize, or use the controls above"
 }

@@ -101,6 +101,7 @@ import ActionBarMaybe from './ActionBarMaybe';
 import ListingImageGallery from './ListingImageGallery/ListingImageGallery';
 import InquiryForm from './InquiryForm/InquiryForm';
 import MakeOfferForm from './MakeOfferForm/MakeOfferForm';
+import ViewInSpaceModal from './ViewInSpaceModal';
 import { pathByRouteName } from '../../util/routes';
 
 import css from './ListingPage.module.css';
@@ -189,6 +190,14 @@ const IconEmail = () => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="2" y="4" width="16" height="12" rx="1" stroke="currentColor" strokeWidth="1.5" fill="none" />
     <path d="M2 5L10 11L18 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+  </svg>
+);
+
+const IconViewInSpace = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
@@ -316,6 +325,7 @@ export const ListingPageComponent = props => {
   const [makeOfferModalOpen, setMakeOfferModalOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isViewInSpaceModalOpen, setIsViewInSpaceModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   // Cart related state
   const [selectedQuantity, setSelectedQuantity] = useState(1);
@@ -702,6 +712,16 @@ export const ListingPageComponent = props => {
               imageVariants={imageVariants}
               thumbnailVariants={thumbnailVariants}
             />
+            {images.length > 0 && (
+              <button
+                type="button"
+                className={css.viewInSpaceButton}
+                onClick={() => setIsViewInSpaceModalOpen(true)}
+              >
+                <IconViewInSpace />
+                <span><FormattedMessage id="ListingPage.viewInYourSpace" /></span>
+              </button>
+            )}
           </div>
 
           {/* Right column - Content */}
@@ -1043,6 +1063,15 @@ export const ListingPageComponent = props => {
           }}
         />
       </Modal>
+
+      {/* View in Your Space Modal */}
+      <ViewInSpaceModal
+        isOpen={isViewInSpaceModalOpen}
+        onClose={() => setIsViewInSpaceModalOpen(false)}
+        onManageDisableScrolling={onManageDisableScrolling}
+        productImage={images[0]?.attributes?.variants?.['scaled-large']?.url || images[0]?.attributes?.variants?.['scaled-medium']?.url}
+        productTitle={title}
+      />
     </Page>
   );
 };
