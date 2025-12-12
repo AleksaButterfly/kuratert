@@ -55,6 +55,7 @@ const initiateOrderPayloadCreator = (
       ...(imageUrl ? { imageUrl } : {}),
       // Include frame info in the cart item for display purposes
       ...(frameInfo ? {
+        selectedFrameId: frameInfo.selectedFrameId,
         selectedFrameColor: frameInfo.selectedFrameColor,
         selectedFrameLabel: frameInfo.selectedFrameLabel,
         framePriceInSubunits: frameInfo.framePriceInSubunits,
@@ -389,6 +390,7 @@ const speculateTransactionPayloadCreator = (
       ...(imageUrl ? { imageUrl } : {}),
       // Include frame info in the cart item for display purposes
       ...(frameInfo ? {
+        selectedFrameId: frameInfo.selectedFrameId,
         selectedFrameColor: frameInfo.selectedFrameColor,
         selectedFrameLabel: frameInfo.selectedFrameLabel,
         framePriceInSubunits: frameInfo.framePriceInSubunits,

@@ -2,6 +2,7 @@ import React from 'react';
 import classNames from 'classnames';
 
 import { H4 } from '../../../components';
+import { FormattedMessage } from '../../../util/reactIntl';
 
 import css from './TransactionPanel.module.css';
 import { formatMoney } from '../../../util/currency';
@@ -16,7 +17,11 @@ const DetailCardHeadingsMaybe = props => {
     price,
     showListingImage,
     intl,
+    mainListingFrameInfo,
   } = props;
+
+  // Frame info display for single item purchases
+  const hasFrameInfo = mainListingFrameInfo?.selectedFrameLabel;
 
   return showDetailCardHeadings ? (
     <div
@@ -33,6 +38,14 @@ const DetailCardHeadingsMaybe = props => {
         ) : null}
       </H4>
       {subTitle ? <p className={css.detailCardSubtitle}>{subTitle}</p> : null}
+      {hasFrameInfo ? (
+        <p className={css.frameInfoText}>
+          <FormattedMessage
+            id="TransactionPanel.selectedFrame"
+            values={{ frameName: mainListingFrameInfo.selectedFrameLabel }}
+          />
+        </p>
+      ) : null}
     </div>
   ) : null;
 };

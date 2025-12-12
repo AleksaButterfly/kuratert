@@ -300,6 +300,13 @@
   }
 }
 
+.frameInfoText {
+  composes: marketplaceSmallFontStyles from global;
+  color: var(--colorGrey700);
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+
 /* AddressLinkMaybe subcomponent */
 .address {
   composes: h5 from global;

@@ -162,6 +162,7 @@ const getOrderParams = (pageData, shippingDetails, optionalPaymentParams, config
       // Include main listing's frame info in protectedData
       ...(frameInfo ? {
         mainListingFrameInfo: {
+          selectedFrameId: frameInfo.selectedFrameId,
           selectedFrameColor: frameInfo.selectedFrameColor,
           selectedFrameLabel: frameInfo.selectedFrameLabel,
           framePriceInSubunits: frameInfo.framePriceInSubunits,
@@ -722,6 +723,7 @@ export const CheckoutPageWithPayment = props => {
           breakdown={breakdown}
           showListingImage={showListingImage}
           intl={intl}
+          mainListingFrameInfo={cartItemsCount > 0 ? null : mainListingFrameInfo}
         />
       </div>
     </Page>

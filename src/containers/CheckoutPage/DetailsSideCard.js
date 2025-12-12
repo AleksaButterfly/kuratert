@@ -48,7 +48,11 @@ const DetailsSideCard = props => {
     breakdown,
     showListingImage,
     intl,
+    mainListingFrameInfo,
   } = props;
+
+  // Frame info display for single item purchases
+  const hasFrameInfo = mainListingFrameInfo?.selectedFrameLabel;
 
   const { price, publicData } = listing?.attributes || {};
   const unitType = publicData.unitType || 'unknown';
@@ -109,6 +113,14 @@ const DetailsSideCard = props => {
                 />
               </div>
             </div>
+          ) : null}
+          {hasFrameInfo ? (
+            <p className={css.frameInfoText}>
+              <FormattedMessage
+                id="CheckoutPage.selectedFrame"
+                values={{ frameName: mainListingFrameInfo.selectedFrameLabel }}
+              />
+            </p>
           ) : null}
         </div>
         {speculateTransactionErrorMessage}

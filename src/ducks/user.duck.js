@@ -721,6 +721,7 @@ const userSlice = createSlice({
               quantity: quantity || 1,
               // Include frame info if provided
               ...(frameInfo ? {
+                selectedFrameId: frameInfo.selectedFrameId,
                 selectedFrameColor: frameInfo.selectedFrameColor,
                 selectedFrameLabel: frameInfo.selectedFrameLabel,
                 framePriceInSubunits: frameInfo.framePriceInSubunits,

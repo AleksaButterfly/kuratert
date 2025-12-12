@@ -179,8 +179,10 @@ export const CartPageComponent = props => {
   // Get frame info for a listing from cartItems
   const getFrameInfoForListing = listingId => {
     const cartItem = cartItems?.find(item => item.listingId === listingId);
-    if (cartItem?.selectedFrameColor) {
+    // Check for selectedFrameId OR selectedFrameColor (recommended frames don't have color)
+    if (cartItem?.selectedFrameId || cartItem?.selectedFrameColor) {
       return {
+        selectedFrameId: cartItem.selectedFrameId,
         selectedFrameColor: cartItem.selectedFrameColor,
         selectedFrameLabel: cartItem.selectedFrameLabel,
         framePriceInSubunits: cartItem.framePriceInSubunits,

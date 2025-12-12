@@ -223,6 +223,9 @@ export class TransactionPanelComponent extends Component {
     const cartItems = protectedData?.cartItems || [];
     const hasCartItems = cartItems.length > 0;
 
+    // Get main listing frame info for single item purchases
+    const mainListingFrameInfo = protectedData?.mainListingFrameInfo;
+
     const classes = classNames(rootClassName || css.root, className);
 
     return (
@@ -391,6 +394,7 @@ export class TransactionPanelComponent extends Component {
                   showPrice={showPrice}
                   price={listing?.attributes?.price}
                   intl={intl}
+                  mainListingFrameInfo={!hasCartItems ? mainListingFrameInfo : null}
                 />
                 {showOrderPanel ? orderPanel : null}
                 {showBreakDown ? (

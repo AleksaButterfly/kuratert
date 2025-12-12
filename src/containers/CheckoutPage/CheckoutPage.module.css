@@ -311,6 +311,13 @@
   }
 }
 
+.frameInfoText {
+  composes: marketplaceSmallFontStyles from global;
+  color: var(--colorGrey700);
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+
 .orderBreakdownHeader {
   @media (--viewportLarge) {
     margin: 0 48px;
