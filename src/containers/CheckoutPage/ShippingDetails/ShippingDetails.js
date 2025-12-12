@@ -70,41 +70,22 @@ const ShippingDetails = props => {
         })}
         onUnmount={() => formApi.change('recipientPhoneNumber', undefined)}
       />
-      <div className={css.formRow}>
-        <FieldTextInput
-          id={`${fieldId}.recipientAddressLine1`}
-          name="recipientAddressLine1"
-          disabled={disabled}
-          className={css.field}
-          type="text"
-          autoComplete="shipping address-line1"
-          label={intl.formatMessage({ id: 'ShippingDetails.addressLine1Label' })}
-          placeholder={intl.formatMessage({
-            id: 'ShippingDetails.addressLine1Placeholder',
-          })}
-          validate={validators.required(
-            intl.formatMessage({ id: 'ShippingDetails.addressLine1Required' })
-          )}
-          onUnmount={() => formApi.change('recipientAddressLine1', undefined)}
-        />
-
-        <FieldTextInput
-          id={`${fieldId}.recipientAddressLine2`}
-          name="recipientAddressLine2"
-          disabled={disabled}
-          className={css.field}
-          type="text"
-          autoComplete="shipping address-line2"
-          label={intl.formatMessage(
-            { id: 'ShippingDetails.addressLine2Label' },
-            { optionalText: optionalText }
-          )}
-          placeholder={intl.formatMessage({
-            id: 'ShippingDetails.addressLine2Placeholder',
-          })}
-          onUnmount={() => formApi.change('recipientAddressLine2', undefined)}
-        />
-      </div>
+      <FieldTextInput
+        id={`${fieldId}.recipientAddressLine1`}
+        name="recipientAddressLine1"
+        disabled={disabled}
+        className={css.fieldFullWidth}
+        type="text"
+        autoComplete="shipping address-line1"
+        label={intl.formatMessage({ id: 'ShippingDetails.addressLine1Label' })}
+        placeholder={intl.formatMessage({
+          id: 'ShippingDetails.addressLine1Placeholder',
+        })}
+        validate={validators.required(
+          intl.formatMessage({ id: 'ShippingDetails.addressLine1Required' })
+        )}
+        onUnmount={() => formApi.change('recipientAddressLine1', undefined)}
+      />
       <div className={css.formRow}>
         <FieldTextInput
           id={`${fieldId}.recipientPostalCode`}
@@ -136,44 +117,27 @@ const ShippingDetails = props => {
           onUnmount={() => formApi.change('recipientCity', undefined)}
         />
       </div>
-      <div className={css.formRow}>
-        <FieldTextInput
-          id={`${fieldId}.recipientState`}
-          name="recipientState"
-          disabled={disabled}
-          className={css.field}
-          type="text"
-          autoComplete="shipping address-level1"
-          label={intl.formatMessage(
-            { id: 'ShippingDetails.stateLabel' },
-            { optionalText: optionalText }
-          )}
-          placeholder={intl.formatMessage({ id: 'ShippingDetails.statePlaceholder' })}
-          onUnmount={() => formApi.change('recipientState', undefined)}
-        />
-
-        <FieldSelect
-          id={`${fieldId}.recipientCountry`}
-          name="recipientCountry"
-          disabled={disabled}
-          className={css.field}
-          label={intl.formatMessage({ id: 'ShippingDetails.countryLabel' })}
-          validate={validators.required(
-            intl.formatMessage({ id: 'ShippingDetails.countryRequired' })
-          )}
-        >
-          <option disabled value="">
-            {intl.formatMessage({ id: 'ShippingDetails.countryPlaceholder' })}
-          </option>
-          {countryCodes.map(country => {
-            return (
-              <option key={country.code} value={country.code}>
-                {country.name}
-              </option>
-            );
-          })}
-        </FieldSelect>
-      </div>
+      <FieldSelect
+        id={`${fieldId}.recipientCountry`}
+        name="recipientCountry"
+        disabled={disabled}
+        className={css.fieldFullWidth}
+        label={intl.formatMessage({ id: 'ShippingDetails.countryLabel' })}
+        validate={validators.required(
+          intl.formatMessage({ id: 'ShippingDetails.countryRequired' })
+        )}
+      >
+        <option disabled value="">
+          {intl.formatMessage({ id: 'ShippingDetails.countryPlaceholder' })}
+        </option>
+        {countryCodes.map(country => {
+          return (
+            <option key={country.code} value={country.code}>
+              {country.name}
+            </option>
+          );
+        })}
+      </FieldSelect>
     </div>
   );
 };

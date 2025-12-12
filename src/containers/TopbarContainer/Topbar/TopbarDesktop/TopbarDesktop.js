@@ -19,7 +19,6 @@ import {
   NamedLink,
   IconCart,
   IconFavorites,
-  IconInbox,
   IconSearch,
   IconUser,
 } from '../../../../components';
@@ -81,22 +80,6 @@ const CartLink = ({ intl, count }) => {
   );
 };
 
-const InboxLink = ({ intl, notificationCount, inboxTab }) => {
-  return (
-    <NamedLink
-      name="InboxPage"
-      params={{ tab: inboxTab }}
-      className={css.topbarLink}
-      aria-label={intl.formatMessage({ id: 'TopbarDesktop.inbox' })}
-    >
-      <span className={css.topbarLinkLabel}>
-        <IconInbox />
-        {notificationCount > 0 && <span className={css.inboxBadge}>{notificationCount}</span>}
-      </span>
-    </NamedLink>
-  );
-};
-
 const SignupLink = ({ intl }) => {
   return (
     <NamedLink
@@ -111,19 +94,38 @@ const SignupLink = ({ intl }) => {
   );
 };
 
-const ProfileMenu = ({ currentPage, currentUser, onLogout, showManageListingsLink, intl }) => {
+const ProfileMenu = ({ currentPage, currentUser, onLogout, showManageListingsLink, notificationCount, inboxTab, intl }) => {
   const currentPageClass = page => {
     const isAccountSettingsPage =
       page === 'AccountSettingsPage' && ACCOUNT_SETTINGS_PAGES.includes(currentPage);
-    return currentPage === page || isAccountSettingsPage ? css.currentPage : null;
+    const isInboxPage = page === 'InboxPage' && currentPage === 'InboxPage';
+    return currentPage === page || isAccountSettingsPage || isInboxPage ? css.currentPage : null;
   };
 
   return (
     <Menu ariaLabel={intl.formatMessage({ id: 'TopbarDesktop.screenreader.profileMenu' })}>
       <MenuLabel className={css.profileMenuLabel} isOpenClassName={css.profileMenuIsOpen}>
-        <Avatar className={css.avatar} user={currentUser} disableProfileLink />
+        <span className={css.avatarWrapper}>
+          <Avatar className={css.avatar} user={currentUser} disableProfileLink />
+          {notificationCount > 0 && <span className={css.avatarNotificationDot} />}
+        </span>
       </MenuLabel>
       <MenuContent className={css.profileMenuContent}>
+        <MenuItem key="InboxPage">
+          <NamedLink
+            className={classNames(css.menuLink, css.inboxMenuLink, currentPageClass('InboxPage'))}
+            name="InboxPage"
+            params={{ tab: inboxTab }}
+          >
+            <span className={css.menuItemBorder} />
+            <span className={css.inboxLinkContent}>
+              <FormattedMessage id="TopbarDesktop.inboxLink" />
+              {notificationCount > 0 && (
+                <span className={css.inboxMenuBadge}>{notificationCount}</span>
+              )}
+            </span>
+          </NamedLink>
+        </MenuItem>
         {showManageListingsLink ? (
           <MenuItem key="ManageListingsPage">
             <NamedLink
@@ -259,16 +261,14 @@ const TopbarDesktop = props => {
   const favoritesLink = <FavoritesLink intl={intl} count={favoritesCount} />;
   const cartLink = <CartLink intl={intl} count={cartCount} />;
 
-  const inboxLinkMaybe = authenticatedOnClientSide ? (
-    <InboxLink intl={intl} notificationCount={notificationCount} inboxTab={inboxTab} />
-  ) : null;
-
   const profileMenuMaybe = authenticatedOnClientSide ? (
     <ProfileMenu
       currentPage={currentPage}
       currentUser={currentUser}
       onLogout={onLogout}
       showManageListingsLink={showCreateListingsLink}
+      notificationCount={notificationCount}
+      inboxTab={inboxTab}
       intl={intl}
     />
   ) : null;
@@ -309,7 +309,6 @@ const TopbarDesktop = props => {
         {searchButton}
         {favoritesLink}
         {cartLink}
-        {inboxLinkMaybe}
         {profileMenuMaybe}
         {signupLinkMaybe}
       </div>

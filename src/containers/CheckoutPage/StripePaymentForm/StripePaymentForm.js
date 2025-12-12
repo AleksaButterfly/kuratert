@@ -364,10 +364,8 @@ class StripePaymentForm extends Component {
     formApi.batch(() => {
       formApi.change('name', shouldFill ? values.recipientName : '');
       formApi.change('addressLine1', shouldFill ? values.recipientAddressLine1 : '');
-      formApi.change('addressLine2', shouldFill ? values.recipientAddressLine2 : '');
       formApi.change('postal', shouldFill ? values.recipientPostal : '');
       formApi.change('city', shouldFill ? values.recipientCity : '');
-      formApi.change('state', shouldFill ? values.recipientState : '');
       formApi.change('country', shouldFill ? values.recipientCountry : '');
     });
   }

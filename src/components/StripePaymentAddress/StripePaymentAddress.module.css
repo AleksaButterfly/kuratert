@@ -29,3 +29,8 @@
     width: calc(50% - 12px);
   }
 }
+
+.fieldFullWidth {
+  width: 100%;
+  margin-top: 24px;
+}

@@ -197,13 +197,54 @@
   /* No special hover state when open */
 }
 
+.avatarWrapper {
+  position: relative;
+  display: inline-block;
+}
+
 .avatar {
   margin: 16px 0;
+}
+
+.avatarNotificationDot {
+  position: absolute;
+  top: 14px;
+  right: 0;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background-color: var(--colorFail);
+  border: 2px solid var(--colorWhite);
 }
 
 .profileMenuContent {
   min-width: 276px;
   padding-top: 20px;
+}
+
+.inboxMenuLink {
+  /* Same as menuLink but first item */
+}
+
+.inboxLinkContent {
+  display: flex;
+  align-items: center;
+}
+
+.inboxMenuBadge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  margin-left: 8px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background-color: var(--colorGrey900);
+  color: var(--colorWhite);
+  font-size: 11px;
+  font-weight: var(--fontWeightSemiBold);
+  line-height: 1;
 }
 
 /* left animated "border" like hover element */

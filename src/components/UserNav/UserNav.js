@@ -17,7 +17,7 @@ import css from './UserNav.module.css';
  * @returns {JSX.Element} User navigation component
  */
 const UserNav = props => {
-  const { className, rootClassName, currentPage, showManageListingsLink } = props;
+  const { className, rootClassName, currentPage, showManageListingsLink, inboxTab = 'sales' } = props;
   const intl = useIntl();
   const classes = classNames(rootClassName || css.root, className);
 
@@ -34,6 +34,15 @@ const UserNav = props => {
     : [];
 
   const tabs = [
+    {
+      text: <FormattedMessage id="UserNav.inbox" />,
+      selected: currentPage === 'InboxPage',
+      disabled: false,
+      linkProps: {
+        name: 'InboxPage',
+        params: { tab: inboxTab },
+      },
+    },
     ...manageListingsTabMaybe,
     {
       text: <FormattedMessage id="UserNav.profileSettings" />,
