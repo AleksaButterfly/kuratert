@@ -1723,7 +1723,6 @@
   "UserNav.profileSettings": "Profile settings",
   "UserNav.screenreader.userNav": "User profile navigation",
   "UserNav.yourListings": "Your listings",
-
   "MakeOfferForm.heading": "Make an offer for {listingTitle}",
   "MakeOfferForm.currentPrice": "Current price:",
   "MakeOfferForm.offerLabel": "Your offer",
@@ -1739,7 +1738,6 @@
   "MakeOfferForm.shippingPriceNote": "Shipping fee: {shippingPrice}",
   "MakeOfferForm.submitButton": "Submit Offer",
   "MakeOfferForm.submitFailed": "Failed to send offer. Please try again.",
-
   "TransactionPage.negotiated-purchase.customer.offer-pending.title": "Offer sent",
   "TransactionPage.negotiated-purchase.customer.offer-pending.description": "Your offer has been sent to the seller. You'll be notified when they respond.",
   "TransactionPage.negotiated-purchase.customer.offer-pending.extraInfo": "The seller can accept, decline, or make a counter offer.",
@@ -1773,7 +1771,6 @@
   "TransactionPage.negotiated-purchase.customer.completed.description": "This transaction has been completed.",
   "TransactionPage.negotiated-purchase.customer.canceled.title": "Canceled",
   "TransactionPage.negotiated-purchase.customer.canceled.description": "This transaction was canceled.",
-
   "TransactionPage.negotiated-purchase.provider.offer-pending.title": "New offer received",
   "TransactionPage.negotiated-purchase.provider.offer-pending.description": "You have received an offer. Accept, decline, or make a counter offer.",
   "TransactionPage.negotiated-purchase.provider.offer-pending.extraInfo": "Respond within 14 days before the offer expires.",
@@ -1806,7 +1803,6 @@
   "TransactionPage.negotiated-purchase.provider.completed.description": "This transaction has been completed.",
   "TransactionPage.negotiated-purchase.provider.canceled.title": "Canceled",
   "TransactionPage.negotiated-purchase.provider.canceled.description": "This transaction was canceled.",
-
   "TransactionPage.negotiated-purchase.customer.transition-withdraw-offer.actionButton": "Withdraw Offer",
   "TransactionPage.negotiated-purchase.customer.transition-withdraw-offer.actionError": "Failed to withdraw offer",
   "TransactionPage.negotiated-purchase.customer.transition-accept-counter-offer.actionButton": "Accept Counter Offer",
@@ -1823,7 +1819,6 @@
   "TransactionPage.negotiated-purchase.customer.transition-mark-received.actionError": "Failed to mark as received",
   "TransactionPage.negotiated-purchase.customer.transition-dispute.actionButton": "Report Issue",
   "TransactionPage.negotiated-purchase.customer.transition-dispute.actionError": "Failed to report issue",
-
   "TransactionPage.negotiated-purchase.provider.transition-accept-offer.actionButton": "Accept Offer",
   "TransactionPage.negotiated-purchase.provider.transition-accept-offer.actionError": "Failed to accept offer",
   "TransactionPage.negotiated-purchase.provider.transition-decline-offer.actionButton": "Decline",
@@ -1834,7 +1829,6 @@
   "TransactionPage.negotiated-purchase.provider.transition-withdraw-counter-offer.actionError": "Failed to withdraw counter offer",
   "TransactionPage.negotiated-purchase.provider.transition-mark-delivered.actionButton": "Mark as Shipped",
   "TransactionPage.negotiated-purchase.provider.transition-mark-delivered.actionError": "Failed to mark as shipped",
-
   "TransactionPage.ActivityFeed.negotiated-purchase.offer-pending": "{actor, select, you {You made an offer of {negotiationOffer}.} other {{otherUsersName} made an offer of {negotiationOffer}.}}",
   "TransactionPage.ActivityFeed.negotiated-purchase.counter-pending": "{actor, select, you {You made a counter offer of {negotiationOffer}.} other {{otherUsersName} made a counter offer of {negotiationOffer}.}}",
   "TransactionPage.ActivityFeed.negotiated-purchase.accepted": "{actor, select, you {You accepted the offer.} other {{otherUsersName} accepted the offer.}}",
@@ -1847,7 +1841,6 @@
   "TransactionPage.ActivityFeed.negotiated-purchase.completed": "Transaction completed.",
   "TransactionPage.ActivityFeed.negotiated-purchase.canceled": "The transaction was canceled.",
   "TransactionPage.ActivityFeed.negotiated-purchase.disputed": "The order was disputed.",
-
   "InboxPage.negotiated-purchase.offer-pending.customer": "Offer Sent",
   "InboxPage.negotiated-purchase.offer-pending.provider": "New Offer",
   "InboxPage.negotiated-purchase.counter-pending.customer": "Counter Offer",
