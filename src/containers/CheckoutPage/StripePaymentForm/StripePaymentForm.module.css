@@ -159,7 +159,11 @@
 
 /* Express Checkout - Wallet Payments */
 .expressCheckout {
-  margin-bottom: 24px;
+}
+
+/* Remove margin-top from heading when wallet buttons are shown above */
+.headingAfterWallet {
+  margin-top: 0;
 }
 
 .expressCheckoutHeading {
