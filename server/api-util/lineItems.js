@@ -240,7 +240,8 @@ exports.transactionLineItems = (listing, orderData, providerCommission, customer
 
   // Check if there's frame info for the main listing
   const { frameInfo } = orderData || {};
-  const framePriceInSubunits = frameInfo?.framePriceInSubunits || 0;
+  // Ensure framePriceInSubunits is a number (it might come as string from JSON)
+  const framePriceInSubunits = parseInt(frameInfo?.framePriceInSubunits, 10) || 0;
 
   // Check if offer is valid (either Money instance or object with amount/currency)
   const isValidOffer = offer && (
