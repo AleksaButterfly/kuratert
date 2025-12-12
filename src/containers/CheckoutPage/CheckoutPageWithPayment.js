@@ -301,16 +301,33 @@ const handleSubmit = (values, process, props, stripe, submitting, setSubmitting)
     setPageData,
     sessionStorageKey,
   } = props;
-  const { card, message, paymentMethod: selectedPaymentMethod, formValues } = values;
+  const {
+    card,
+    message,
+    paymentMethod: selectedPaymentMethod,
+    formValues,
+    walletPaymentMethodId,
+  } = values;
   const { saveAfterOnetimePayment: saveAfterOnetimePaymentRaw } = formValues;
+
+  // Check if this is a wallet payment (Google Pay, Apple Pay, Link, etc.)
+  const isWalletPayment = selectedPaymentMethod === 'walletPayment' && walletPaymentMethodId;
 
   const saveAfterOnetimePayment =
     Array.isArray(saveAfterOnetimePaymentRaw) && saveAfterOnetimePaymentRaw.length > 0;
-  const selectedPaymentFlow = paymentFlow(selectedPaymentMethod, saveAfterOnetimePayment);
+
+  // Wallet payments work like saved card - they provide a payment_method ID directly
+  const selectedPaymentFlow = isWalletPayment
+    ? USE_SAVED_CARD
+    : paymentFlow(selectedPaymentMethod, saveAfterOnetimePayment);
+
   const hasDefaultPaymentMethodSaved = hasDefaultPaymentMethod(stripeCustomerFetched, currentUser);
   const stripePaymentMethodId = hasDefaultPaymentMethodSaved
     ? currentUser?.stripeCustomer?.defaultPaymentMethod?.attributes?.stripePaymentMethodId
     : null;
+
+  // Use wallet payment method ID if available, otherwise use saved card ID
+  const effectivePaymentMethodId = isWalletPayment ? walletPaymentMethodId : stripePaymentMethodId;
 
   // If paymentIntent status is not waiting user action,
   // confirmCardPayment has been called previously.
@@ -326,7 +343,7 @@ const handleSubmit = (values, process, props, stripe, submitting, setSubmitting)
     message,
     paymentIntent,
     hasPaymentIntentUserActionsDone,
-    stripePaymentMethodId,
+    stripePaymentMethodId: effectivePaymentMethodId,
     process,
     onInitiateOrder,
     onConfirmCardPayment,
@@ -336,7 +353,8 @@ const handleSubmit = (values, process, props, stripe, submitting, setSubmitting)
     sessionStorageKey,
     stripeCustomer: currentUser?.stripeCustomer,
     isPaymentFlowUseSavedCard: selectedPaymentFlow === USE_SAVED_CARD,
-    isPaymentFlowPayAndSaveCard: selectedPaymentFlow === PAY_AND_SAVE_FOR_LATER_USE,
+    // Don't save wallet payments as default payment method
+    isPaymentFlowPayAndSaveCard: isWalletPayment ? false : selectedPaymentFlow === PAY_AND_SAVE_FOR_LATER_USE,
     setPageData,
   };
 
@@ -344,12 +362,14 @@ const handleSubmit = (values, process, props, stripe, submitting, setSubmitting)
   // Note: optionalPaymentParams contains Stripe paymentMethod,
   // but that can also be passed on Step 2
   // stripe.confirmCardPayment(stripe, { payment_method: stripePaymentMethodId })
-  const optionalPaymentParams =
-    selectedPaymentFlow === USE_SAVED_CARD && hasDefaultPaymentMethodSaved
-      ? { paymentMethod: stripePaymentMethodId }
-      : selectedPaymentFlow === PAY_AND_SAVE_FOR_LATER_USE
-      ? { setupPaymentMethodForSaving: true }
-      : {};
+  // For wallet payments, we pass the wallet payment method ID directly
+  const optionalPaymentParams = isWalletPayment
+    ? { paymentMethod: walletPaymentMethodId }
+    : selectedPaymentFlow === USE_SAVED_CARD && hasDefaultPaymentMethodSaved
+    ? { paymentMethod: stripePaymentMethodId }
+    : selectedPaymentFlow === PAY_AND_SAVE_FOR_LATER_USE
+    ? { setupPaymentMethodForSaving: true }
+    : {};
 
   // These are the order parameters for the first payment-related transition
   // which is either initiate-transition or initiate-transition-after-enquiry

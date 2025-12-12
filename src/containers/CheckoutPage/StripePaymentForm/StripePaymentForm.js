@@ -250,6 +250,86 @@ const initialState = {
   // The mode can be 'onetimePayment', 'defaultCard', or 'replaceCard'
   // Check SavedCardDetails component for more information
   paymentMethod: null,
+  // Wallet payment states (Google Pay, Apple Pay, Link, etc.)
+  paymentRequest: null,
+  canMakePayment: null, // { applePay: true } or { googlePay: true } or null
+  walletPaymentInProgress: false,
+  walletError: null,
+};
+
+/**
+ * Express Checkout component for wallet payments (Google Pay, Apple Pay, Link, etc.)
+ */
+const ExpressCheckout = props => {
+  const {
+    paymentRequest,
+    canMakePayment,
+    walletPaymentInProgress,
+    walletError,
+    intl,
+  } = props;
+
+  // Don't render if wallet payments not available
+  if (!canMakePayment) {
+    return null;
+  }
+
+  const showApplePay = canMakePayment.applePay;
+  const showGooglePay = canMakePayment.googlePay;
+  const showLink = canMakePayment.link;
+
+  const handleClick = () => {
+    if (paymentRequest) {
+      paymentRequest.show();
+    }
+  };
+
+  // Determine button style based on available wallet
+  const getButtonClass = () => {
+    if (showApplePay) return css.applePayButton;
+    if (showGooglePay) return css.googlePayButton;
+    if (showLink) return css.linkPayButton;
+    return css.googlePayButton; // Default fallback
+  };
+
+  // Determine button text based on available wallet
+  const getButtonText = () => {
+    if (showApplePay) return 'Apple Pay';
+    if (showGooglePay) return 'Google Pay';
+    if (showLink) return 'Link';
+    return 'Pay';
+  };
+
+  return (
+    <div className={css.expressCheckout}>
+      <Heading as="h3" rootClassName={css.expressCheckoutHeading}>
+        <FormattedMessage id="StripePaymentForm.expressCheckout" />
+      </Heading>
+
+      <button
+        type="button"
+        className={classNames(css.walletButton, getButtonClass())}
+        onClick={handleClick}
+        disabled={walletPaymentInProgress}
+      >
+        {walletPaymentInProgress ? (
+          <IconSpinner className={css.walletSpinner} />
+        ) : (
+          <span className={css.walletButtonContent}>{getButtonText()}</span>
+        )}
+      </button>
+
+      {walletError ? <span className={css.walletError}>{walletError}</span> : null}
+
+      <div className={css.orDivider}>
+        <span className={css.orDividerLine}></span>
+        <span className={css.orDividerText}>
+          <FormattedMessage id="StripePaymentForm.orPayWithCard" />
+        </span>
+        <span className={css.orDividerLine}></span>
+      </div>
+    </div>
+  );
 };
 
 /**
@@ -304,6 +384,10 @@ class StripePaymentForm extends Component {
     this.initializeStripeElement = this.initializeStripeElement.bind(this);
     this.handleStripeElementRef = this.handleStripeElementRef.bind(this);
     this.changePaymentMethod = this.changePaymentMethod.bind(this);
+    // Wallet payment methods
+    this.initializePaymentRequest = this.initializePaymentRequest.bind(this);
+    this.handleWalletPayment = this.handleWalletPayment.bind(this);
+    this.getPaymentAmount = this.getPaymentAmount.bind(this);
     this.finalFormAPI = null;
     this.cardContainer = null;
   }
@@ -327,6 +411,9 @@ class StripePaymentForm extends Component {
       if (!(hasHandledCardPayment || defaultPaymentMethod || loadingData)) {
         this.initializeStripeElement();
       }
+
+      // Initialize Payment Request for wallet payments (Google Pay, Apple Pay, Link, etc.)
+      this.initializePaymentRequest();
     }
   }
 
@@ -336,6 +423,100 @@ class StripePaymentForm extends Component {
       this.card.unmount();
       this.card = null;
     }
+  }
+
+  componentDidUpdate(prevProps) {
+    // Update payment request when total price changes
+    if (prevProps.totalPrice !== this.props.totalPrice && this.state.paymentRequest) {
+      const amount = this.getPaymentAmount();
+      if (amount > 0) {
+        this.state.paymentRequest.update({
+          total: {
+            label: this.props.marketplaceName || 'Total',
+            amount: amount,
+          },
+        });
+      }
+    }
+  }
+
+  /**
+   * Parse total price string to subunits (cents)
+   * @returns {number} Amount in subunits
+   */
+  getPaymentAmount() {
+    const { totalPrice } = this.props;
+    if (!totalPrice) return 0;
+    // totalPrice comes as formatted string like "$50.00" or "50,00 USD"
+    const numericValue = parseFloat(totalPrice.replace(/[^0-9.,]/g, '').replace(',', '.'));
+    return Math.round(numericValue * 100);
+  }
+
+  /**
+   * Initialize Stripe Payment Request for wallet payments
+   */
+  initializePaymentRequest() {
+    const { totalPrice, marketplaceName } = this.props;
+    const amount = this.getPaymentAmount();
+
+    // Don't initialize if amount is 0 (price not loaded yet)
+    if (amount <= 0) {
+      return;
+    }
+
+    const paymentRequest = this.stripe.paymentRequest({
+      country: 'US', // Required for Payment Request API
+      currency: 'usd', // TODO: Get from config if needed
+      total: {
+        label: marketplaceName || 'Total',
+        amount: amount,
+      },
+      requestPayerName: true,
+      requestPayerEmail: true,
+    });
+
+    // Check if wallet payments are available
+    paymentRequest.canMakePayment().then(result => {
+      if (result) {
+        this.setState({
+          paymentRequest,
+          canMakePayment: result,
+        });
+
+        // Listen for wallet payment success
+        paymentRequest.on('paymentmethod', this.handleWalletPayment);
+      }
+    });
+  }
+
+  /**
+   * Handle successful wallet payment
+   * @param {Object} event - Stripe payment method event
+   */
+  handleWalletPayment(event) {
+    const { onSubmit, formId, intl } = this.props;
+    const paymentMethodId = event.paymentMethod.id;
+
+    this.setState({ walletPaymentInProgress: true, walletError: null });
+
+    // Get current form values for shipping, message, etc.
+    const formValues = this.finalFormAPI ? this.finalFormAPI.getState().values : {};
+
+    // Build params matching existing handleSubmit signature
+    const params = {
+      message: formValues.initialMessage ? formValues.initialMessage.trim() : null,
+      card: null, // No card element for wallet payments
+      formId,
+      formValues,
+      paymentMethod: 'walletPayment', // New payment method type
+      walletPaymentMethodId: paymentMethodId, // The actual Stripe payment method ID
+    };
+
+    // Complete the payment request UI (tell wallet it succeeded)
+    event.complete('success');
+
+    // Call the existing onSubmit handler
+    onSubmit(params);
   }
 
   initializeStripeElement(element) {
@@ -572,6 +753,17 @@ class StripePaymentForm extends Component {
           locale={locale}
           intl={intl}
         />
+
+        {/* Express Checkout - Wallet Payments (Google Pay, Apple Pay, Link) */}
+        {billingDetailsNeeded && !loadingData && this.state.canMakePayment ? (
+          <ExpressCheckout
+            paymentRequest={this.state.paymentRequest}
+            canMakePayment={this.state.canMakePayment}
+            walletPaymentInProgress={this.state.walletPaymentInProgress}
+            walletError={this.state.walletError}
+            intl={intl}
+          />
+        ) : null}
 
         {billingDetailsNeeded && !loadingData ? (
           <React.Fragment>

@@ -156,3 +156,99 @@
 .missingStripeKey {
   color: var(--colorFail);
 }
+
+/* Express Checkout - Wallet Payments */
+.expressCheckout {
+  margin-bottom: 24px;
+}
+
+.expressCheckoutHeading {
+  composes: p from global;
+  font-weight: var(--fontWeightBold);
+  padding: 0;
+  margin-bottom: 16px;
+}
+
+.walletButton {
+  width: 100%;
+  height: 48px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 500;
+  transition: opacity 0.2s ease;
+
+  @media (--viewportMedium) {
+    height: 52px;
+  }
+}
+
+.walletButton:hover {
+  opacity: 0.9;
+}
+
+.walletButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.applePayButton {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+.googlePayButton {
+  background-color: #ffffff;
+  border: 1px solid var(--colorGrey200);
+  color: var(--colorGrey800);
+}
+
+.linkPayButton {
+  background-color: #00d66f;
+  color: #ffffff;
+}
+
+.walletButtonContent {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.walletSpinner {
+  width: 24px;
+  height: 24px;
+}
+
+/* Or Divider */
+.orDivider {
+  display: flex;
+  align-items: center;
+  margin: 24px 0;
+
+  @media (--viewportMedium) {
+    margin: 32px 0;
+  }
+}
+
+.orDividerLine {
+  flex: 1;
+  height: 1px;
+  background-color: var(--colorGrey200);
+}
+
+.orDividerText {
+  padding: 0 16px;
+  font-size: 14px;
+  color: var(--colorGrey500);
+  font-weight: 500;
+}
+
+.walletError {
+  color: var(--colorFail);
+  font-size: 13px;
+  margin-top: 8px;
+}
