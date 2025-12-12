@@ -134,35 +134,32 @@ const ViewInSpaceModal = props => {
     const { FabricImage } = fabricModule;
     const canvas = fabricCanvasRef.current;
 
-    FabricImage.fromURL(imageSrc, { crossOrigin: 'anonymous' }).then(img => {
-      // Scale to fit canvas
-      const scale = Math.min(
-        canvas.width / img.width,
-        canvas.height / img.height
-      );
+    return new Promise((resolve) => {
+      FabricImage.fromURL(imageSrc, { crossOrigin: 'anonymous' }).then(img => {
+        // Scale to fit canvas
+        const scale = Math.min(
+          canvas.width / img.width,
+          canvas.height / img.height
+        );
 
-      img.scale(scale);
-      img.set({
-        left: (canvas.width - img.width * scale) / 2,
-        top: (canvas.height - img.height * scale) / 2,
-        selectable: false,
-        evented: false,
-        hoverCursor: 'default',
+        img.scale(scale);
+        img.set({
+          left: (canvas.width - img.width * scale) / 2,
+          top: (canvas.height - img.height * scale) / 2,
+          selectable: false,
+          evented: false,
+          hoverCursor: 'default',
+        });
+
+        // Clear and add room image as background
+        canvas.clear();
+        canvas.add(img);
+        canvas.sendObjectToBack(img);
+        canvas.renderAll();
+        resolve();
       });
-
-      // Clear and add room image as background
-      canvas.clear();
-      canvas.add(img);
-      canvas.sendObjectToBack(img);
-
-      // Add product image on top
-      if (productImage) {
-        loadProductImage();
-      }
-
-      canvas.renderAll();
     });
-  }, [productImage]);
+  }, []);
 
   // Load product image onto canvas
   const loadProductImage = useCallback(async () => {
@@ -215,17 +212,21 @@ const ViewInSpaceModal = props => {
   }, [productImage, productScale]);
 
   // Handle room image upload
-  const handleRoomImageUpload = (e) => {
+  const handleRoomImageUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setIsLoading(true);
     const reader = new FileReader();
 
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       const imageSrc = event.target?.result;
       setRoomImage(imageSrc);
-      loadRoomImage(imageSrc);
+      await loadRoomImage(imageSrc);
+      // Load product image after room image is ready
+      if (productImage) {
+        await loadProductImage();
+      }
       setIsLoading(false);
     };
 
@@ -276,9 +277,12 @@ const ViewInSpaceModal = props => {
     }
   };
 
-  const handleReset = () => {
+  const handleReset = async () => {
     if (roomImage) {
-      loadRoomImage(roomImage);
+      await loadRoomImage(roomImage);
+      if (productImage) {
+        await loadProductImage();
+      }
     }
   };
 
