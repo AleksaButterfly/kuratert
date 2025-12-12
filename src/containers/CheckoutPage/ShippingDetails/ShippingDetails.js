@@ -60,14 +60,14 @@ const ShippingDetails = props => {
         disabled={disabled}
         className={css.fieldFullWidth}
         type="text"
-        autoComplete="shipping phoneNumber"
-        label={intl.formatMessage(
-          { id: 'ShippingDetails.recipientPhoneNumberLabel' },
-          { optionalText: optionalText }
-        )}
+        autoComplete="shipping tel"
+        label={intl.formatMessage({ id: 'ShippingDetails.recipientPhoneNumberLabel' })}
         placeholder={intl.formatMessage({
           id: 'ShippingDetails.recipientPhoneNumberPlaceholder',
         })}
+        validate={validators.required(
+          intl.formatMessage({ id: 'ShippingDetails.recipientPhoneNumberRequired' })
+        )}
         onUnmount={() => formApi.change('recipientPhoneNumber', undefined)}
       />
       <FieldTextInput

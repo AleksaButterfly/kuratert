@@ -107,7 +107,8 @@ const getOrderParams = (pageData, shippingDetails, optionalPaymentParams, config
   const quantityMaybe = quantity ? { quantity } : {};
   const seats = pageData.orderData?.seats;
   const seatsMaybe = seats ? { seats } : {};
-  const deliveryMethod = pageData.orderData?.deliveryMethod;
+  // Get deliveryMethod from orderData or transaction protectedData (for negotiated-purchase flow)
+  const deliveryMethod = pageData.orderData?.deliveryMethod || pageData.transaction?.attributes?.protectedData?.deliveryMethod;
   const deliveryMethodMaybe = deliveryMethod ? { deliveryMethod } : {};
   const { listingType, unitType, priceVariants } = pageData?.listing?.attributes?.publicData || {};
 
@@ -588,8 +589,12 @@ export const CheckoutPageWithPayment = props => {
   // e.g. {country: 'FI'}
 
   const initialValuesForStripePayment = { name: userName, recipientName: userName };
+
+  // Get delivery method from orderData or transaction protectedData (for negotiated-purchase flow)
+  const deliveryMethod = orderData?.deliveryMethod || tx.attributes.protectedData?.deliveryMethod;
+
   const askShippingDetails =
-    orderData?.deliveryMethod === 'shipping' &&
+    deliveryMethod === 'shipping' &&
     !hasTransactionPassedPendingPayment(existingTransaction, process);
 
   // Get pickup location - try main listing first, then fall back to cart items
@@ -600,7 +605,7 @@ export const CheckoutPageWithPayment = props => {
   const cartItemLocation = cartItemWithLocation?.listing?.attributes?.publicData?.location;
   const listingLocation = mainListingLocation?.address ? mainListingLocation : cartItemLocation;
 
-  const showPickUpLocation = isPurchase && orderData?.deliveryMethod === 'pickup';
+  const showPickUpLocation = isPurchase && deliveryMethod === 'pickup';
   const showLocation = (isBooking || isNegotiation) && listingLocation?.address;
 
   const providerDisplayName = isNegotiation

@@ -260,7 +260,7 @@ export const sendInquiry = (listing, message) => (dispatch, getState, sdk) => {
 const NEGOTIATED_PURCHASE_PROCESS_ALIAS = 'negotiated-purchase/release-1';
 
 const sendOfferPayloadCreator = (
-  { listing, offerPrice, message },
+  { listing, offerPrice, message, deliveryMethod },
   { dispatch, rejectWithValue, extra: sdk }
 ) => {
   const listingId = listing?.id;
@@ -285,6 +285,7 @@ const sendOfferPayloadCreator = (
       listingId,
       protectedData: {
         unitType: NEGOTIATED_ITEM,
+        ...(deliveryMethod ? { deliveryMethod } : {}),
         ...(message ? { customerMessage: message } : {}),
       },
     },
@@ -296,6 +297,7 @@ const sendOfferPayloadCreator = (
     quantity: 1,
     stockReservationQuantity: 1,
     actor: 'customer',
+    ...(deliveryMethod ? { deliveryMethod } : {}),
   };
 
   return initiatePrivileged({
@@ -333,8 +335,8 @@ export const sendOfferThunk = createAsyncThunk(
   sendOfferPayloadCreator
 );
 // Backward compatible wrapper for the thunk
-export const sendOffer = (listing, offerPrice, message) => (dispatch, getState, sdk) => {
-  return dispatch(sendOfferThunk({ listing, offerPrice, message })).unwrap();
+export const sendOffer = (listing, offerPrice, message, deliveryMethod) => (dispatch, getState, sdk) => {
+  return dispatch(sendOfferThunk({ listing, offerPrice, message, deliveryMethod })).unwrap();
 };
 
 // Helper function for loadData call.

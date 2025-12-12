@@ -1,6 +1,6 @@
 import React from 'react';
 import classNames from 'classnames';
-import { Form as FinalForm } from 'react-final-form';
+import { Form as FinalForm, Field } from 'react-final-form';
 
 import appSettings from '../../../config/settings';
 import { FormattedMessage, useIntl } from '../../../util/reactIntl';
@@ -38,17 +38,40 @@ const MakeOfferForm = props => {
     authorDisplayName,
     marketplaceCurrency,
     inProgress,
+    shippingEnabled,
+    pickupEnabled,
+    shippingPriceInSubunits,
     ...restProps
   } = props;
+
+  // Format shipping price if available
+  const shippingPrice = shippingPriceInSubunits
+    ? new Money(shippingPriceInSubunits, marketplaceCurrency)
+    : null;
+  const shippingPriceFormatted = shippingPrice ? formatMoney(intl, shippingPrice) : null;
+
+  // Determine delivery method availability
+  const hasShipping = !!shippingEnabled;
+  const hasPickup = !!pickupEnabled;
+  const hasMultipleDeliveryMethods = hasShipping && hasPickup;
+  const hasSingleDeliveryMethod = (hasShipping || hasPickup) && !hasMultipleDeliveryMethods;
+  const singleDeliveryMethod = hasSingleDeliveryMethod ? (hasShipping ? 'shipping' : 'pickup') : null;
+
+  // Set initial values with single delivery method if only one is available
+  const initialValues = {
+    ...(singleDeliveryMethod ? { deliveryMethod: singleDeliveryMethod } : {}),
+  };
 
   return (
     <FinalForm
       {...restProps}
+      initialValues={initialValues}
       render={fieldRenderProps => {
         const {
           className,
           rootClassName,
           handleSubmit,
+          values,
         } = fieldRenderProps;
 
         const currencyConfig = appSettings.getCurrencyFormatting(marketplaceCurrency);
@@ -70,7 +93,10 @@ const MakeOfferForm = props => {
 
         const classes = classNames(rootClassName || css.root, className);
         const submitInProgress = inProgress || false;
-        const submitDisabled = submitInProgress;
+
+        // Require delivery method selection if multiple methods available
+        const needsDeliveryMethod = hasMultipleDeliveryMethods && !values.deliveryMethod;
+        const submitDisabled = submitInProgress || needsDeliveryMethod;
 
         const errorMessageMaybe = submitError ? (
           <p className={css.errorPlaceholder}>
@@ -108,6 +134,50 @@ const MakeOfferForm = props => {
               currencyConfig={currencyConfig}
               validate={offerValidators}
             />
+
+            {/* Delivery Method Selection */}
+            {(hasShipping || hasPickup) && (
+              <div className={css.deliveryMethodSection}>
+                <label className={css.deliveryMethodLabel}>
+                  <FormattedMessage id="MakeOfferForm.deliveryMethodLabel" />
+                </label>
+                {hasMultipleDeliveryMethods ? (
+                  <Field name="deliveryMethod">
+                    {({ input }) => (
+                      <select
+                        {...input}
+                        className={css.deliveryMethodSelect}
+                      >
+                        <option value="" disabled>
+                          {intl.formatMessage({ id: 'MakeOfferForm.selectDeliveryMethod' })}
+                        </option>
+                        <option value="shipping">
+                          {intl.formatMessage({ id: 'MakeOfferForm.deliveryShipping' })}
+                        </option>
+                        <option value="pickup">
+                          {intl.formatMessage({ id: 'MakeOfferForm.deliveryPickup' })}
+                        </option>
+                      </select>
+                    )}
+                  </Field>
+                ) : (
+                  <span className={css.deliveryMethodSingle}>
+                    {singleDeliveryMethod === 'shipping'
+                      ? intl.formatMessage({ id: 'MakeOfferForm.deliveryShipping' })
+                      : intl.formatMessage({ id: 'MakeOfferForm.deliveryPickup' })}
+                  </span>
+                )}
+                {/* Show shipping price when shipping is selected */}
+                {shippingPriceFormatted && (values.deliveryMethod === 'shipping' || singleDeliveryMethod === 'shipping') && (
+                  <p className={css.shippingPriceNote}>
+                    <FormattedMessage
+                      id="MakeOfferForm.shippingPriceNote"
+                      values={{ shippingPrice: shippingPriceFormatted }}
+                    />
+                  </p>
+                )}
+              </div>
+            )}
 
             <FieldTextInput
               className={css.messageField}

@@ -428,7 +428,7 @@ export const ListingPageComponent = props => {
   const isOwnListing =
     userAndListingAuthorAvailable && currentListing.author.id.uuid === currentUser.id.uuid;
 
-  const { listingType, transactionProcessAlias, unitType, frameOptions } = publicData;
+  const { listingType, transactionProcessAlias, unitType, frameOptions, shippingEnabled, pickupEnabled, shippingPriceInSubunitsOneItem } = publicData;
   if (!(listingType && transactionProcessAlias && unitType)) {
     return (
       <ErrorPage topbar={topbar} scrollingDisabled={scrollingDisabled} intl={intl} invalidListing />
@@ -1026,9 +1026,12 @@ export const ListingPageComponent = props => {
           submitError={sendOfferError}
           marketplaceCurrency={config.currency}
           inProgress={sendOfferInProgress}
+          shippingEnabled={shippingEnabled}
+          pickupEnabled={pickupEnabled}
+          shippingPriceInSubunits={shippingPriceInSubunitsOneItem}
           onSubmit={values => {
-            const { offerPrice, message } = values;
-            onSendOffer(currentListing, offerPrice, message).then(transactionId => {
+            const { offerPrice, message, deliveryMethod } = values;
+            onSendOffer(currentListing, offerPrice, message, deliveryMethod).then(transactionId => {
               if (transactionId) {
                 setMakeOfferModalOpen(false);
                 const orderDetailsPath = pathByRouteName('OrderDetailsPage', routeConfiguration, {
@@ -1172,7 +1175,7 @@ const mapDispatchToProps = dispatch => ({
     dispatch(setInitialValues(values, saveToSessionStorage)),
   onFetchTransactionLineItems: params => dispatch(fetchTransactionLineItems(params)),
   onSendInquiry: (listing, message) => dispatch(sendInquiry(listing, message)),
-  onSendOffer: (listing, offerPrice, message) => dispatch(sendOffer(listing, offerPrice, message)),
+  onSendOffer: (listing, offerPrice, message, deliveryMethod) => dispatch(sendOffer(listing, offerPrice, message, deliveryMethod)),
   onInitializeCardPaymentData: () => dispatch(initializeCardPaymentData()),
   onFetchTimeSlots: (listingId, start, end, timeZone, options) =>
     dispatch(fetchTimeSlots(listingId, start, end, timeZone, options)),
