@@ -61,10 +61,19 @@ const getFirstImageAspectRatio = (firstImage, scaledVariant) => {
  * @param {Array<string>} props.thumbnailVariants - The thumbnail variants
  * @returns {JSX.Element} listing image gallery component
  */
+// View in Space icon
+const IconViewInSpace = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
 const ListingImageGallery = props => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const intl = useIntl();
-  const { rootClassName, className, images, imageVariants, thumbnailVariants } = props;
+  const { rootClassName, className, images, imageVariants, thumbnailVariants, onViewInSpace } = props;
   const thumbVariants = thumbnailVariants || imageVariants;
   // imageVariants are scaled variants.
   const { aspectWidth, aspectHeight } = getFirstImageAspectRatio(images?.[0], imageVariants[0]);
@@ -88,6 +97,15 @@ const ListingImageGallery = props => {
   const imageSizesMaybe = isFullscreen
     ? {}
     : { sizes: `(max-width: 1024px) 100vw, (max-width: 1200px) calc(100vw - 192px), 708px` };
+  const handleViewInSpace = (e, image) => {
+    e.stopPropagation();
+    if (onViewInSpace) {
+      const imageUrl = image?.attributes?.variants?.['scaled-large']?.url ||
+                       image?.attributes?.variants?.['scaled-medium']?.url;
+      onViewInSpace(imageUrl);
+    }
+  };
+
   const renderItem = item => {
     return (
       <AspectRatioWrapper
@@ -103,6 +121,16 @@ const ListingImageGallery = props => {
             variants={imageVariants}
             {...imageSizesMaybe}
           />
+          {onViewInSpace && !isFullscreen && (
+            <button
+              type="button"
+              className={css.viewInSpaceButton}
+              onClick={(e) => handleViewInSpace(e, item.image)}
+            >
+              <IconViewInSpace />
+              <span><FormattedMessage id="ListingPage.viewInYourSpace" /></span>
+            </button>
+          )}
         </div>
       </AspectRatioWrapper>
     );
