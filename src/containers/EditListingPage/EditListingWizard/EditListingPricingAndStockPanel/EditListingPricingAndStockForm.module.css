@@ -78,7 +78,6 @@
 
 .framePriceInput {
   flex: 1;
-  min-width: 120px;
 }
 
 .removeFrameButton {
@@ -140,8 +139,7 @@
 }
 
 .recommendedFrameLabelInput {
-  flex: 2;
-  min-width: 180px;
+  flex: 1;
 }
 
 .additionalFramesSection {
