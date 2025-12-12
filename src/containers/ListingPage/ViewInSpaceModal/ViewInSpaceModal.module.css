@@ -136,6 +136,7 @@
 
 .controlButton svg {
   flex-shrink: 0;
+  fill: none;
 }
 
 .downloadButton {

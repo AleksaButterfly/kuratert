@@ -179,16 +179,15 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
+  padding: 8px 16px;
   background-color: rgba(255, 255, 255, 0.9);
   border: none;
-  border-radius: 4px;
   box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.06);
   cursor: pointer;
   font-family: var(--fontFamily);
   font-size: 14px;
-  font-weight: var(--fontWeightMedium);
-  color: var(--colorGrey900);
+  line-height: 21px;
+  color: #1a1a1a;
   transition: all 0.2s ease;
   z-index: 1;
 }
@@ -200,6 +199,9 @@
 
 .viewInSpaceButton svg {
   flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  fill: none;
 }
 
 .thumbInner {
