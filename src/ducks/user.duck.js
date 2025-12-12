@@ -648,10 +648,10 @@ const userSlice = createSlice({
 
         // Optimistic update: add to favorites immediately
         const listingId = action.meta.arg;
-        if (state.currentUser?.attributes?.profile?.privateData) {
-          const currentFavorites = state.currentUser.attributes.profile.privateData.favoriteListingIds || [];
+        if (state.currentUser?.attributes?.profile?.publicData) {
+          const currentFavorites = state.currentUser.attributes.profile.publicData.favoriteListingIds || [];
           if (!currentFavorites.includes(listingId)) {
-            state.currentUser.attributes.profile.privateData.favoriteListingIds = [listingId, ...currentFavorites];
+            state.currentUser.attributes.profile.publicData.favoriteListingIds = [listingId, ...currentFavorites];
           }
         }
       })
@@ -666,9 +666,9 @@ const userSlice = createSlice({
 
         // Revert optimistic update on error
         const listingId = action.meta.arg;
-        if (state.currentUser?.attributes?.profile?.privateData?.favoriteListingIds) {
-          state.currentUser.attributes.profile.privateData.favoriteListingIds =
-            state.currentUser.attributes.profile.privateData.favoriteListingIds.filter(id => id !== listingId);
+        if (state.currentUser?.attributes?.profile?.publicData?.favoriteListingIds) {
+          state.currentUser.attributes.profile.publicData.favoriteListingIds =
+            state.currentUser.attributes.profile.publicData.favoriteListingIds.filter(id => id !== listingId);
         }
       })
       // removeListingFromFavorites
@@ -679,9 +679,9 @@ const userSlice = createSlice({
 
         // Optimistic update: remove from favorites immediately
         const listingId = action.meta.arg;
-        if (state.currentUser?.attributes?.profile?.privateData?.favoriteListingIds) {
-          state.currentUser.attributes.profile.privateData.favoriteListingIds =
-            state.currentUser.attributes.profile.privateData.favoriteListingIds.filter(id => id !== listingId);
+        if (state.currentUser?.attributes?.profile?.publicData?.favoriteListingIds) {
+          state.currentUser.attributes.profile.publicData.favoriteListingIds =
+            state.currentUser.attributes.profile.publicData.favoriteListingIds.filter(id => id !== listingId);
         }
       })
       .addCase(removeListingFromFavoritesThunk.fulfilled, state => {
@@ -695,10 +695,10 @@ const userSlice = createSlice({
 
         // Revert optimistic update on error: add back to favorites
         const listingId = action.meta.arg;
-        if (state.currentUser?.attributes?.profile?.privateData) {
-          const currentFavorites = state.currentUser.attributes.profile.privateData.favoriteListingIds || [];
+        if (state.currentUser?.attributes?.profile?.publicData) {
+          const currentFavorites = state.currentUser.attributes.profile.publicData.favoriteListingIds || [];
           if (!currentFavorites.includes(listingId)) {
-            state.currentUser.attributes.profile.privateData.favoriteListingIds = [listingId, ...currentFavorites];
+            state.currentUser.attributes.profile.publicData.favoriteListingIds = [listingId, ...currentFavorites];
           }
         }
       })
