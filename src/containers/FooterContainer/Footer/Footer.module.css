@@ -285,13 +285,11 @@
   font-size: 14px;
   line-height: 18px;
   color: var(--colorGrey300);
-  -webkit-text-fill-color: var(--colorGrey300);
   text-decoration: none;
-  transition: var(--transitionStyleButton);
+  transition: color var(--transitionStyleButton);
 
   &:hover {
     color: var(--colorWhite);
-    -webkit-text-fill-color: var(--colorWhite);
     text-decoration: none;
   }
 }
@@ -299,7 +297,5 @@
 .languageIcon {
   width: 14px;
   height: 14px;
-  color: inherit;
   fill: currentColor;
-  transition: var(--transitionStyleButton);
 }
