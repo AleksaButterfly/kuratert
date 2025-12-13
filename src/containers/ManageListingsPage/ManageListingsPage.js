@@ -7,7 +7,11 @@ import { useRouteConfiguration } from '../../context/routeConfigurationContext';
 import { useConfiguration } from '../../context/configurationContext';
 import { FormattedMessage, useIntl } from '../../util/reactIntl';
 import { pathByRouteName } from '../../util/routes';
-import { hasPermissionToPostListings, showCreateListingLinkForUser } from '../../util/userHelpers';
+import {
+  getCurrentUserTypeRoles,
+  hasPermissionToPostListings,
+  showCreateListingLinkForUser,
+} from '../../util/userHelpers';
 import { NO_ACCESS_PAGE_POST_LISTINGS } from '../../util/urlHelpers';
 import { propTypes } from '../../util/types';
 import { isErrorNoPermissionToPostListings } from '../../util/errors';
@@ -235,6 +239,7 @@ export const ManageListingsPageComponent = props => {
 
   const {
     currentUser,
+    currentUserHasListings,
     closingListing,
     closingListingError,
     discardingDraft,
@@ -253,6 +258,20 @@ export const ManageListingsPageComponent = props => {
     onManageDisableScrolling,
     salesTransactions = [],
   } = props;
+
+  const { customer: isCustomer, provider: isProvider } = getCurrentUserTypeRoles(
+    config,
+    currentUser
+  );
+
+  // Determine inbox tab based on user roles
+  const inboxTab = !isCustomer
+    ? 'sales'
+    : !isProvider
+    ? 'orders'
+    : currentUserHasListings
+    ? 'sales'
+    : 'orders';
 
   useEffect(() => {
     if (isErrorNoPermissionToPostListings(openingListingError?.error)) {
@@ -353,6 +372,7 @@ export const ManageListingsPageComponent = props => {
             <UserNav
               currentPage="ManageListingsPage"
               showManageListingsLink={showManageListingsLink}
+              inboxTab={inboxTab}
             />
           </>
         }
@@ -618,7 +638,7 @@ export const ManageListingsPageComponent = props => {
 };
 
 const mapStateToProps = state => {
-  const { currentUser } = state.user;
+  const { currentUser, currentUserHasListings } = state.user;
   const {
     currentPageResultIds,
     pagination,
@@ -636,6 +656,7 @@ const mapStateToProps = state => {
   const listings = getOwnListingsById(state, currentPageResultIds);
   return {
     currentUser,
+    currentUserHasListings,
     currentPageResultIds,
     listings,
     pagination,

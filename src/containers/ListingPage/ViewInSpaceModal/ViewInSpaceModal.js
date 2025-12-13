@@ -344,6 +344,7 @@ const ViewInSpaceModal = props => {
       onClose={onClose}
       onManageDisableScrolling={onManageDisableScrolling}
       usePortal
+      containerClassName={css.modalContainer}
       contentClassName={css.modalContent}
     >
       <div className={css.container}>

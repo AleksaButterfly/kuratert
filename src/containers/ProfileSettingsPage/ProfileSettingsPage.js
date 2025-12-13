@@ -8,6 +8,7 @@ import { propTypes } from '../../util/types';
 import { PROFILE_PAGE_PENDING_APPROVAL_VARIANT } from '../../util/urlHelpers';
 import { ensureCurrentUser } from '../../util/data';
 import {
+  getCurrentUserTypeRoles,
   initialValuesForUserFields,
   isUserAuthorized,
   pickUserFieldsData,
@@ -74,6 +75,7 @@ export const ProfileSettingsPageComponent = props => {
   const intl = useIntl();
   const {
     currentUser,
+    currentUserHasListings,
     image,
     onImageUpload,
     onUpdateProfile,
@@ -85,6 +87,19 @@ export const ProfileSettingsPageComponent = props => {
   } = props;
 
   const { userFields, userTypes = [] } = config.user;
+  const { customer: isCustomer, provider: isProvider } = getCurrentUserTypeRoles(
+    config,
+    currentUser
+  );
+
+  // Determine inbox tab based on user roles
+  const inboxTab = !isCustomer
+    ? 'sales'
+    : !isProvider
+    ? 'orders'
+    : currentUserHasListings
+    ? 'sales'
+    : 'orders';
   const publicUserFields = userFields.filter(uf => uf.scope === 'public');
 
   const handleSubmit = (values, userType) => {
@@ -168,6 +183,7 @@ export const ProfileSettingsPageComponent = props => {
             <UserNav
               currentPage="ProfileSettingsPage"
               showManageListingsLink={showManageListingsLink}
+              inboxTab={inboxTab}
             />
           </>
         }
@@ -189,7 +205,7 @@ export const ProfileSettingsPageComponent = props => {
 };
 
 const mapStateToProps = state => {
-  const { currentUser } = state.user;
+  const { currentUser, currentUserHasListings } = state.user;
   const {
     image,
     uploadImageError,
@@ -199,6 +215,7 @@ const mapStateToProps = state => {
   } = state.ProfileSettingsPage;
   return {
     currentUser,
+    currentUserHasListings,
     image,
     scrollingDisabled: isScrollingDisabled(state),
     updateInProgress,

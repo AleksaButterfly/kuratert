@@ -8,7 +8,11 @@ import { createResourceLocatorString } from '../../util/routes';
 import { FormattedMessage, useIntl } from '../../util/reactIntl';
 import { ensureCurrentUser } from '../../util/data';
 import { propTypes } from '../../util/types';
-import { showCreateListingLinkForUser, showPaymentDetailsForUser } from '../../util/userHelpers';
+import {
+  getCurrentUserTypeRoles,
+  showCreateListingLinkForUser,
+  showPaymentDetailsForUser,
+} from '../../util/userHelpers';
 import { isScrollingDisabled } from '../../ducks/ui.duck';
 import {
   stripeAccountClearError,
@@ -105,6 +109,7 @@ export const StripePayoutPageComponent = props => {
   const intl = useIntl();
   const {
     currentUser,
+    currentUserHasListings,
     scrollingDisabled,
     getAccountLinkInProgress,
     getAccountLinkError,
@@ -121,6 +126,20 @@ export const StripePayoutPageComponent = props => {
     params,
     authScopes,
   } = props;
+
+  const { customer: isCustomer, provider: isProvider } = getCurrentUserTypeRoles(
+    config,
+    currentUser
+  );
+
+  // Determine inbox tab based on user roles
+  const inboxTab = !isCustomer
+    ? 'sales'
+    : !isProvider
+    ? 'orders'
+    : currentUserHasListings
+    ? 'sales'
+    : 'orders';
 
   const { returnURLType } = params || {};
   const ensuredCurrentUser = ensureCurrentUser(currentUser);
@@ -195,6 +214,7 @@ export const StripePayoutPageComponent = props => {
             <UserNav
               currentPage="StripePayoutPage"
               showManageListingsLink={showManageListingsLink}
+              inboxTab={inboxTab}
             />
           </>
         }
@@ -275,11 +295,12 @@ const mapStateToProps = state => {
     stripeAccount,
     stripeAccountFetched,
   } = state.stripeConnectAccount;
-  const { currentUser } = state.user;
+  const { currentUser, currentUserHasListings } = state.user;
   const { payoutDetailsSaveInProgress, payoutDetailsSaved } = state.StripePayoutPage;
   const { authScopes } = state.auth;
   return {
     currentUser,
+    currentUserHasListings,
     getAccountLinkInProgress,
     getAccountLinkError,
     createStripeAccountError,

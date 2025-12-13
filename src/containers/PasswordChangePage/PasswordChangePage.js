@@ -6,7 +6,11 @@ import { useConfiguration } from '../../context/configurationContext';
 import { FormattedMessage, useIntl } from '../../util/reactIntl';
 import { propTypes } from '../../util/types';
 import { isScrollingDisabled } from '../../ducks/ui.duck';
-import { showCreateListingLinkForUser, showPaymentDetailsForUser } from '../../util/userHelpers';
+import {
+  getCurrentUserTypeRoles,
+  showCreateListingLinkForUser,
+  showPaymentDetailsForUser,
+} from '../../util/userHelpers';
 
 import { Page, UserNav, H3, LayoutSideNavigation } from '../../components';
 
@@ -40,6 +44,7 @@ export const PasswordChangePageComponent = props => {
     changePasswordError,
     changePasswordInProgress,
     currentUser,
+    currentUserHasListings,
     onChange,
     onSubmitChangePassword,
     onResetPassword,
@@ -48,6 +53,20 @@ export const PasswordChangePageComponent = props => {
     passwordChanged,
     scrollingDisabled,
   } = props;
+
+  const { customer: isCustomer, provider: isProvider } = getCurrentUserTypeRoles(
+    config,
+    currentUser
+  );
+
+  // Determine inbox tab based on user roles
+  const inboxTab = !isCustomer
+    ? 'sales'
+    : !isProvider
+    ? 'orders'
+    : currentUserHasListings
+    ? 'sales'
+    : 'orders';
 
   const changePasswordForm =
     currentUser && currentUser.id ? (
@@ -87,6 +106,7 @@ export const PasswordChangePageComponent = props => {
             <UserNav
               currentPage="PasswordChangePage"
               showManageListingsLink={showManageListingsLink}
+              inboxTab={inboxTab}
             />
           </>
         }
@@ -116,11 +136,12 @@ const mapStateToProps = state => {
     resetPasswordInProgress,
     resetPasswordError,
   } = state.PasswordChangePage;
-  const { currentUser } = state.user;
+  const { currentUser, currentUserHasListings } = state.user;
   return {
     changePasswordError,
     changePasswordInProgress,
     currentUser,
+    currentUserHasListings,
     passwordChanged,
     scrollingDisabled: isScrollingDisabled(state),
     resetPasswordInProgress,

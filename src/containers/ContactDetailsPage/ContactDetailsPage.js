@@ -7,7 +7,11 @@ import { useConfiguration } from '../../context/configurationContext';
 import { FormattedMessage, useIntl } from '../../util/reactIntl';
 import { propTypes } from '../../util/types';
 import { ensureCurrentUser } from '../../util/data';
-import { showCreateListingLinkForUser, showPaymentDetailsForUser } from '../../util/userHelpers';
+import {
+  getCurrentUserTypeRoles,
+  showCreateListingLinkForUser,
+  showPaymentDetailsForUser,
+} from '../../util/userHelpers';
 
 import { sendVerificationEmail } from '../../ducks/user.duck';
 import { isScrollingDisabled } from '../../ducks/ui.duck';
@@ -52,6 +56,7 @@ export const ContactDetailsPageComponent = props => {
     savePhoneNumberError,
     saveContactDetailsInProgress,
     currentUser,
+    currentUserHasListings,
     contactDetailsChanged,
     onChange,
     scrollingDisabled,
@@ -64,6 +69,19 @@ export const ContactDetailsPageComponent = props => {
     resetPasswordError,
   } = props;
   const { userTypes = [] } = config.user;
+  const { customer: isCustomer, provider: isProvider } = getCurrentUserTypeRoles(
+    config,
+    currentUser
+  );
+
+  // Determine inbox tab based on user roles
+  const inboxTab = !isCustomer
+    ? 'sales'
+    : !isProvider
+    ? 'orders'
+    : currentUserHasListings
+    ? 'sales'
+    : 'orders';
 
   const user = ensureCurrentUser(currentUser);
   const currentEmail = user.attributes.email || '';
@@ -125,6 +143,7 @@ export const ContactDetailsPageComponent = props => {
             <UserNav
               currentPage="ContactDetailsPage"
               showManageListingsLink={showManageListingsLink}
+              inboxTab={inboxTab}
             />
           </>
         }
@@ -147,7 +166,12 @@ export const ContactDetailsPageComponent = props => {
 
 const mapStateToProps = state => {
   // Topbar needs user info.
-  const { currentUser, sendVerificationEmailInProgress, sendVerificationEmailError } = state.user;
+  const {
+    currentUser,
+    currentUserHasListings,
+    sendVerificationEmailInProgress,
+    sendVerificationEmailError,
+  } = state.user;
   const {
     saveEmailError,
     savePhoneNumberError,
@@ -161,6 +185,7 @@ const mapStateToProps = state => {
     savePhoneNumberError,
     saveContactDetailsInProgress,
     currentUser,
+    currentUserHasListings,
     contactDetailsChanged,
     scrollingDisabled: isScrollingDisabled(state),
     sendVerificationEmailInProgress,

@@ -9,7 +9,7 @@ import { useRouteConfiguration } from '../../context/routeConfigurationContext';
 
 import { FormattedMessage, intlShape, useIntl } from '../../util/reactIntl';
 import { parse } from '../../util/urlHelpers';
-import { getCurrentUserTypeRoles } from '../../util/userHelpers';
+import { getCurrentUserTypeRoles, showCreateListingLinkForUser } from '../../util/userHelpers';
 import {
   propTypes,
   DATE_TYPE_DATE,
@@ -47,6 +47,7 @@ import {
   TimeRange,
   UserDisplayName,
   LayoutSideNavigation,
+  UserNav,
 } from '../../components';
 
 import TopbarContainer from '../../containers/TopbarContainer/TopbarContainer';
@@ -277,6 +278,7 @@ export const InboxPageComponent = props => {
     config,
     currentUser
   );
+  const showManageListingsLink = showCreateListingLinkForUser(config, currentUser);
 
   const isOrders = tab === 'orders';
   const hasNoResults = !fetchInProgress && transactions.length === 0 && !fetchOrdersOrSalesError;
@@ -382,10 +384,17 @@ export const InboxPageComponent = props => {
       <LayoutSideNavigation
         sideNavClassName={css.navigation}
         topbar={
-          <TopbarContainer
-            mobileRootClassName={css.mobileTopbar}
-            desktopClassName={css.desktopTopbar}
-          />
+          <>
+            <TopbarContainer
+              mobileRootClassName={css.mobileTopbar}
+              desktopClassName={css.desktopTopbar}
+            />
+            <UserNav
+              currentPage="InboxPage"
+              inboxTab={tab}
+              showManageListingsLink={showManageListingsLink}
+            />
+          </>
         }
         sideNav={
           <>

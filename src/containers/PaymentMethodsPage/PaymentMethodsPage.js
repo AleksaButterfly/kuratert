@@ -6,7 +6,11 @@ import { useConfiguration } from '../../context/configurationContext.js';
 import { FormattedMessage, useIntl } from '../../util/reactIntl';
 import { ensureCurrentUser, ensureStripeCustomer, ensurePaymentMethodCard } from '../../util/data';
 import { propTypes } from '../../util/types';
-import { showCreateListingLinkForUser, showPaymentDetailsForUser } from '../../util/userHelpers.js';
+import {
+  getCurrentUserTypeRoles,
+  showCreateListingLinkForUser,
+  showPaymentDetailsForUser,
+} from '../../util/userHelpers.js';
 import { savePaymentMethod, deletePaymentMethod } from '../../ducks/paymentMethods.duck';
 import { handleCardSetup } from '../../ducks/stripe.duck';
 import { manageDisableScrolling, isScrollingDisabled } from '../../ducks/ui.duck';
@@ -49,6 +53,7 @@ const PaymentMethodsPageComponent = props => {
 
   const {
     currentUser,
+    currentUserHasListings,
     addPaymentMethodError,
     deletePaymentMethodError,
     createStripeCustomerError,
@@ -63,6 +68,20 @@ const PaymentMethodsPageComponent = props => {
     onManageDisableScrolling,
     stripeCustomerFetched,
   } = props;
+
+  const { customer: isCustomer, provider: isProvider } = getCurrentUserTypeRoles(
+    config,
+    currentUser
+  );
+
+  // Determine inbox tab based on user roles
+  const inboxTab = !isCustomer
+    ? 'sales'
+    : !isProvider
+    ? 'orders'
+    : currentUserHasListings
+    ? 'sales'
+    : 'orders';
 
   const getClientSecret = setupIntent => {
     return setupIntent && setupIntent.attributes ? setupIntent.attributes.clientSecret : null;
@@ -182,6 +201,7 @@ const PaymentMethodsPageComponent = props => {
             <UserNav
               currentPage="PaymentMethodsPage"
               showManageListingsLink={showManageListingsLink}
+              inboxTab={inboxTab}
             />
           </>
         }
@@ -230,7 +250,7 @@ const PaymentMethodsPageComponent = props => {
 };
 
 const mapStateToProps = state => {
-  const { currentUser } = state.user;
+  const { currentUser, currentUserHasListings } = state.user;
 
   const {
     deletePaymentMethodInProgress,
@@ -244,6 +264,7 @@ const mapStateToProps = state => {
   const { handleCardSetupError } = state.stripe;
   return {
     currentUser,
+    currentUserHasListings,
     scrollingDisabled: isScrollingDisabled(state),
     deletePaymentMethodInProgress,
     addPaymentMethodError,

@@ -9,6 +9,7 @@ import { FormattedMessage, useIntl } from '../../util/reactIntl';
 import { propTypes } from '../../util/types';
 import { ensureCurrentUser } from '../../util/data';
 import {
+  getCurrentUserTypeRoles,
   showCreateListingLinkForUser,
   showPaymentDetailsForUser,
   initialValuesForUserFields,
@@ -49,6 +50,7 @@ export const ManageAccountPageComponent = props => {
     deleteAccountError,
     deleteAccountInProgress,
     currentUser,
+    currentUserHasListings,
     scrollingDisabled,
     onSubmitDeleteAccount,
     onResetPassword,
@@ -58,6 +60,20 @@ export const ManageAccountPageComponent = props => {
     updateProfileInProgress = false,
     updateProfileError,
   } = props;
+
+  const { customer: isCustomer, provider: isProvider } = getCurrentUserTypeRoles(
+    config,
+    currentUser
+  );
+
+  // Determine inbox tab based on user roles
+  const inboxTab = !isCustomer
+    ? 'sales'
+    : !isProvider
+    ? 'orders'
+    : currentUserHasListings
+    ? 'sales'
+    : 'orders';
 
   const user = ensureCurrentUser(currentUser);
   const { publicData, protectedData, privateData } = user?.attributes.profile;
@@ -130,6 +146,7 @@ export const ManageAccountPageComponent = props => {
             <UserNav
               currentPage="ManageAccountPage"
               showManageListingsLink={showManageListingsLink}
+              inboxTab={inboxTab}
             />
           </>
         }
@@ -187,7 +204,7 @@ export const ManageAccountPageComponent = props => {
 
 const mapStateToProps = state => {
   // Topbar needs user info.
-  const { currentUser } = state.user;
+  const { currentUser, currentUserHasListings } = state.user;
   const {
     deleteAccountError,
     deleteAccountInProgress,
@@ -201,6 +218,7 @@ const mapStateToProps = state => {
     deleteAccountError,
     deleteAccountInProgress,
     currentUser,
+    currentUserHasListings,
     accountDeletionConfirmed,
     scrollingDisabled: isScrollingDisabled(state),
     resetPasswordInProgress,
