@@ -123,8 +123,20 @@ const validateStripeCurrency = stripe => {
 };
 
 const mergeLocalizations = (hostedLocalization, defaultLocalization) => {
-  // This defaults to 'en', if no locale is set.
-  const locale = hostedLocalization?.locale || defaultLocalization.locale || 'en';
+  // Check localStorage for user's language preference (client-side only)
+  // Norwegian (nb-NO) is always the default
+  const getLocaleFromStorage = () => {
+    if (typeof window === 'undefined') return null;
+    const savedLocale = localStorage.getItem('locale');
+    if (savedLocale === 'en') return 'en';
+    if (savedLocale === 'no') return 'nb-NO';
+    return null;
+  };
+
+  const storedLocale = getLocaleFromStorage();
+  // Use stored locale if available, otherwise fall back to hosted/default (which should be nb-NO)
+  const locale = storedLocale || hostedLocalization?.locale || defaultLocalization.locale || 'nb-NO';
+
   // NOTE: We use this with DatePicker and moment, the range should be 0 - 6 instead of 1-7.
   const firstDay = hostedLocalization?.firstDayOfWeek || defaultLocalization.firstDayOfWeek || 1;
   const firstDayInMomentRange = firstDay % 7;

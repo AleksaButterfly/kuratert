@@ -72,7 +72,16 @@ const defaultConfig = {
   // Note: The localization comes from localization asset nowadays by default.
   //       To use this built-in configuration, you need to remove the overwrite from configHelper.js (mergeLocalizations func)
   localization: {
-    locale: 'nb-NO',
+    // Dynamic locale based on localStorage preference
+    // Norwegian (nb-NO) is always the default
+    locale: (() => {
+      if (typeof window === 'undefined') return 'nb-NO';
+      const savedLocale = localStorage.getItem('locale');
+      if (savedLocale === 'en') {
+        return 'en';
+      }
+      return 'nb-NO'; // Norwegian is always default
+    })(),
     // First day of week
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/getWeekInfo#return_value
     // 1: Monday

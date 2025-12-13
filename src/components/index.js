@@ -44,6 +44,7 @@ export { default as IconSocialMediaInstagram } from './IconSocialMediaInstagram/
 export { default as IconSocialMediaTwitter } from './IconSocialMediaTwitter/IconSocialMediaTwitter';
 export { default as IconSpinner } from './IconSpinner/IconSpinner';
 export { default as IconSuccess } from './IconSuccess/IconSuccess';
+export { default as IconLanguage } from './IconLanguage/IconLanguage';
 export { default as KeywordSearchPredictions } from './KeywordSearchPredictions/KeywordSearchPredictions';
 
 // Typography
@@ -96,6 +97,7 @@ export { default as Menu } from './Menu/Menu';
 // Modal
 export { default as Modal } from './Modal/Modal';
 export { default as ModalInMobile } from './ModalInMobile/ModalInMobile';
+export { default as LanguageModal } from './LanguageModal/LanguageModal';
 
 // Fields (for Final Form)
 export { default as FieldCheckbox } from './FieldCheckbox/FieldCheckbox';

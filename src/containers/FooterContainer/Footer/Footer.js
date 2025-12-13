@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import classNames from 'classnames';
 
 import { useIntl } from '../../../util/reactIntl';
-import { LinkedLogo, ExternalLink, NamedLink } from '../../../components';
+import { useConfiguration } from '../../../context/configurationContext';
+import { supportedLanguages } from '../../../util/translations';
+import { LinkedLogo, ExternalLink, NamedLink, IconLanguage, LanguageModal } from '../../../components';
 import BlockBuilder from '../../PageBuilder/BlockBuilder';
 import NewsletterForm from './NewsletterForm';
 import { subscribeToNewsletter } from '../../../util/api';
@@ -70,10 +72,19 @@ const Footer = props => {
     socialMediaLinks = [],
     linkLogoToExternalSite,
     options,
+    languageModalOpen,
+    onToggleLanguageModal,
+    onManageDisableScrolling,
   } = props;
 
   const intl = useIntl();
+  const config = useConfiguration();
   const classes = classNames(rootClassName || css.root, className);
+
+  // Get current language for display
+  const locale = config.localization?.locale || 'nb-NO';
+  const currentLanguageCode = locale.startsWith('nb') || locale === 'no' ? 'no' : 'en';
+  const currentLanguage = supportedLanguages.find(lang => lang.code === currentLanguageCode);
 
   // Newsletter state
   const [newsletterInProgress, setNewsletterInProgress] = useState(false);
@@ -208,8 +219,31 @@ const Footer = props => {
                 {intl.formatMessage({ id: link.labelId })}
               </NamedLink>
             ))}
+
+            {/* Language Selector */}
+            <button
+              type="button"
+              className={css.languageSelector}
+              onClick={() => onToggleLanguageModal(true)}
+            >
+              <IconLanguage className={css.languageIcon} />
+              <span className={css.languageText}>
+                {intl.formatMessage(
+                  { id: 'Footer.language' },
+                  { language: currentLanguage?.language, code: currentLanguageCode.toUpperCase() }
+                )}
+              </span>
+            </button>
           </div>
         </div>
+
+        {/* Language Modal */}
+        <LanguageModal
+          id="FooterLanguageModal"
+          isOpen={languageModalOpen}
+          onCloseModal={() => onToggleLanguageModal(false)}
+          onManageDisableScrolling={onManageDisableScrolling}
+        />
       </div>
     </footer>
   );

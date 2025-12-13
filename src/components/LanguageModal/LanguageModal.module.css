@@ -1,0 +1,62 @@
+@import '../../styles/customMediaQueries.css';
+
+.root {
+  composes: marketplaceModalBaseStyles from global;
+  padding-top: 70px;
+}
+
+@media (--viewportMedium) {
+  .root {
+    flex-basis: 567px;
+  }
+}
+
+.modalContent {
+  flex-grow: 1;
+}
+
+.modalTitle {
+  composes: marketplaceModalTitleStyles from global;
+}
+
+.languages {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-gap: 12px;
+  margin-top: 24px;
+}
+
+.language {
+  /* Reset button styles */
+  background: none;
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+
+  /* Custom styles */
+  text-align: left;
+  color: var(--colorGrey700);
+  padding: 9px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--borderRadiusMedium);
+  width: 100%;
+}
+
+.language:hover {
+  text-decoration: none;
+  background-color: var(--colorGrey50);
+}
+
+.selectedLanguage {
+  border-color: var(--colorGrey700);
+}
+
+.languageText,
+.languageCountry {
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.languageCountry {
+  color: var(--colorGrey500);
+}

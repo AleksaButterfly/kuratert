@@ -4,6 +4,7 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   disableScrollRequests: [],
+  languageModalOpen: false,
 };
 
 const uiSlice = createSlice({
@@ -24,12 +25,15 @@ const uiSlice = createSlice({
         state.disableScrollRequests = [...disableScrollRequests, { componentId, disableScrolling }];
       }
     },
+    toggleLanguageModal: (state, action) => {
+      state.languageModalOpen = action.payload;
+    },
   },
 });
 
 // ================ Exports ================ //
 
-export const { disableScrolling } = uiSlice.actions;
+export const { disableScrolling, toggleLanguageModal } = uiSlice.actions;
 export default uiSlice.reducer;
 
 // ================ Helper function ================ //
@@ -43,3 +47,5 @@ export const isScrollingDisabled = state => {
   const { disableScrollRequests } = state.ui;
   return disableScrollRequests.some(r => r.disableScrolling);
 };
+
+export const isLanguageModalOpen = state => state.ui.languageModalOpen;

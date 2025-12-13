@@ -7,6 +7,7 @@ import { FormattedMessage } from '../../../../util/reactIntl';
 import { ACCOUNT_SETTINGS_PAGES } from '../../../../routing/routeConfiguration';
 import { createResourceLocatorString } from '../../../../util/routes';
 import { isMainSearchTypeKeywords } from '../../../../util/search';
+import { supportedLanguages } from '../../../../util/translations';
 import { getSearchPageResourceLocatorStringParams } from '../../../SearchPage/SearchPage.shared';
 import {
   Avatar,
@@ -21,6 +22,8 @@ import {
   IconFavorites,
   IconSearch,
   IconUser,
+  IconLanguage,
+  LanguageModal,
 } from '../../../../components';
 import { getFavoriteListingIds, getCartItemCount } from '../../../../util/userHelpers';
 
@@ -91,6 +94,21 @@ const SignupLink = ({ intl }) => {
         <IconUser />
       </span>
     </NamedLink>
+  );
+};
+
+const LanguageButton = ({ intl, currentLanguage, onClick }) => {
+  return (
+    <button
+      type="button"
+      className={css.topbarLink}
+      onClick={onClick}
+      aria-label={intl.formatMessage({ id: 'TopbarDesktop.language' })}
+    >
+      <span className={css.topbarLinkLabel}>
+        <IconLanguage className={css.languageIcon} />
+      </span>
+    </button>
   );
 };
 
@@ -201,6 +219,9 @@ const TopbarDesktop = props => {
     showCreateListingsLink,
     showSearchForm,
     inboxTab,
+    languageModalOpen,
+    onToggleLanguageModal,
+    onManageDisableScrolling,
   } = props;
   const [mounted, setMounted] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -208,6 +229,11 @@ const TopbarDesktop = props => {
   const history = useHistory();
   const location = useLocation();
   const routeConfiguration = useRouteConfiguration();
+
+  // Get current language for display
+  const locale = config.localization?.locale || 'nb-NO';
+  const currentLanguageCode = locale.startsWith('nb') || locale === 'no' ? 'no' : 'en';
+  const currentLanguage = supportedLanguages.find(lang => lang.code === currentLanguageCode);
 
   useEffect(() => {
     setMounted(true);
@@ -260,6 +286,13 @@ const TopbarDesktop = props => {
   ) : null;
   const favoritesLink = <FavoritesLink intl={intl} count={favoritesCount} />;
   const cartLink = <CartLink intl={intl} count={cartCount} />;
+  const languageButton = (
+    <LanguageButton
+      intl={intl}
+      currentLanguage={currentLanguage}
+      onClick={() => onToggleLanguageModal(true)}
+    />
+  );
 
   const profileMenuMaybe = authenticatedOnClientSide ? (
     <ProfileMenu
@@ -306,12 +339,21 @@ const TopbarDesktop = props => {
           hasClientSideContentReady={authenticatedOnClientSide || !isAuthenticatedOrJustHydrated}
           showCreateListingsLink={showCreateListingsLink}
         />
+        {languageButton}
         {searchButton}
         {favoritesLink}
         {cartLink}
         {profileMenuMaybe}
         {signupLinkMaybe}
       </div>
+
+      {/* Language Modal */}
+      <LanguageModal
+        id="TopbarLanguageModal"
+        isOpen={languageModalOpen}
+        onCloseModal={() => onToggleLanguageModal(false)}
+        onManageDisableScrolling={onManageDisableScrolling}
+      />
     </nav>
   );
 };
