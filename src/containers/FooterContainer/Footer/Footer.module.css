@@ -283,6 +283,7 @@
   cursor: pointer;
   font-family: inherit;
   font-size: 14px;
+  font-weight: var(--fontWeightMedium);
   line-height: 18px;
   color: var(--colorGrey300);
   text-decoration: none;
