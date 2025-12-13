@@ -23,7 +23,7 @@ import { requireListingImage } from '../../util/configHelpers';
 
 // Import global thunk functions
 import { isScrollingDisabled } from '../../ducks/ui.duck';
-import { confirmCardPayment, retrievePaymentIntent } from '../../ducks/stripe.duck';
+import { confirmCardPayment, confirmKlarnaPayment, retrievePaymentIntent } from '../../ducks/stripe.duck';
 import { savePaymentMethod } from '../../ducks/paymentMethods.duck';
 
 // Import shared components
@@ -229,7 +229,7 @@ const mapStateToProps = state => {
     confirmPaymentError,
   } = state.CheckoutPage;
   const { currentUser } = state.user;
-  const { confirmCardPaymentError, paymentIntent, retrievePaymentIntentError } = state.stripe;
+  const { confirmCardPaymentError, confirmKlarnaPaymentError, paymentIntent, retrievePaymentIntentError } = state.stripe;
   return {
     scrollingDisabled: isScrollingDisabled(state),
     currentUser,
@@ -245,6 +245,7 @@ const mapStateToProps = state => {
     initiateInquiryError,
     initiateOrderError,
     confirmCardPaymentError,
+    confirmKlarnaPaymentError,
     confirmPaymentError,
     paymentIntent,
     retrievePaymentIntentError,
@@ -262,6 +263,7 @@ const mapDispatchToProps = dispatch => ({
     dispatch(initiateOrder(params, processAlias, transactionId, transitionName, isPrivileged)),
   onRetrievePaymentIntent: params => dispatch(retrievePaymentIntent(params)),
   onConfirmCardPayment: params => dispatch(confirmCardPayment(params)),
+  onConfirmKlarnaPayment: params => dispatch(confirmKlarnaPayment(params)),
   onConfirmPayment: (transactionId, transitionName, transitionParams) =>
     dispatch(confirmPayment(transactionId, transitionName, transitionParams)),
   onSendMessage: params => dispatch(sendMessage(params)),

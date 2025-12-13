@@ -150,6 +150,53 @@
    :from :state/pending-payment,
    :to :state/payment-expired}
 
+  ;; ============================================================
+  ;; KLARNA PAYMENT FLOW (Push payment method - immediate capture)
+  ;; ============================================================
+
+  ;; Customer initiates Klarna payment after offer accepted
+  {:name :transition/request-payment-klarna,
+   :actor :actor.role/customer,
+   :actions
+   [{:name :action/update-protected-data}
+    {:name :action/create-pending-stock-reservation}
+    {:name :action/privileged-set-line-items}
+    {:name :action/stripe-create-payment-intent-push,
+     :config {:paymentMethodTypes ["klarna"]}}],
+   :from :state/accepted,
+   :to :state/pending-payment-klarna,
+   :privileged? true}
+
+  ;; Customer confirms Klarna payment (after returning from Klarna)
+  {:name :transition/confirm-payment-klarna,
+   :actor :actor.role/customer,
+   :actions
+   [{:name :action/accept-stock-reservation}],
+   :from :state/pending-payment-klarna,
+   :to :state/purchased}
+
+  ;; Klarna payment expires after 15 minutes
+  {:name :transition/expire-payment-klarna,
+   :at
+   {:fn/plus
+    [{:fn/timepoint [:time/first-entered-state :state/pending-payment-klarna]}
+     {:fn/period ["PT15M"]}]},
+   :actions
+   [{:name :action/calculate-full-refund}
+    {:name :action/stripe-refund-payment}
+    {:name :action/decline-stock-reservation}],
+   :from :state/pending-payment-klarna,
+   :to :state/payment-expired}
+
+  ;; Customer cancels Klarna payment to try different method
+  {:name :transition/cancel-payment-klarna,
+   :actor :actor.role/customer,
+   :actions
+   [{:name :action/stripe-refund-payment}
+    {:name :action/decline-stock-reservation}],
+   :from :state/pending-payment-klarna,
+   :to :state/accepted}
+
   ;; Accepted state expires after 7 days if customer doesn't pay
   {:name :transition/expire-accepted,
    :at
@@ -381,6 +428,30 @@
 
   {:name :notification/shipping-reminder,
    :on :transition/confirm-payment,
+   :at
+   {:fn/plus
+    [{:fn/timepoint [:time/first-entered-state :state/purchased]}
+     {:fn/period ["P3D"]}]},
+   :to :actor.role/provider,
+   :template :offer-shipping-reminder}
+
+  ;; Klarna payment notifications (same templates as card payments)
+  {:name :notification/order-receipt-klarna,
+   :on :transition/confirm-payment-klarna,
+   :at
+   {:fn/plus
+    [{:fn/timepoint [:time/first-entered-state :state/purchased]}
+     {:fn/period ["PT15M"]}]},
+   :to :actor.role/customer,
+   :template :offer-order-receipt}
+
+  {:name :notification/new-order-klarna,
+   :on :transition/confirm-payment-klarna,
+   :to :actor.role/provider,
+   :template :offer-new-order}
+
+  {:name :notification/shipping-reminder-klarna,
+   :on :transition/confirm-payment-klarna,
    :at
    {:fn/plus
     [{:fn/timepoint [:time/first-entered-state :state/purchased]}

@@ -256,3 +256,64 @@
   font-size: 13px;
   margin-top: 8px;
 }
+
+/* Klarna Button */
+.klarnaButton {
+  width: 100%;
+  height: 48px;
+  border: 1px solid var(--colorGrey200);
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  transition: opacity 0.2s ease;
+  margin-bottom: 12px;
+
+  @media (--viewportMedium) {
+    height: 52px;
+  }
+}
+
+.klarnaButton:hover {
+  opacity: 0.9;
+}
+
+.klarnaButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.klarnaButtonContent {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.klarnaSpinner {
+  width: 24px;
+  height: 24px;
+}
+
+/* Cancel Klarna Payment Section */
+.cancelKlarnaSection {
+  margin-bottom: 24px;
+  padding: 20px;
+  background-color: var(--colorGrey50);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.cancelKlarnaMessage {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  color: var(--colorGrey700);
+}
+
+.cancelKlarnaButton {
+  composes: buttonDefault from global;
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+}

@@ -406,6 +406,12 @@
   }
 }
 
+.klarnaProcessing {
+  color: var(--colorGrey700);
+  text-align: center;
+  padding: 24px 0;
+}
+
 .priceContainer {
   /* Layout */
   display: flex;

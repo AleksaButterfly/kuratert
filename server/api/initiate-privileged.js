@@ -97,11 +97,17 @@ module.exports = (req, res) => {
     .then(trustedSdk => {
       const { params } = bodyParams;
 
+      // Extract paymentMethodTypes if present (for Klarna and other push payment methods)
+      const paymentMethodTypesMaybe = params.paymentMethodTypes
+        ? { paymentMethodTypes: params.paymentMethodTypes }
+        : {};
+
       // Add lineItems and protectedData to the body params
       const body = {
         ...bodyParams,
         params: {
           ...params,
+          ...paymentMethodTypesMaybe,
           lineItems,
           ...metadataMaybe,
           // Merge with existing protectedData (cartItems already serialized by client if present)

@@ -159,6 +159,34 @@ export const hasTransactionPassedPendingPayment = (tx, process) => {
   return process.hasPassedState(process.states.PENDING_PAYMENT, tx);
 };
 
+/**
+ * Check if transaction is in pending-payment-klarna state
+ * @param {Object} transaction
+ * @param {Object} process
+ * @returns true if transaction is in PENDING_PAYMENT_KLARNA state
+ */
+export const isInKlarnaPendingState = (transaction, process) => {
+  if (!transaction?.id || !process) {
+    return false;
+  }
+  const state = process.getState(transaction);
+  return state === process.states?.PENDING_PAYMENT_KLARNA;
+};
+
+/**
+ * Check if transaction is in pending-payment (card) state
+ * @param {Object} transaction
+ * @param {Object} process
+ * @returns true if transaction is in PENDING_PAYMENT state
+ */
+export const isInCardPendingState = (transaction, process) => {
+  if (!transaction?.id || !process) {
+    return false;
+  }
+  const state = process.getState(transaction);
+  return state === process.states?.PENDING_PAYMENT;
+};
+
 const persistTransaction = (order, pageData, storeData, setPageData, sessionStorageKey) => {
   // Store the returned transaction (order)
   if (order?.id) {
@@ -358,6 +386,178 @@ export const processCheckoutWithPayment = (orderParams, extraPaymentParams) => {
   );
 
   return handlePaymentIntentCreation(orderParams);
+};
+
+/**
+ * Build return URL for Klarna redirect
+ *
+ * @param {String} origin - window.location.origin
+ * @param {String} listingSlug - listing slug for URL
+ * @param {String} listingId - listing UUID
+ * @param {String} transactionId - transaction UUID (or 'pending' if not yet created)
+ * @returns String - return URL for Klarna
+ */
+export const buildKlarnaReturnUrl = (origin, listingSlug, listingId, transactionId) => {
+  return `${origin}/l/${listingSlug}/${listingId}/checkout?klarna_return=true&txId=${transactionId}`;
+};
+
+/**
+ * Get billing details from form values for Klarna
+ *
+ * @param {Object} formValues - form values with recipient/billing info
+ * @param {Object} currentUser - current user entity
+ * @returns Object - billing details for Klarna
+ */
+export const getBillingDetailsForKlarna = (formValues, currentUser) => {
+  const {
+    recipientName,
+    recipientAddressLine1,
+    recipientAddressLine2,
+    recipientPostal,
+    recipientCity,
+    recipientState,
+    recipientCountry,
+    name,
+    addressLine1,
+    addressLine2,
+    postal,
+    city,
+    state,
+    country,
+  } = formValues;
+
+  // Prefer recipient (shipping) details if available, otherwise use billing details
+  const finalName = recipientName || name ||
+    `${currentUser?.attributes?.profile?.firstName || ''} ${currentUser?.attributes?.profile?.lastName || ''}`.trim();
+  const finalEmail = currentUser?.attributes?.email;
+  const finalLine1 = recipientAddressLine1 || addressLine1;
+  const finalLine2 = recipientAddressLine2 || addressLine2 || '';
+  const finalCity = recipientCity || city;
+  const finalState = recipientState || state || '';
+  const finalPostal = recipientPostal || postal;
+  const finalCountry = recipientCountry || country;
+
+  return {
+    name: finalName,
+    email: finalEmail,
+    address: {
+      line1: finalLine1,
+      line2: finalLine2,
+      city: finalCity,
+      state: finalState,
+      postal_code: finalPostal,
+      country: finalCountry,
+    },
+  };
+};
+
+/**
+ * Create call sequence for checkout with Klarna.
+ *
+ * Klarna flow differs from card payments:
+ * 1. Request payment (creates PaymentIntent with Klarna method type)
+ * 2. Confirm Klarna payment (redirects user to Klarna)
+ *
+ * After user returns from Klarna:
+ * 3. Confirm payment in Marketplace API
+ * 4. Send initial message
+ *
+ * @param {Object} orderParams - params for the order
+ * @param {Object} extraPaymentParams - extra params for the Klarna flow
+ * @returns Promise that initiates Klarna payment and triggers redirect
+ */
+export const processCheckoutWithKlarna = (orderParams, extraPaymentParams) => {
+  const {
+    onInitiateOrder,
+    onConfirmKlarnaPayment,
+    pageData,
+    process,
+    setPageData,
+    sessionStorageKey,
+    returnUrl,
+    billingDetails,
+    stripe,
+  } = extraPaymentParams;
+
+  const storedTx = ensureTransaction(pageData.transaction);
+  const processAlias = pageData?.listing?.attributes?.publicData?.transactionProcessAlias;
+
+  ////////////////////////////////////////////////
+  // Step 1: initiate order with Klarna         //
+  // by requesting payment from Marketplace API //
+  ////////////////////////////////////////////////
+  const fnRequestPaymentKlarna = fnParams => {
+    const hasPaymentIntents = storedTx.attributes.protectedData?.stripePaymentIntents;
+
+    const processName = resolveLatestProcessName(processAlias.split('/')[0]);
+
+    // Determine correct Klarna transition based on process and state
+    let requestTransition;
+    if (processName === NEGOTIATED_PURCHASE_PROCESS_NAME) {
+      // For negotiated purchase, always use REQUEST_PAYMENT_KLARNA from accepted state
+      requestTransition = process.transitions.REQUEST_PAYMENT_KLARNA;
+    } else if (storedTx?.attributes?.lastTransition === process.transitions.INQUIRE) {
+      requestTransition = process.transitions.REQUEST_PAYMENT_KLARNA_AFTER_INQUIRY;
+    } else {
+      requestTransition = process.transitions.REQUEST_PAYMENT_KLARNA;
+    }
+
+    const isPrivileged = process.isPrivileged(requestTransition);
+
+    // Add paymentMethodTypes for Klarna - required by stripe-create-payment-intent-push action
+    const klarnaParams = {
+      ...fnParams,
+      paymentMethodTypes: ['klarna'],
+    };
+
+    // If paymentIntent exists, order has been initiated previously.
+    const orderPromise = hasPaymentIntents
+      ? Promise.resolve(storedTx)
+      : onInitiateOrder(klarnaParams, processAlias, storedTx.id, requestTransition, isPrivileged);
+
+    orderPromise.then(order => {
+      // Store the returned transaction (order)
+      persistTransaction(order, pageData, storeData, setPageData, sessionStorageKey);
+    });
+
+    return orderPromise;
+  };
+
+  ////////////////////////////////////////////////
+  // Step 2: Confirm Klarna payment             //
+  // (triggers redirect to Klarna)              //
+  ////////////////////////////////////////////////
+  const fnConfirmKlarnaPayment = fnParams => {
+    const order = fnParams;
+
+    const hasPaymentIntents = order?.attributes?.protectedData?.stripePaymentIntents;
+    if (!hasPaymentIntents) {
+      throw new Error(
+        `Missing StripePaymentIntents key in transaction's protectedData. Check that your transaction process is configured to use payment intents.`
+      );
+    }
+
+    const { stripePaymentIntentClientSecret } =
+      order.attributes.protectedData.stripePaymentIntents.default;
+
+    // Update return URL with actual transaction ID
+    const finalReturnUrl = returnUrl.replace('txId=pending', `txId=${order.id.uuid}`);
+
+    return onConfirmKlarnaPayment({
+      stripe,
+      stripePaymentIntentClientSecret,
+      orderId: order?.id,
+      returnUrl: finalReturnUrl,
+      billingDetails,
+    });
+  };
+
+  // Compose the Klarna payment flow
+  const applyAsync = (acc, val) => acc.then(val);
+  const composeAsync = (...funcs) => x => funcs.reduce(applyAsync, Promise.resolve(x));
+  const handleKlarnaPayment = composeAsync(fnRequestPaymentKlarna, fnConfirmKlarnaPayment);
+
+  return handleKlarnaPayment(orderParams);
 };
 
 /**

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 // Import contexts and util modules
 import { FormattedMessage, intlShape } from '../../util/reactIntl';
@@ -23,6 +23,7 @@ import { H3, H4, NamedLink, OrderBreakdown, Page, TopbarSimplified } from '../..
 
 import {
   bookingDatesMaybe,
+  buildKlarnaReturnUrl,
   getBillingDetails,
   getFormattedTotalPrice,
   getShippingDetailsMaybe,
@@ -30,7 +31,10 @@ import {
   hasDefaultPaymentMethod,
   hasPaymentExpired,
   hasTransactionPassedPendingPayment,
+  isInKlarnaPendingState,
+  isInCardPendingState,
   processCheckoutWithPayment,
+  processCheckoutWithKlarna,
   setOrderPageInitialValues,
 } from './CheckoutPageTransactionHelpers.js';
 import { getErrorMessages } from './ErrorMessages';
@@ -266,6 +270,16 @@ export const loadInitialDataForStripePayments = ({
   //       this is added here instead of loadData static function.
   fetchStripeCustomer();
 
+  // Skip speculation when returning from Klarna - the transaction is already created
+  // and in pending-payment-klarna state
+  const isKlarnaReturn = typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).get('klarna_return') === 'true';
+
+  if (isKlarnaReturn) {
+    // Don't speculate - the Klarna return handler will take over
+    return;
+  }
+
   // Fetch speculated transaction for showing price in order breakdown
   // NOTE: if unit type is line-item/item, quantity needs to be added.
   // The way to pass it to checkout page is through pageData.orderData
@@ -294,6 +308,7 @@ const handleSubmit = (values, process, props, stripe, submitting, setSubmitting)
     onInitiateOrder,
     onConfirmCardPayment,
     onConfirmPayment,
+    onConfirmKlarnaPayment,
     onSendMessage,
     onSavePaymentMethod,
     onSubmitCallback,
@@ -312,6 +327,9 @@ const handleSubmit = (values, process, props, stripe, submitting, setSubmitting)
 
   // Check if this is a wallet payment (Google Pay, Apple Pay, Link, etc.)
   const isWalletPayment = selectedPaymentMethod === 'walletPayment' && walletPaymentMethodId;
+
+  // Check if this is a Klarna payment
+  const isKlarnaPayment = selectedPaymentMethod === 'klarna';
 
   const saveAfterOnetimePayment =
     Array.isArray(saveAfterOnetimePaymentRaw) && saveAfterOnetimePaymentRaw.length > 0;
@@ -334,12 +352,60 @@ const handleSubmit = (values, process, props, stripe, submitting, setSubmitting)
   const hasPaymentIntentUserActionsDone =
     paymentIntent && STRIPE_PI_USER_ACTIONS_DONE_STATUSES.includes(paymentIntent.status);
 
+  const shippingDetails = getShippingDetailsMaybe(formValues);
+  const billingDetails = getBillingDetails(formValues, currentUser);
+
+  // Handle Klarna payment separately
+  if (isKlarnaPayment) {
+    // For Klarna, we don't need paymentMethod in orderParams - it's handled differently
+    const orderParams = getOrderParams(pageData, shippingDetails, {}, config);
+
+    // Build Klarna return URL
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const listing = pageData.listing;
+    const listingSlug = createSlug(listing?.attributes?.title || '');
+    const listingId = listing?.id?.uuid;
+    // Use 'pending' for transaction ID - will be replaced after order is created
+    const returnUrl = buildKlarnaReturnUrl(origin, listingSlug, listingId, 'pending');
+
+    const klarnaPaymentParams = {
+      pageData,
+      speculatedTransaction,
+      stripe,
+      billingDetails,
+      message,
+      process,
+      onInitiateOrder,
+      onConfirmKlarnaPayment,
+      onSendMessage,
+      sessionStorageKey,
+      setPageData,
+      returnUrl,
+    };
+
+    processCheckoutWithKlarna(orderParams, klarnaPaymentParams)
+      .then(response => {
+        // Klarna redirects the user, so we shouldn't reach here unless there's an error
+        // The response will be 'klarna_redirect' if successfully redirected
+        if (response === 'klarna_redirect') {
+          // User was redirected to Klarna - this code won't run
+          return;
+        }
+        setSubmitting(false);
+      })
+      .catch(err => {
+        console.error('Klarna payment error:', err);
+        setSubmitting(false);
+      });
+    return;
+  }
+
   const requestPaymentParams = {
     pageData,
     speculatedTransaction,
     stripe,
     card,
-    billingDetails: getBillingDetails(formValues, currentUser),
+    billingDetails,
     message,
     paymentIntent,
     hasPaymentIntentUserActionsDone,
@@ -358,7 +424,6 @@ const handleSubmit = (values, process, props, stripe, submitting, setSubmitting)
     setPageData,
   };
 
-  const shippingDetails = getShippingDetailsMaybe(formValues);
   // Note: optionalPaymentParams contains Stripe paymentMethod,
   // but that can also be passed on Step 2
   // stripe.confirmCardPayment(stripe, { payment_method: stripePaymentMethodId })
@@ -474,6 +539,9 @@ export const CheckoutPageWithPayment = props => {
   const [submitting, setSubmitting] = useState(false);
   // Initialized stripe library is saved to state - if it's needed at some point here too.
   const [stripe, setStripe] = useState(null);
+  const [klarnaProcessing, setKlarnaProcessing] = useState(false);
+  const [klarnaError, setKlarnaError] = useState(null);
+  const [cancelKlarnaInProgress, setCancelKlarnaInProgress] = useState(false);
 
   const {
     scrollingDisabled,
@@ -495,7 +563,127 @@ export const CheckoutPageWithPayment = props => {
     cartItemsCount,
     title,
     config,
+    history,
+    routeConfiguration,
+    dispatch,
+    onConfirmPayment,
+    onSendMessage,
+    onSubmitCallback,
+    onRetrievePaymentIntent,
   } = props;
+
+  // Handle Klarna return from redirect
+  useEffect(() => {
+    const handleKlarnaReturn = async () => {
+      if (typeof window === 'undefined') return;
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const isKlarnaReturn = urlParams.get('klarna_return') === 'true';
+      const txIdFromUrl = urlParams.get('txId');
+      const paymentIntentClientSecret = urlParams.get('payment_intent_client_secret');
+
+      if (!isKlarnaReturn || !txIdFromUrl || klarnaProcessing) {
+        return;
+      }
+
+      // Transaction should be loaded from session storage
+      const existingTx = pageData?.transaction;
+      if (!existingTx?.id || existingTx.id.uuid !== txIdFromUrl) {
+        // Transaction not found or doesn't match
+        setKlarnaError('Transaction not found');
+        return;
+      }
+
+      // Wait for Stripe to be initialized
+      if (!stripe) {
+        return;
+      }
+
+      setKlarnaProcessing(true);
+
+      try {
+        // Retrieve PaymentIntent status from Stripe
+        const stripePaymentIntents = existingTx.attributes.protectedData?.stripePaymentIntents;
+        const clientSecret = paymentIntentClientSecret || stripePaymentIntents?.default?.stripePaymentIntentClientSecret;
+
+        if (!clientSecret) {
+          throw new Error('Payment intent client secret not found');
+        }
+
+        const { paymentIntent: retrievedPI, error: retrieveError } = await stripe.retrievePaymentIntent(clientSecret);
+
+        if (retrieveError) {
+          throw new Error(retrieveError.message);
+        }
+
+        // Check if payment was successful
+        if (STRIPE_PI_USER_ACTIONS_DONE_STATUSES.includes(retrievedPI.status)) {
+          // Confirm payment in Marketplace API
+          const process = processName ? getProcess(processName) : null;
+          const confirmTransition = process?.transitions?.CONFIRM_PAYMENT_KLARNA;
+
+          if (confirmTransition) {
+            await onConfirmPayment(existingTx.id, confirmTransition, {});
+          }
+
+          // Clear cart optimistically after successful purchase
+          const hasCartItems = pageData.cartItems && pageData.cartItems.length > 0;
+          if (hasCartItems) {
+            dispatch(clearCartOptimistic());
+          }
+
+          // Redirect to order details
+          const orderDetailsPath = pathByRouteName('OrderDetailsPage', routeConfiguration, {
+            id: existingTx.id.uuid,
+          });
+
+          setOrderPageInitialValues({}, routeConfiguration, dispatch);
+          onSubmitCallback();
+          history.push(orderDetailsPath);
+        } else if (retrievedPI.status === 'requires_payment_method') {
+          // Payment failed or was cancelled
+          setKlarnaError('Klarna payment was not completed. Please try again.');
+          setKlarnaProcessing(false);
+          // Clean up URL params
+          window.history.replaceState({}, '', window.location.pathname);
+        } else {
+          setKlarnaError(`Payment status: ${retrievedPI.status}`);
+          setKlarnaProcessing(false);
+        }
+      } catch (err) {
+        console.error('Klarna return processing error:', err);
+        setKlarnaError(err.message || 'Failed to process Klarna payment');
+        setKlarnaProcessing(false);
+      }
+    };
+
+    handleKlarnaReturn();
+  }, [stripe, pageData?.transaction?.id?.uuid, klarnaProcessing]);
+
+  // Handler for cancelling Klarna payment to try a different payment method
+  const handleCancelKlarnaPayment = async () => {
+    const existingTx = pageData?.transaction;
+    if (!existingTx?.id) {
+      return;
+    }
+
+    setCancelKlarnaInProgress(true);
+
+    try {
+      const process = processName ? getProcess(processName) : null;
+      const cancelTransition = process?.transitions?.CANCEL_PAYMENT_KLARNA;
+
+      if (cancelTransition) {
+        await onConfirmPayment(existingTx.id, cancelTransition, {});
+      }
+
+      // Reload page to get fresh state
+      window.location.reload();
+    } catch (err) {
+      console.error('Failed to cancel Klarna payment:', err);
+      setCancelKlarnaInProgress(false);
+    }
+  };
 
   // Since the listing data is already given from the ListingPage
   // and stored to handle refreshes, it might not have the possible
@@ -555,6 +743,10 @@ export const CheckoutPageWithPayment = props => {
   const process = processName ? getProcess(processName) : null;
   const transitions = process.transitions;
   const isPaymentExpired = hasPaymentExpired(existingTransaction, process, isClockInSync);
+
+  // Check if transaction is stuck in Klarna or card pending state
+  const isKlarnaPending = isInKlarnaPendingState(existingTransaction, process);
+  const isCardPending = isInCardPendingState(existingTransaction, process);
 
   // Allow showing page when currentUser is still being downloaded,
   // but show payment form only when user info is loaded.
@@ -692,8 +884,17 @@ export const CheckoutPageWithPayment = props => {
             {errorMessages.speculateErrorMessage}
             {errorMessages.retrievePaymentIntentErrorMessage}
             {errorMessages.paymentExpiredMessage}
+            {klarnaError ? (
+              <p className={css.error}>
+                <FormattedMessage id="CheckoutPage.klarnaPaymentError" values={{ error: klarnaError }} />
+              </p>
+            ) : null}
 
-            {showPaymentForm ? (
+            {klarnaProcessing ? (
+              <p className={css.klarnaProcessing}>
+                <FormattedMessage id="CheckoutPage.klarnaProcessing" />
+              </p>
+            ) : showPaymentForm ? (
               <StripePaymentForm
                 className={css.paymentForm}
                 onSubmit={values =>
@@ -729,6 +930,10 @@ export const CheckoutPageWithPayment = props => {
                 marketplaceName={config.marketplaceName}
                 isBooking={isBookingProcessAlias(transactionProcessAlias)}
                 isFuzzyLocation={config.maps.fuzzy.enabled}
+                isKlarnaPending={isKlarnaPending}
+                isCardPending={isCardPending}
+                onCancelKlarnaPayment={handleCancelKlarnaPayment}
+                cancelKlarnaInProgress={cancelKlarnaInProgress}
               />
             ) : null}
           </section>

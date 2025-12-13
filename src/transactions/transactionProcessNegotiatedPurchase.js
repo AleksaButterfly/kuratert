@@ -61,6 +61,12 @@ export const transitions = {
   CONFIRM_PAYMENT: 'transition/confirm-payment',
   EXPIRE_PAYMENT: 'transition/expire-payment',
 
+  // Klarna payment transitions (push payment method - immediate capture)
+  REQUEST_PAYMENT_KLARNA: 'transition/request-payment-klarna',
+  CONFIRM_PAYMENT_KLARNA: 'transition/confirm-payment-klarna',
+  EXPIRE_PAYMENT_KLARNA: 'transition/expire-payment-klarna',
+  CANCEL_PAYMENT_KLARNA: 'transition/cancel-payment-klarna',
+
   // ============================================================
   // FULFILLMENT PHASE (same as default-purchase)
   // ============================================================
@@ -100,6 +106,7 @@ export const states = {
   ACCEPTED: 'accepted',
   DECLINED: 'declined',
   PENDING_PAYMENT: 'pending-payment',
+  PENDING_PAYMENT_KLARNA: 'pending-payment-klarna',
   PAYMENT_EXPIRED: 'payment-expired',
   PURCHASED: 'purchased',
   DELIVERED: 'delivered',
@@ -146,6 +153,7 @@ export const graph = {
     [states.ACCEPTED]: {
       on: {
         [transitions.REQUEST_PAYMENT]: states.PENDING_PAYMENT,
+        [transitions.REQUEST_PAYMENT_KLARNA]: states.PENDING_PAYMENT_KLARNA,
         [transitions.EXPIRE_ACCEPTED]: states.DECLINED,
       },
     },
@@ -153,6 +161,13 @@ export const graph = {
       on: {
         [transitions.CONFIRM_PAYMENT]: states.PURCHASED,
         [transitions.EXPIRE_PAYMENT]: states.PAYMENT_EXPIRED,
+      },
+    },
+    [states.PENDING_PAYMENT_KLARNA]: {
+      on: {
+        [transitions.CONFIRM_PAYMENT_KLARNA]: states.PURCHASED,
+        [transitions.EXPIRE_PAYMENT_KLARNA]: states.PAYMENT_EXPIRED,
+        [transitions.CANCEL_PAYMENT_KLARNA]: states.ACCEPTED,
       },
     },
     [states.PAYMENT_EXPIRED]: { type: 'final' },
@@ -227,7 +242,9 @@ export const isRelevantPastTransition = transition => {
     transitions.EXPIRE_COUNTER_OFFER,
     transitions.EXPIRE_ACCEPTED,
     transitions.CONFIRM_PAYMENT,
+    transitions.CONFIRM_PAYMENT_KLARNA,
     transitions.EXPIRE_PAYMENT,
+    transitions.EXPIRE_PAYMENT_KLARNA,
     transitions.MARK_DELIVERED,
     transitions.OPERATOR_MARK_DELIVERED,
     transitions.MARK_RECEIVED,
@@ -252,6 +269,7 @@ export const isPrivileged = transition => {
     transitions.PROVIDER_COUNTER_OFFER,
     transitions.CUSTOMER_COUNTER_OFFER,
     transitions.REQUEST_PAYMENT,
+    transitions.REQUEST_PAYMENT_KLARNA,
   ].includes(transition);
 };
 

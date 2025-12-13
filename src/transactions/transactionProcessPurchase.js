@@ -33,6 +33,13 @@ export const transitions = {
   // the transaction will expire automatically.
   EXPIRE_PAYMENT: 'transition/expire-payment',
 
+  // Klarna payment transitions (push payment method - immediate capture)
+  REQUEST_PAYMENT_KLARNA: 'transition/request-payment-klarna',
+  REQUEST_PAYMENT_KLARNA_AFTER_INQUIRY: 'transition/request-payment-klarna-after-inquiry',
+  CONFIRM_PAYMENT_KLARNA: 'transition/confirm-payment-klarna',
+  EXPIRE_PAYMENT_KLARNA: 'transition/expire-payment-klarna',
+  CANCEL_PAYMENT_KLARNA: 'transition/cancel-payment-klarna',
+
   // Provider or opeartor can mark the product shipped/delivered
   MARK_DELIVERED: 'transition/mark-delivered',
   OPERATOR_MARK_DELIVERED: 'transition/operator-mark-delivered',
@@ -96,6 +103,7 @@ export const states = {
   INITIAL: 'initial',
   INQUIRY: 'inquiry',
   PENDING_PAYMENT: 'pending-payment',
+  PENDING_PAYMENT_KLARNA: 'pending-payment-klarna',
   PAYMENT_EXPIRED: 'payment-expired',
   PURCHASED: 'purchased',
   DELIVERED: 'delivered',
@@ -132,11 +140,13 @@ export const graph = {
       on: {
         [transitions.INQUIRE]: states.INQUIRY,
         [transitions.REQUEST_PAYMENT]: states.PENDING_PAYMENT,
+        [transitions.REQUEST_PAYMENT_KLARNA]: states.PENDING_PAYMENT_KLARNA,
       },
     },
     [states.INQUIRY]: {
       on: {
         [transitions.REQUEST_PAYMENT_AFTER_INQUIRY]: states.PENDING_PAYMENT,
+        [transitions.REQUEST_PAYMENT_KLARNA_AFTER_INQUIRY]: states.PENDING_PAYMENT_KLARNA,
       },
     },
 
@@ -144,6 +154,14 @@ export const graph = {
       on: {
         [transitions.EXPIRE_PAYMENT]: states.PAYMENT_EXPIRED,
         [transitions.CONFIRM_PAYMENT]: states.PURCHASED,
+      },
+    },
+
+    [states.PENDING_PAYMENT_KLARNA]: {
+      on: {
+        [transitions.EXPIRE_PAYMENT_KLARNA]: states.PAYMENT_EXPIRED,
+        [transitions.CONFIRM_PAYMENT_KLARNA]: states.PURCHASED,
+        [transitions.CANCEL_PAYMENT_KLARNA]: states.INITIAL,
       },
     },
 
@@ -213,6 +231,7 @@ export const graph = {
 export const isRelevantPastTransition = transition => {
   return [
     transitions.CONFIRM_PAYMENT,
+    transitions.CONFIRM_PAYMENT_KLARNA,
     transitions.AUTO_CANCEL,
     transitions.CANCEL,
     transitions.MARK_DELIVERED,
@@ -243,9 +262,12 @@ export const isProviderReview = transition => {
 // should go through the local API endpoints, or if using JS SDK is
 // enough.
 export const isPrivileged = transition => {
-  return [transitions.REQUEST_PAYMENT, transitions.REQUEST_PAYMENT_AFTER_INQUIRY].includes(
-    transition
-  );
+  return [
+    transitions.REQUEST_PAYMENT,
+    transitions.REQUEST_PAYMENT_AFTER_INQUIRY,
+    transitions.REQUEST_PAYMENT_KLARNA,
+    transitions.REQUEST_PAYMENT_KLARNA_AFTER_INQUIRY,
+  ].includes(transition);
 };
 
 // Check when transaction is completed (item is received and review notifications sent)

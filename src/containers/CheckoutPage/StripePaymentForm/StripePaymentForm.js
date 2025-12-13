@@ -255,6 +255,8 @@ const initialState = {
   canMakePayment: null, // { applePay: true } or { googlePay: true } or null
   walletPaymentInProgress: false,
   walletError: null,
+  // Klarna payment state
+  klarnaPaymentInProgress: false,
 };
 
 /**
@@ -285,25 +287,56 @@ const LinkIcon = () => (
   </svg>
 );
 
+// Klarna logo
+const KlarnaIcon = () => (
+  <svg viewBox="0 0 1448 609" width="60" height="25" aria-hidden="true">
+    <path d="M0 304.493C0 180.585 0 118.631 30.3995 74.5079C42.2947 57.2427 57.2427 42.2947 74.5079 30.3995C118.631 0 180.585 0 304.493 0H1142.75C1266.65 0 1328.61 0 1372.73 30.3995C1390 42.2947 1404.95 57.2427 1416.84 74.5079C1447.24 118.631 1447.24 180.585 1447.24 304.493C1447.24 428.402 1447.24 490.356 1416.84 534.479C1404.95 551.744 1390 566.692 1372.73 578.587C1328.61 608.987 1266.65 608.987 1142.75 608.987H304.494C180.585 608.987 118.631 608.987 74.5079 578.587C57.2427 566.692 42.2947 551.744 30.3995 534.479C0 490.356 0 428.402 0 304.493Z" fill="#FFA8CD"/>
+    <path d="M1166.17 389.005C1140.92 389.005 1121.24 368.125 1121.24 342.771C1121.24 317.416 1140.92 296.536 1166.17 296.536C1191.42 296.536 1211.1 317.416 1211.1 342.771C1211.1 368.125 1191.42 389.005 1166.17 389.005ZM1153.54 437.85C1175.08 437.85 1202.56 429.647 1217.79 397.581L1219.27 398.327C1212.59 415.851 1212.59 426.292 1212.59 428.902V433.003H1266.8V252.538H1212.59V256.64C1212.59 259.25 1212.59 269.69 1219.27 287.214L1217.79 287.96C1202.56 255.894 1175.08 247.691 1153.54 247.691C1101.93 247.691 1065.54 288.706 1065.54 342.771C1065.54 396.835 1101.93 437.85 1153.54 437.85ZM971.216 247.691C946.707 247.691 927.397 256.267 911.801 287.96L910.316 287.214C917 269.69 917 259.25 917 256.64V252.538H862.784V433.003H918.485V337.923C918.485 312.942 932.968 297.281 956.362 297.281C979.757 297.281 991.268 310.704 991.268 337.55V433.003H1046.97V318.162C1046.97 277.147 1015.03 247.691 971.216 247.691ZM782.203 287.96L780.717 287.214C787.401 269.69 787.401 259.25 787.401 256.64V252.538H733.186V433.003H788.887L789.258 346.126C789.258 320.772 802.626 305.484 824.536 305.484C830.477 305.484 835.305 306.23 840.875 307.722V252.538C816.366 247.318 794.457 256.64 782.203 287.96ZM605.073 389.005C579.821 389.005 560.14 368.125 560.14 342.771C560.14 317.416 579.821 296.536 605.073 296.536C630.324 296.536 650.005 317.416 650.005 342.771C650.005 368.125 630.324 389.005 605.073 389.005ZM592.447 437.85C613.985 437.85 641.464 429.647 656.689 397.581L658.174 398.327C651.49 415.851 651.49 426.292 651.49 428.902V433.003H705.706V252.538H651.49V256.64C651.49 259.25 651.49 269.69 658.174 287.214L656.689 287.96C641.464 255.894 613.985 247.691 592.447 247.691C540.83 247.691 504.439 288.706 504.439 342.771C504.439 396.835 540.83 437.85 592.447 437.85ZM426.828 433.003H482.53V172H426.828V433.003ZM385.981 172H329.165C329.165 218.608 300.572 260.368 257.125 290.197L240.043 302.129V172H181V433.003H240.043V303.62L337.706 433.003H409.747L315.797 309.213C358.501 278.266 386.352 230.166 385.981 172Z" fill="#0B051D"/>
+  </svg>
+);
+
+/**
+ * Klarna Payment Button component
+ */
+const KlarnaPaymentButton = props => {
+  const { onClick, inProgress, intl } = props;
+
+  return (
+    <button
+      type="button"
+      className={css.klarnaButton}
+      onClick={onClick}
+      disabled={inProgress}
+    >
+      {inProgress ? (
+        <IconSpinner className={css.klarnaSpinner} />
+      ) : (
+        <span className={css.klarnaButtonContent}>
+          <KlarnaIcon />
+        </span>
+      )}
+    </button>
+  );
+};
+
 const ExpressCheckout = props => {
   const {
     paymentRequest,
     canMakePayment,
     walletPaymentInProgress,
     walletError,
+    onKlarnaClick,
+    klarnaInProgress,
+    showKlarnaButton,
     intl,
   } = props;
 
-  // Don't render if wallet payments not available
-  if (!canMakePayment) {
-    return null;
-  }
+  const showApplePay = canMakePayment?.applePay;
+  const showGooglePay = canMakePayment?.googlePay;
+  const showLink = canMakePayment?.link;
+  const hasWallets = showApplePay || showGooglePay || showLink;
 
-  const showApplePay = canMakePayment.applePay;
-  const showGooglePay = canMakePayment.googlePay;
-  const showLink = canMakePayment.link;
-
-  const handleClick = () => {
+  const handleWalletClick = () => {
     if (paymentRequest) {
       paymentRequest.show();
     }
@@ -331,18 +364,30 @@ const ExpressCheckout = props => {
         <FormattedMessage id="StripePaymentForm.expressCheckout" />
       </Heading>
 
-      <button
-        type="button"
-        className={classNames(css.walletButton, getButtonClass())}
-        onClick={handleClick}
-        disabled={walletPaymentInProgress}
-      >
-        {walletPaymentInProgress ? (
-          <IconSpinner className={css.walletSpinner} />
-        ) : (
-          <span className={css.walletButtonContent}>{getWalletIcon()}</span>
-        )}
-      </button>
+      {/* Klarna button - shown first (priority for Norway) */}
+      {showKlarnaButton !== false && (
+        <KlarnaPaymentButton
+          onClick={onKlarnaClick}
+          inProgress={klarnaInProgress}
+          intl={intl}
+        />
+      )}
+
+      {/* Wallet buttons (Apple Pay, Google Pay, etc.) */}
+      {hasWallets ? (
+        <button
+          type="button"
+          className={classNames(css.walletButton, getButtonClass())}
+          onClick={handleWalletClick}
+          disabled={walletPaymentInProgress}
+        >
+          {walletPaymentInProgress ? (
+            <IconSpinner className={css.walletSpinner} />
+          ) : (
+            <span className={css.walletButtonContent}>{getWalletIcon()}</span>
+          )}
+        </button>
+      ) : null}
 
       {walletError ? <span className={css.walletError}>{walletError}</span> : null}
 
@@ -413,6 +458,8 @@ class StripePaymentForm extends Component {
     this.initializePaymentRequest = this.initializePaymentRequest.bind(this);
     this.handleWalletPayment = this.handleWalletPayment.bind(this);
     this.getPaymentAmount = this.getPaymentAmount.bind(this);
+    // Klarna payment method
+    this.handleKlarnaClick = this.handleKlarnaClick.bind(this);
     this.finalFormAPI = null;
     this.cardContainer = null;
   }
@@ -541,6 +588,31 @@ class StripePaymentForm extends Component {
     event.complete('success');
 
     // Call the existing onSubmit handler
+    onSubmit(params);
+  }
+
+  /**
+   * Handle Klarna button click
+   * Collects form data and submits with Klarna payment method
+   */
+  handleKlarnaClick() {
+    const { onSubmit, formId } = this.props;
+
+    this.setState({ klarnaPaymentInProgress: true });
+
+    // Get current form values for shipping, billing, message, etc.
+    const formValues = this.finalFormAPI ? this.finalFormAPI.getState().values : {};
+
+    // Build params with Klarna payment method flag
+    const params = {
+      message: formValues.initialMessage ? formValues.initialMessage.trim() : null,
+      card: null, // No card element for Klarna payments
+      formId,
+      formValues,
+      paymentMethod: 'klarna', // Klarna payment method type
+    };
+
+    // Call the onSubmit handler
     onSubmit(params);
   }
 
@@ -680,6 +752,10 @@ class StripePaymentForm extends Component {
       marketplaceName,
       isBooking,
       isFuzzyLocation,
+      isKlarnaPending,
+      isCardPending,
+      onCancelKlarnaPayment,
+      cancelKlarnaInProgress,
       values,
     } = formRenderProps;
 
@@ -687,6 +763,11 @@ class StripePaymentForm extends Component {
 
     const ensuredDefaultPaymentMethod = ensurePaymentMethodCard(defaultPaymentMethod);
     const billingDetailsNeeded = !(hasHandledCardPayment || confirmPaymentError);
+
+    // Determine what payment methods to show based on pending state
+    const showKlarnaButton = !isCardPending && !isKlarnaPending;
+    const showCardInputs = !isKlarnaPending;
+    const showCancelKlarnaUI = isKlarnaPending;
 
     const { cardValueValid, paymentMethod } = this.state;
     const hasDefaultPaymentMethod = ensuredDefaultPaymentMethod.id;
@@ -779,18 +860,38 @@ class StripePaymentForm extends Component {
           intl={intl}
         />
 
-        {/* Express Checkout - Wallet Payments (Google Pay, Apple Pay, Link) */}
-        {billingDetailsNeeded && !loadingData && this.state.canMakePayment ? (
+        {/* Cancel Klarna payment UI - shown when stuck in Klarna pending state */}
+        {showCancelKlarnaUI && (
+          <div className={css.cancelKlarnaSection}>
+            <p className={css.cancelKlarnaMessage}>
+              <FormattedMessage id="StripePaymentForm.klarnaPaymentPending" />
+            </p>
+            <Button
+              type="button"
+              onClick={onCancelKlarnaPayment}
+              inProgress={cancelKlarnaInProgress}
+              className={css.cancelKlarnaButton}
+            >
+              <FormattedMessage id="StripePaymentForm.cancelKlarnaAndTryDifferent" />
+            </Button>
+          </div>
+        )}
+
+        {/* Express Checkout - Klarna + Wallet Payments (Google Pay, Apple Pay, Link) */}
+        {billingDetailsNeeded && !loadingData && !showCancelKlarnaUI ? (
           <ExpressCheckout
             paymentRequest={this.state.paymentRequest}
             canMakePayment={this.state.canMakePayment}
             walletPaymentInProgress={this.state.walletPaymentInProgress}
             walletError={this.state.walletError}
+            onKlarnaClick={this.handleKlarnaClick}
+            klarnaInProgress={this.state.klarnaPaymentInProgress}
+            showKlarnaButton={showKlarnaButton}
             intl={intl}
           />
         ) : null}
 
-        {billingDetailsNeeded && !loadingData ? (
+        {billingDetailsNeeded && !loadingData && showCardInputs ? (
           <React.Fragment>
             {hasDefaultPaymentMethod ? (
               <PaymentMethodSelector
@@ -807,7 +908,7 @@ class StripePaymentForm extends Component {
               />
             ) : (
               <React.Fragment>
-                <Heading as="h3" rootClassName={classNames(css.heading, { [css.headingAfterWallet]: this.state.canMakePayment })}>
+                <Heading as="h3" rootClassName={classNames(css.heading, css.headingAfterWallet)}>
                   <FormattedMessage id="StripePaymentForm.paymentHeading" />
                 </Heading>
                 <OneTimePaymentWithCardElement

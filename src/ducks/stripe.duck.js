@@ -123,6 +123,59 @@ export const confirmCardPayment = params => dispatch => {
   return dispatch(confirmCardPaymentThunk(params)).unwrap();
 };
 
+////////////////////////////
+// Confirm Klarna Payment //
+////////////////////////////
+const confirmKlarnaPaymentPayloadCreator = (params, { rejectWithValue }) => {
+  const { stripe, stripePaymentIntentClientSecret, returnUrl, billingDetails } = params;
+  const transactionId = params.orderId;
+
+  return stripe
+    .confirmKlarnaPayment(stripePaymentIntentClientSecret, {
+      payment_method: {
+        billing_details: billingDetails,
+      },
+      return_url: returnUrl,
+    })
+    .then(response => {
+      if (response.error) {
+        return Promise.reject(response);
+      } else {
+        // For Klarna, if there's no error but also no paymentIntent,
+        // it means the user was redirected to Klarna (expected behavior)
+        return { ...response, transactionId };
+      }
+    })
+    .catch(err => {
+      // Unwrap Stripe error.
+      const e = err.error || storableError(err);
+
+      // Log error
+      const containsPaymentIntent = err.error && err.error.payment_intent;
+      const { code, doc_url, message, payment_intent } = containsPaymentIntent ? err.error : {};
+      const loggableError = containsPaymentIntent
+        ? {
+            code,
+            message,
+            doc_url,
+            paymentIntentStatus: payment_intent.status,
+          }
+        : e;
+      log.error(loggableError, 'stripe-confirm-klarna-payment-failed', {
+        stripeMessage: loggableError.message,
+      });
+      return rejectWithValue(e);
+    });
+};
+export const confirmKlarnaPaymentThunk = createAsyncThunk(
+  'stripe/confirmKlarnaPayment',
+  confirmKlarnaPaymentPayloadCreator
+);
+// Backward compatible wrapper function
+export const confirmKlarnaPayment = params => dispatch => {
+  return dispatch(confirmKlarnaPaymentThunk(params)).unwrap();
+};
+
 ///////////////////////
 // Handle Card Setup //
 ///////////////////////
@@ -177,6 +230,8 @@ const stripeSlice = createSlice({
   initialState: {
     confirmCardPaymentInProgress: false,
     confirmCardPaymentError: null,
+    confirmKlarnaPaymentInProgress: false,
+    confirmKlarnaPaymentError: null,
     handleCardSetupInProgress: false,
     handleCardSetupError: null,
     paymentIntent: null,
@@ -189,6 +244,8 @@ const stripeSlice = createSlice({
       return {
         confirmCardPaymentInProgress: false,
         confirmCardPaymentError: null,
+        confirmKlarnaPaymentInProgress: false,
+        confirmKlarnaPaymentError: null,
         handleCardSetupInProgress: false,
         handleCardSetupError: null,
         paymentIntent: null,
@@ -232,6 +289,20 @@ const stripeSlice = createSlice({
         console.error(action.payload);
         state.confirmCardPaymentError = action.payload;
         state.confirmCardPaymentInProgress = false;
+      })
+      // Confirm Klarna Payment cases
+      .addCase(confirmKlarnaPaymentThunk.pending, state => {
+        state.confirmKlarnaPaymentError = null;
+        state.confirmKlarnaPaymentInProgress = true;
+      })
+      .addCase(confirmKlarnaPaymentThunk.fulfilled, (state, action) => {
+        state.paymentIntent = action.payload;
+        state.confirmKlarnaPaymentInProgress = false;
+      })
+      .addCase(confirmKlarnaPaymentThunk.rejected, (state, action) => {
+        console.error(action.payload);
+        state.confirmKlarnaPaymentError = action.payload;
+        state.confirmKlarnaPaymentInProgress = false;
       })
       // Handle Card Setup cases
       .addCase(handleCardSetupThunk.pending, state => {
