@@ -301,4 +301,5 @@
   height: 14px;
   color: inherit;
   fill: currentColor;
+  transition: var(--transitionStyleButton);
 }
