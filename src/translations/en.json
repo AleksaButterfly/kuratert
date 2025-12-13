@@ -944,6 +944,7 @@
   "OrderBreakdown.bookingWithDSTInEffect": "Daylight saving time",
   "OrderBreakdown.commission": "{role, select, customer {{marketplaceName} fee *} provider {{marketplaceName} fee *} other {}}",
   "OrderBreakdown.commissionFeeNote": "* The fee helps us run this platform and provide the best possible service to you!",
+  "OrderBreakdown.frame": "Frame",
   "OrderBreakdown.frameOption": "Frame ({frameLabel})",
   "OrderBreakdown.pickupFee": "Pickup",
   "OrderBreakdown.providerTotalDefault": "You'll earn",

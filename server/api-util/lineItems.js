@@ -94,7 +94,21 @@ const getItemQuantityAndLineItems = (orderData, publicData, currency, listings) 
       ]
     : [];
 
-  return { quantity, extraLineItems: deliveryLineItem };
+  // Frame line item (only for single item purchases, not cart items - cart items have frame in their unit price)
+  const frameInfo = orderData?.frameInfo;
+  const framePriceInSubunits = parseInt(frameInfo?.framePriceInSubunits, 10) || 0;
+  const frameLineItem = !hasCartItems && framePriceInSubunits > 0
+    ? [
+        {
+          code: 'line-item/frame',
+          unitPrice: new Money(framePriceInSubunits, currency),
+          quantity: 1,
+          includeFor: ['customer', 'provider'],
+        },
+      ]
+    : [];
+
+  return { quantity, extraLineItems: [...frameLineItem, ...deliveryLineItem] };
 };
 
 
@@ -113,7 +127,21 @@ const getNegotiatedItemQuantityAndLineItems = (orderData, publicData, currency) 
   const isShipping = deliveryMethod === 'shipping';
   const { shippingPriceInSubunitsOneItem } = publicData || {};
 
-  // Single item with shipping support
+  // Frame line item
+  const frameInfo = orderData?.frameInfo;
+  const framePriceInSubunits = parseInt(frameInfo?.framePriceInSubunits, 10) || 0;
+  const frameLineItem = framePriceInSubunits > 0
+    ? [
+        {
+          code: 'line-item/frame',
+          unitPrice: new Money(framePriceInSubunits, currency),
+          quantity: 1,
+          includeFor: ['customer', 'provider'],
+        },
+      ]
+    : [];
+
+  // Shipping line item
   const totalShippingFee = isShipping && shippingPriceInSubunitsOneItem
     ? new Money(shippingPriceInSubunitsOneItem, currency)
     : null;
@@ -129,7 +157,7 @@ const getNegotiatedItemQuantityAndLineItems = (orderData, publicData, currency) 
       ]
     : [];
 
-  return { quantity: 1, extraLineItems: deliveryLineItem };
+  return { quantity: 1, extraLineItems: [...frameLineItem, ...deliveryLineItem] };
 };
 
 /**
@@ -238,11 +266,6 @@ exports.transactionLineItems = (listing, orderData, providerCommission, customer
   const { priceInSubunits } = priceVariantConfig || {};
   const isPriceInSubunitsValid = Number.isInteger(priceInSubunits) && priceInSubunits >= 0;
 
-  // Check if there's frame info for the main listing
-  const { frameInfo } = orderData || {};
-  // Ensure framePriceInSubunits is a number (it might come as string from JSON)
-  const framePriceInSubunits = parseInt(frameInfo?.framePriceInSubunits, 10) || 0;
-
   // Check if offer is valid (either Money instance or object with amount/currency)
   const isValidOffer = offer && (
     offer instanceof Money ||
@@ -253,19 +276,15 @@ exports.transactionLineItems = (listing, orderData, providerCommission, customer
     ? (offer instanceof Money ? offer : new Money(offer.amount, offer.currency))
     : null;
 
-  // Calculate base unit price
+  // Calculate unit price
   // For negotiated items, use the offer price if available
-  const baseUnitPrice =
+  // Note: Frame price is now a separate line item, not added to unit price
+  const unitPrice =
     isBookable && priceVariationsEnabled && isPriceInSubunitsValid
       ? new Money(priceInSubunits, currency)
       : normalizedOffer && (isNegotiationUnitType || isNegotiatedItem)
       ? normalizedOffer
       : priceAttribute;
-
-  // Add frame price to unit price if frame is selected
-  const unitPrice = framePriceInSubunits > 0 && baseUnitPrice
-    ? new Money(baseUnitPrice.amount + framePriceInSubunits, currency)
-    : baseUnitPrice;
 
   /**
    * Pricing starts with order's base price:

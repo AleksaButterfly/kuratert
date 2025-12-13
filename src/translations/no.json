@@ -944,6 +944,7 @@
   "OrderBreakdown.bookingWithDSTInEffect": "Sommertid",
   "OrderBreakdown.commission": "{role, select, customer {{marketplaceName} gebyr *} provider {{marketplaceName} gebyr *} other {}}",
   "OrderBreakdown.commissionFeeNote": "* Gebyret hjelper oss å drive denne plattformen og gi deg best mulig service!",
+  "OrderBreakdown.frame": "Ramme",
   "OrderBreakdown.frameOption": "Ramme ({frameLabel})",
   "OrderBreakdown.pickupFee": "Henting",
   "OrderBreakdown.providerTotalDefault": "Du vil tjene",
