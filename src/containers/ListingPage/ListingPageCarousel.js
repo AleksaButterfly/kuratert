@@ -878,7 +878,14 @@ export const ListingPageComponent = props => {
               {isPurchase && (
                 <button
                   className={isInCart ? css.addedToCartButton : css.addToCartButton}
-                  onClick={handleAddToCart}
+                  onClick={() => {
+                    if (!isAuthenticated) {
+                      const state = { from: `${location.pathname}${location.search}${location.hash}` };
+                      history.push(pathByRouteName('SignupPage', routeConfiguration, {}), state);
+                    } else {
+                      handleAddToCart();
+                    }
+                  }}
                   disabled={isOwnListing || addListingToCartInProgress || !hasStock || isInCart}
                 >
                   {addListingToCartInProgress ? (
@@ -898,10 +905,8 @@ export const ListingPageComponent = props => {
                   if (isAuthenticated) {
                     setMakeOfferModalOpen(true);
                   } else {
-                    history.push({
-                      pathname: '/login',
-                      state: { from: location.pathname },
-                    });
+                    const state = { from: `${location.pathname}${location.search}${location.hash}` };
+                    history.push(pathByRouteName('SignupPage', routeConfiguration, {}), state);
                   }
                 }}
                 disabled={isOwnListing || !hasStock}
