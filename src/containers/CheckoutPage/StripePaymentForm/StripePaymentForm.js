@@ -908,7 +908,9 @@ class StripePaymentForm extends Component {
               />
             ) : (
               <React.Fragment>
-                <Heading as="h3" rootClassName={classNames(css.heading, css.headingAfterWallet)}>
+                <Heading as="h3" rootClassName={classNames(css.heading, {
+                  [css.headingAfterWallet]: billingDetailsNeeded && !loadingData && !showCancelKlarnaUI && (showKlarnaButton || this.state.canMakePayment)
+                })}>
                   <FormattedMessage id="StripePaymentForm.paymentHeading" />
                 </Heading>
                 <OneTimePaymentWithCardElement
