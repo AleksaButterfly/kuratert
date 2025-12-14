@@ -572,6 +572,7 @@ export const CheckoutPageWithPayment = props => {
     onSendMessage,
     onSubmitCallback,
     onRetrievePaymentIntent,
+    sessionStorageKey,
   } = props;
 
   // Handle Klarna return from redirect
