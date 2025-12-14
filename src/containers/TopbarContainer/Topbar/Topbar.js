@@ -154,8 +154,6 @@ const TopbarComponent = props => {
     showGenericError,
     config,
     routeConfiguration,
-    languageModalOpen,
-    onToggleLanguageModal,
   } = props;
 
   const handleSubmit = values => {
@@ -364,9 +362,6 @@ const TopbarComponent = props => {
           showSearchForm={showSearchForm}
           showCreateListingsLink={showCreateListingsLink}
           inboxTab={topbarInboxTab}
-          languageModalOpen={languageModalOpen}
-          onToggleLanguageModal={onToggleLanguageModal}
-          onManageDisableScrolling={onManageDisableScrolling}
         />
       </div>
       <Modal

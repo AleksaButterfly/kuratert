@@ -6,7 +6,7 @@ import loadable from '@loadable/component';
 
 import { sendVerificationEmail, hasCurrentUserErrors } from '../../ducks/user.duck';
 import { logout, authenticationInProgress } from '../../ducks/auth.duck';
-import { manageDisableScrolling, toggleLanguageModal, isLanguageModalOpen } from '../../ducks/ui.duck';
+import { manageDisableScrolling } from '../../ducks/ui.duck';
 
 const Topbar = loadable(() => import(/* webpackChunkName: "Topbar" */ './Topbar/Topbar'));
 
@@ -59,7 +59,6 @@ const mapStateToProps = state => {
     sendVerificationEmailInProgress,
     sendVerificationEmailError,
     hasGenericError,
-    languageModalOpen: isLanguageModalOpen(state),
   };
 };
 
@@ -68,7 +67,6 @@ const mapDispatchToProps = dispatch => ({
   onManageDisableScrolling: (componentId, disableScrolling) =>
     dispatch(manageDisableScrolling(componentId, disableScrolling)),
   onResendVerificationEmail: () => dispatch(sendVerificationEmail()),
-  onToggleLanguageModal: isOpen => dispatch(toggleLanguageModal(isOpen)),
 });
 
 // Note: it is important that the withRouter HOC is **outside** the
