@@ -866,14 +866,14 @@ class StripePaymentForm extends Component {
             <p className={css.cancelKlarnaMessage}>
               <FormattedMessage id="StripePaymentForm.klarnaPaymentPending" />
             </p>
-            <Button
+            <PrimaryButton
               type="button"
               onClick={onCancelKlarnaPayment}
               inProgress={cancelKlarnaInProgress}
               className={css.cancelKlarnaButton}
             >
               <FormattedMessage id="StripePaymentForm.cancelKlarnaAndTryDifferent" />
-            </Button>
+            </PrimaryButton>
           </div>
         )}
 
