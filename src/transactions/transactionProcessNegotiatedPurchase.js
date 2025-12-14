@@ -270,6 +270,7 @@ export const isPrivileged = transition => {
     transitions.CUSTOMER_COUNTER_OFFER,
     transitions.REQUEST_PAYMENT,
     transitions.REQUEST_PAYMENT_KLARNA,
+    transitions.CANCEL_PAYMENT_KLARNA,
   ].includes(transition);
 };
 

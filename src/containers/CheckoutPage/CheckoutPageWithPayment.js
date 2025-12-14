@@ -674,7 +674,9 @@ export const CheckoutPageWithPayment = props => {
       const cancelTransition = process?.transitions?.CANCEL_PAYMENT_KLARNA;
 
       if (cancelTransition) {
-        await onConfirmPayment(existingTx.id, cancelTransition, {});
+        // Use onInitiateOrder with isPrivilegedTransition=true since cancel-payment-klarna
+        // has stripe-refund-payment action which requires server-side handling
+        await onInitiateOrder({}, processName, existingTx.id, cancelTransition, true);
       }
 
       // Reload page to get fresh state
