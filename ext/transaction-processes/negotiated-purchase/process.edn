@@ -197,6 +197,15 @@
    :from :state/pending-payment-klarna,
    :to :state/accepted}
 
+  ;; Operator cancels Klarna payment
+  {:name :transition/operator-cancel-payment-klarna,
+   :actor :actor.role/operator,
+   :actions
+   [{:name :action/stripe-refund-payment}
+    {:name :action/decline-stock-reservation}],
+   :from :state/pending-payment-klarna,
+   :to :state/accepted}
+
   ;; Accepted state expires after 7 days if customer doesn't pay
   {:name :transition/expire-accepted,
    :at

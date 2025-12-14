@@ -66,6 +66,7 @@ export const transitions = {
   CONFIRM_PAYMENT_KLARNA: 'transition/confirm-payment-klarna',
   EXPIRE_PAYMENT_KLARNA: 'transition/expire-payment-klarna',
   CANCEL_PAYMENT_KLARNA: 'transition/cancel-payment-klarna',
+  OPERATOR_CANCEL_PAYMENT_KLARNA: 'transition/operator-cancel-payment-klarna',
 
   // ============================================================
   // FULFILLMENT PHASE (same as default-purchase)
@@ -168,6 +169,7 @@ export const graph = {
         [transitions.CONFIRM_PAYMENT_KLARNA]: states.PURCHASED,
         [transitions.EXPIRE_PAYMENT_KLARNA]: states.PAYMENT_EXPIRED,
         [transitions.CANCEL_PAYMENT_KLARNA]: states.ACCEPTED,
+        [transitions.OPERATOR_CANCEL_PAYMENT_KLARNA]: states.ACCEPTED,
       },
     },
     [states.PAYMENT_EXPIRED]: { type: 'final' },

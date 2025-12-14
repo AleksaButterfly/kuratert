@@ -16,7 +16,8 @@ const initiateOrderPayloadCreator = (
   { dispatch, extra: sdk, rejectWithValue }
 ) => {
   // Special handling for cancel transitions - they don't need orderData
-  const isCancelTransition = transitionName === 'transition/cancel-payment-klarna';
+  const isCancelTransition = transitionName === 'transition/cancel-payment-klarna' ||
+    transitionName === 'transition/operator-cancel-payment-klarna';
 
   if (isCancelTransition && transactionId) {
     const bodyParams = {

@@ -113,7 +113,8 @@ module.exports = (req, res) => {
   const transitionName = bodyParams.transition;
 
   // Cancel transitions don't need line items - just execute the transition
-  const isCancelTransition = transitionName === 'transition/cancel-payment-klarna';
+  const isCancelTransition = transitionName === 'transition/cancel-payment-klarna' ||
+    transitionName === 'transition/operator-cancel-payment-klarna';
 
   if (isCancelTransition) {
     getTrustedSdk(req)

@@ -39,6 +39,7 @@ export const transitions = {
   CONFIRM_PAYMENT_KLARNA: 'transition/confirm-payment-klarna',
   EXPIRE_PAYMENT_KLARNA: 'transition/expire-payment-klarna',
   CANCEL_PAYMENT_KLARNA: 'transition/cancel-payment-klarna',
+  OPERATOR_CANCEL_PAYMENT_KLARNA: 'transition/operator-cancel-payment-klarna',
 
   // Provider or opeartor can mark the product shipped/delivered
   MARK_DELIVERED: 'transition/mark-delivered',
@@ -162,6 +163,7 @@ export const graph = {
         [transitions.EXPIRE_PAYMENT_KLARNA]: states.PAYMENT_EXPIRED,
         [transitions.CONFIRM_PAYMENT_KLARNA]: states.PURCHASED,
         [transitions.CANCEL_PAYMENT_KLARNA]: states.INITIAL,
+        [transitions.OPERATOR_CANCEL_PAYMENT_KLARNA]: states.INITIAL,
       },
     },
 
