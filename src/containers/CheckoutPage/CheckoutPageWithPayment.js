@@ -38,6 +38,7 @@ import {
   setOrderPageInitialValues,
 } from './CheckoutPageTransactionHelpers.js';
 import { getErrorMessages } from './ErrorMessages';
+import { storeData } from './CheckoutPageSessionHelpers';
 
 import StripePaymentForm from './StripePaymentForm/StripePaymentForm';
 import DetailsSideCard from './DetailsSideCard';
@@ -674,15 +675,17 @@ export const CheckoutPageWithPayment = props => {
       const process = processName ? getProcess(processName) : null;
       const cancelTransition = process?.transitions?.CANCEL_PAYMENT_KLARNA;
 
-      console.log('Cancel Klarna - processName:', processName);
-      console.log('Cancel Klarna - cancelTransition:', cancelTransition);
-      console.log('Cancel Klarna - txId:', existingTx.id);
-      console.log('Cancel Klarna - lastTransition:', existingTx.attributes?.lastTransition);
-
       if (cancelTransition) {
         // Use onInitiateOrder with isPrivilegedTransition=true since cancel-payment-klarna
         // has stripe-refund-payment action which requires server-side handling
-        await onInitiateOrder({}, processName, existingTx.id, cancelTransition, true);
+        const updatedTransaction = await onInitiateOrder({}, processName, existingTx.id, cancelTransition, true);
+
+        // Update session storage with the new transaction state
+        if (updatedTransaction?.id) {
+          const { orderData, listing } = pageData;
+          storeData(orderData, listing, updatedTransaction, sessionStorageKey);
+          setPageData({ ...pageData, transaction: updatedTransaction });
+        }
       }
 
       // Reload page to get fresh state
