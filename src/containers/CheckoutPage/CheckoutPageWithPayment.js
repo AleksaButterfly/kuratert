@@ -566,6 +566,7 @@ export const CheckoutPageWithPayment = props => {
     history,
     routeConfiguration,
     dispatch,
+    onInitiateOrder,
     onConfirmPayment,
     onSendMessage,
     onSubmitCallback,
