@@ -598,6 +598,11 @@ export const ListingPageComponent = props => {
             selectedFrameColor: selectedFrame.color || null,
             selectedFrameLabel: selectedFrame.label,
             framePriceInSubunits: selectedFrame.priceInSubunits,
+            // Money object for email template formatting
+            framePriceMoney: {
+              amount: selectedFrame.priceInSubunits / 100,
+              currency: price?.currency || 'NOK',
+            },
           }
         : null;
       onAddListingToCart(listingId.uuid, selectedQuantity, frameInfo);
@@ -1056,6 +1061,11 @@ export const ListingPageComponent = props => {
                   selectedFrameColor: selectedFrame.color || null,
                   selectedFrameLabel: selectedFrame.label,
                   framePriceInSubunits: selectedFrame.priceInSubunits,
+                  // Money object for email template formatting
+                  framePriceMoney: {
+                    amount: selectedFrame.priceInSubunits / 100,
+                    currency: price?.currency || 'NOK',
+                  },
                 }
               : null;
 
