@@ -15,6 +15,34 @@ const initiateOrderPayloadCreator = (
   { orderParams, processAlias, transactionId, transitionName, isPrivilegedTransition },
   { dispatch, extra: sdk, rejectWithValue }
 ) => {
+  // Special handling for cancel transitions - they don't need orderData
+  const isCancelTransition = transitionName === 'transition/cancel-payment-klarna';
+
+  if (isCancelTransition && transactionId) {
+    const bodyParams = {
+      id: transactionId,
+      transition: transitionName,
+      params: {},
+    };
+    const queryParams = {
+      include: ['booking', 'provider'],
+      expand: true,
+    };
+
+    return transitionPrivileged({ isSpeculative: false, orderData: {}, bodyParams, queryParams })
+      .then(response => {
+        const entities = denormalisedResponseEntities(response);
+        return entities[0];
+      })
+      .catch(e => {
+        log.error(e, 'cancel-klarna-payment-failed', {
+          transactionId: transactionId.uuid,
+          statusText: e.statusText,
+        });
+        return rejectWithValue(storableError(e));
+      });
+  }
+
   // If we already have a transaction ID, we should transition, not initiate.
   const isTransition = !!transactionId;
 

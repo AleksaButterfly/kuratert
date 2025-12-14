@@ -111,6 +111,39 @@ module.exports = (req, res) => {
 
   const sdk = getSdk(req, res);
   const transitionName = bodyParams.transition;
+
+  // Cancel transitions don't need line items - just execute the transition
+  const isCancelTransition = transitionName === 'transition/cancel-payment-klarna';
+
+  if (isCancelTransition) {
+    getTrustedSdk(req)
+      .then(trustedSdk => {
+        const body = {
+          ...bodyParams,
+          params: bodyParams?.params || {},
+        };
+        return trustedSdk.transactions.transition(body, queryParams);
+      })
+      .then(apiResponse => {
+        const { status, statusText, data } = apiResponse;
+        res
+          .status(status)
+          .set('Content-Type', 'application/transit+json')
+          .send(
+            serialize({
+              status,
+              statusText,
+              data,
+            })
+          )
+          .end();
+      })
+      .catch(e => {
+        handleError(res, e);
+      });
+    return;
+  }
+
   let lineItems = null;
   let metadataMaybe = {};
 
