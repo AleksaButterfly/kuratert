@@ -544,6 +544,8 @@ export const CheckoutPageWithPayment = props => {
   const [klarnaProcessing, setKlarnaProcessing] = useState(false);
   const [klarnaError, setKlarnaError] = useState(null);
   const [cancelKlarnaInProgress, setCancelKlarnaInProgress] = useState(false);
+  // Track if user returned from Klarna with failed payment (for showing cancel UI)
+  const [klarnaReturnFailed, setKlarnaReturnFailed] = useState(false);
 
   const {
     scrollingDisabled,
@@ -645,18 +647,21 @@ export const CheckoutPageWithPayment = props => {
           onSubmitCallback();
           history.push(orderDetailsPath);
         } else if (retrievedPI.status === 'requires_payment_method') {
-          // Payment failed or was cancelled
+          // Payment failed or was cancelled - show cancel UI to try different method
           setKlarnaError('Klarna payment was not completed. Please try again.');
+          setKlarnaReturnFailed(true);
           setKlarnaProcessing(false);
           // Clean up URL params
           window.history.replaceState({}, '', window.location.pathname);
         } else {
           setKlarnaError(`Payment status: ${retrievedPI.status}`);
+          setKlarnaReturnFailed(true);
           setKlarnaProcessing(false);
         }
       } catch (err) {
         console.error('Klarna return processing error:', err);
         setKlarnaError(err.message || 'Failed to process Klarna payment');
+        setKlarnaReturnFailed(true);
         setKlarnaProcessing(false);
       }
     };
@@ -951,6 +956,7 @@ export const CheckoutPageWithPayment = props => {
                 isFuzzyLocation={config.maps.fuzzy.enabled}
                 isKlarnaPending={isKlarnaPending}
                 isCardPending={isCardPending}
+                klarnaReturnFailed={klarnaReturnFailed}
                 onCancelKlarnaPayment={handleCancelKlarnaPayment}
                 cancelKlarnaInProgress={cancelKlarnaInProgress}
               />

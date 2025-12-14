@@ -754,6 +754,7 @@ class StripePaymentForm extends Component {
       isFuzzyLocation,
       isKlarnaPending,
       isCardPending,
+      klarnaReturnFailed,
       onCancelKlarnaPayment,
       cancelKlarnaInProgress,
       values,
@@ -767,7 +768,8 @@ class StripePaymentForm extends Component {
     // Determine what payment methods to show based on pending state
     const showKlarnaButton = !isCardPending && !isKlarnaPending;
     const showCardInputs = !isKlarnaPending;
-    const showCancelKlarnaUI = isKlarnaPending;
+    // Only show cancel UI when user returned from Klarna with a failed payment
+    const showCancelKlarnaUI = isKlarnaPending && klarnaReturnFailed;
 
     const { cardValueValid, paymentMethod } = this.state;
     const hasDefaultPaymentMethod = ensuredDefaultPaymentMethod.id;
