@@ -174,7 +174,7 @@ const MakeOfferForm = props => {
                   <p className={css.shippingPriceNote}>
                     <FormattedMessage
                       id="MakeOfferForm.shippingPriceNote"
-                      values={{ shippingPrice: `+${shippingPriceFormatted}` }}
+                      values={{ shippingPrice: shippingPriceFormatted }}
                     />
                   </p>
                 )}

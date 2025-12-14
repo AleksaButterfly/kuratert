@@ -821,7 +821,7 @@
   "MakeOfferForm.offerPlaceholder": "Enter your offer",
   "MakeOfferForm.offerRequired": "Offer amount is required",
   "MakeOfferForm.selectDeliveryMethod": "Select delivery method",
-  "MakeOfferForm.shippingPriceNote": "Shipping fee: {shippingPrice}",
+  "MakeOfferForm.shippingPriceNote": "Shipping fee: +{shippingPrice}",
   "MakeOfferForm.submitButton": "Submit Offer",
   "MakeOfferForm.submitFailed": "Failed to send offer. Please try again.",
   "MakeOfferPage.defaultMessageLabel": "Additional details",

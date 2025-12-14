@@ -821,7 +821,7 @@
   "MakeOfferForm.offerPlaceholder": "Skriv inn tilbudet ditt",
   "MakeOfferForm.offerRequired": "Tilbudsbeløp er påkrevd",
   "MakeOfferForm.selectDeliveryMethod": "Velg leveringsmetode",
-  "MakeOfferForm.shippingPriceNote": "Fraktgebyr: {shippingPrice}",
+  "MakeOfferForm.shippingPriceNote": "Fraktgebyr: +{shippingPrice}",
   "MakeOfferForm.submitButton": "Send inn tilbud",
   "MakeOfferForm.submitFailed": "Kunne ikke sende tilbudet. Vennligst prøv igjen.",
   "MakeOfferPage.defaultMessageLabel": "Tilleggsdetaljer",
