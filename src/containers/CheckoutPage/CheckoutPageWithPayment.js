@@ -674,6 +674,11 @@ export const CheckoutPageWithPayment = props => {
       const process = processName ? getProcess(processName) : null;
       const cancelTransition = process?.transitions?.CANCEL_PAYMENT_KLARNA;
 
+      console.log('Cancel Klarna - processName:', processName);
+      console.log('Cancel Klarna - cancelTransition:', cancelTransition);
+      console.log('Cancel Klarna - txId:', existingTx.id);
+      console.log('Cancel Klarna - lastTransition:', existingTx.attributes?.lastTransition);
+
       if (cancelTransition) {
         // Use onInitiateOrder with isPrivilegedTransition=true since cancel-payment-klarna
         // has stripe-refund-payment action which requires server-side handling
