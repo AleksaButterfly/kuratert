@@ -38,7 +38,7 @@ import {
   setOrderPageInitialValues,
 } from './CheckoutPageTransactionHelpers.js';
 import { getErrorMessages } from './ErrorMessages';
-import { storeData, clearData } from './CheckoutPageSessionHelpers';
+import { storeData } from './CheckoutPageSessionHelpers';
 
 import StripePaymentForm from './StripePaymentForm/StripePaymentForm';
 import DetailsSideCard from './DetailsSideCard';
@@ -678,30 +678,15 @@ export const CheckoutPageWithPayment = props => {
       if (cancelTransition) {
         // Use onInitiateOrder with isPrivilegedTransition=true since cancel-payment-klarna
         // has stripe-refund-payment action which requires server-side handling
-        const updatedTransaction = await onInitiateOrder({}, processName, existingTx.id, cancelTransition, true);
-
-        // Check the new state after cancel
-        // For default-purchase: goes to 'initial' state
-        // For negotiated-purchase: goes to 'accepted' state
-        const txState = updatedTransaction?.attributes?.state;
-        const goesToInitialState = txState === 'state/initial' || txState === 'initial';
-
-        if (goesToInitialState) {
-          // For default-purchase: transaction goes to initial state
-          // Clear the transaction so user can start fresh payment
-          const { orderData, listing } = pageData;
-          storeData(orderData, listing, null, sessionStorageKey);
-          setPageData({ ...pageData, transaction: null });
-        } else if (updatedTransaction?.id) {
-          // For negotiated-purchase: transaction goes to accepted state
-          // Keep the transaction but update it
-          const { orderData, listing } = pageData;
-          storeData(orderData, listing, updatedTransaction, sessionStorageKey);
-          setPageData({ ...pageData, transaction: updatedTransaction });
-        }
+        await onInitiateOrder({}, processName, existingTx.id, cancelTransition, true);
       }
 
-      // Reload page to get fresh state
+      // Clear session storage and reload fresh
+      // This gives the user a clean checkout experience as if they just arrived
+      const { orderData, listing, cartItems } = pageData;
+      storeData(orderData, listing, null, sessionStorageKey, cartItems);
+
+      // Reload page - will start fresh without the cancelled transaction
       window.location.reload();
     } catch (err) {
       console.error('Failed to cancel Klarna payment:', err);
