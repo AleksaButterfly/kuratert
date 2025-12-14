@@ -14,6 +14,7 @@ import {
   resolveLatestProcessName,
   BOOKING_PROCESS_NAME,
   NEGOTIATION_PROCESS_NAME,
+  NEGOTIATED_PURCHASE_PROCESS_NAME,
   PURCHASE_PROCESS_NAME,
 } from '../../transactions/transaction';
 import { clearCartOptimistic } from '../../ducks/user.duck';
@@ -679,15 +680,23 @@ export const CheckoutPageWithPayment = props => {
       if (cancelTransition) {
         // Use onInitiateOrder with isPrivilegedTransition=true since cancel-payment-klarna
         // has stripe-refund-payment action which requires server-side handling
-        await onInitiateOrder({}, processName, existingTx.id, cancelTransition, true);
+        const updatedTx = await onInitiateOrder({}, processName, existingTx.id, cancelTransition, true);
+
+        const { orderData, listing, cartItems } = pageData;
+        const isNegotiatedPurchase = processName === NEGOTIATED_PURCHASE_PROCESS_NAME;
+
+        if (isNegotiatedPurchase && updatedTx?.id) {
+          // For negotiated-purchase: cancel goes to 'accepted' state
+          // Keep the transaction so user can pay again on the same accepted offer
+          storeData(orderData, listing, updatedTx, sessionStorageKey, cartItems);
+        } else {
+          // For default-purchase: cancel goes to 'initial' state
+          // Clear transaction so user starts fresh
+          storeData(orderData, listing, null, sessionStorageKey, cartItems);
+        }
       }
 
-      // Clear session storage and reload fresh
-      // This gives the user a clean checkout experience as if they just arrived
-      const { orderData, listing, cartItems } = pageData;
-      storeData(orderData, listing, null, sessionStorageKey, cartItems);
-
-      // Reload page - will start fresh without the cancelled transaction
+      // Reload page
       window.location.reload();
     } catch (err) {
       console.error('Failed to cancel Klarna payment:', err);
