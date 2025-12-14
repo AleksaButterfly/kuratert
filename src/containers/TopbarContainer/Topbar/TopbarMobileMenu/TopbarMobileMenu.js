@@ -9,7 +9,7 @@ import { ACCOUNT_SETTINGS_PAGES } from '../../../../routing/routeConfiguration';
 import { FormattedMessage } from '../../../../util/reactIntl';
 import { ensureCurrentUser } from '../../../../util/data';
 import { useConfiguration } from '../../../../context/configurationContext';
-import { getFavoriteListingIds, getCartItemCount } from '../../../../util/userHelpers';
+import { getFavoriteListingIds } from '../../../../util/userHelpers';
 
 import {
   AvatarLarge,
@@ -76,6 +76,7 @@ const TopbarMobileMenu = props => {
     inboxTab,
     currentUser,
     notificationCount = 0,
+    validCartItemCount = 0,
     customLinks,
     onLogout,
     showCreateListingsLink,
@@ -123,11 +124,10 @@ const TopbarMobileMenu = props => {
       <NotificationBadge className={css.notificationBadge} count={favoritesCount} />
     ) : null;
 
-  // Get cart item count from currentUser
-  const cartCount = getCartItemCount(currentUser);
+  // Use validCartItemCount which only counts items with stock > 0
   const cartBadge =
-    cartCount > 0 ? (
-      <NotificationBadge className={css.notificationBadge} count={cartCount} />
+    validCartItemCount > 0 ? (
+      <NotificationBadge className={css.notificationBadge} count={validCartItemCount} />
     ) : null;
 
   // Navigation links - shown for both authenticated and unauthenticated users

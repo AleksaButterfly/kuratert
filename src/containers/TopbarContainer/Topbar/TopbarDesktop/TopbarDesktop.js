@@ -25,7 +25,7 @@ import {
   IconLanguage,
   LanguageModal,
 } from '../../../../components';
-import { getFavoriteListingIds, getCartItemCount } from '../../../../util/userHelpers';
+import { getFavoriteListingIds } from '../../../../util/userHelpers';
 
 import CategoryLinks from './CategoryLinks/CategoryLinks';
 import CustomLinksMenu from './CustomLinksMenu/CustomLinksMenu';
@@ -215,6 +215,7 @@ const TopbarDesktop = props => {
     intl,
     isAuthenticated,
     notificationCount = 0,
+    validCartItemCount = 0,
     onLogout,
     showCreateListingsLink,
     showSearchForm,
@@ -277,15 +278,14 @@ const TopbarDesktop = props => {
 
   // Get favorites count from currentUser
   const favoritesCount = getFavoriteListingIds(currentUser).length;
-  // Get cart item count from currentUser
-  const cartCount = getCartItemCount(currentUser);
 
   // Search button is conditionally shown based on Console settings
   const searchButton = showSearchForm ? (
     <SearchButton intl={intl} isSearchOpen={isSearchOpen} onClick={toggleSearch} />
   ) : null;
   const favoritesLink = <FavoritesLink intl={intl} count={favoritesCount} />;
-  const cartLink = <CartLink intl={intl} count={cartCount} />;
+  // Use validCartItemCount which only counts items with stock > 0
+  const cartLink = <CartLink intl={intl} count={validCartItemCount} />;
   const languageButton = (
     <LanguageButton
       intl={intl}

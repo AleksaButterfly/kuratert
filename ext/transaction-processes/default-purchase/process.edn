@@ -97,7 +97,7 @@
    [{:name :action/stripe-refund-payment}
     {:name :action/decline-stock-reservation}],
    :from :state/pending-payment-klarna,
-   :to :state/initial}
+   :to :state/payment-cancelled}
 
   {:name :transition/operator-cancel-payment-klarna,
    :actor :actor.role/operator,
@@ -105,7 +105,7 @@
    [{:name :action/stripe-refund-payment}
     {:name :action/decline-stock-reservation}],
    :from :state/pending-payment-klarna,
-   :to :state/initial}
+   :to :state/payment-cancelled}
 
   {:name :transition/mark-received-from-purchased,
    :actor :actor.role/customer,

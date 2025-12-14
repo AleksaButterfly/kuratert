@@ -106,6 +106,7 @@ export const states = {
   PENDING_PAYMENT: 'pending-payment',
   PENDING_PAYMENT_KLARNA: 'pending-payment-klarna',
   PAYMENT_EXPIRED: 'payment-expired',
+  PAYMENT_CANCELLED: 'payment-cancelled',
   PURCHASED: 'purchased',
   DELIVERED: 'delivered',
   RECEIVED: 'received',
@@ -162,12 +163,13 @@ export const graph = {
       on: {
         [transitions.EXPIRE_PAYMENT_KLARNA]: states.PAYMENT_EXPIRED,
         [transitions.CONFIRM_PAYMENT_KLARNA]: states.PURCHASED,
-        [transitions.CANCEL_PAYMENT_KLARNA]: states.INITIAL,
-        [transitions.OPERATOR_CANCEL_PAYMENT_KLARNA]: states.INITIAL,
+        [transitions.CANCEL_PAYMENT_KLARNA]: states.PAYMENT_CANCELLED,
+        [transitions.OPERATOR_CANCEL_PAYMENT_KLARNA]: states.PAYMENT_CANCELLED,
       },
     },
 
     [states.PAYMENT_EXPIRED]: {},
+    [states.PAYMENT_CANCELLED]: {},
     [states.PURCHASED]: {
       on: {
         [transitions.MARK_DELIVERED]: states.DELIVERED,

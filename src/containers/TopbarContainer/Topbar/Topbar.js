@@ -143,6 +143,7 @@ const TopbarComponent = props => {
     currentUserHasOrders,
     currentPage,
     notificationCount = 0,
+    validCartItemCount = 0,
     intl,
     history,
     location,
@@ -257,6 +258,7 @@ const TopbarComponent = props => {
       currentUser={currentUser}
       onLogout={handleLogout}
       notificationCount={notificationCount}
+      validCartItemCount={validCartItemCount}
       currentPage={resolvedCurrentPage}
       customLinks={customLinks}
       showCreateListingsLink={showCreateListingsLink}
@@ -354,6 +356,7 @@ const TopbarComponent = props => {
           intl={intl}
           isAuthenticated={isAuthenticated}
           notificationCount={notificationCount}
+          validCartItemCount={validCartItemCount}
           onLogout={handleLogout}
           onSearchSubmit={handleSubmit}
           config={config}

@@ -43,6 +43,7 @@ const mapStateToProps = state => {
     currentUserOrderNotificationCount = 0,
     sendVerificationEmailInProgress,
     sendVerificationEmailError,
+    validCartItemCount,
   } = state.user;
   const hasGenericError = !!(logoutError || hasCurrentUserErrors(state));
   return {
@@ -51,6 +52,7 @@ const mapStateToProps = state => {
     currentUserHasListings,
     currentUserHasOrders,
     notificationCount: currentUserSaleNotificationCount + currentUserOrderNotificationCount,
+    validCartItemCount,
     isAuthenticated,
     isLoggedInAs,
     authScopes,

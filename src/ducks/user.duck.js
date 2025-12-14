@@ -154,6 +154,59 @@ export const fetchCurrentUserNotifications = () => (dispatch, getState, sdk) => 
   return dispatch(fetchCurrentUserNotificationsThunk()).unwrap();
 };
 
+///////////////////////////////////////////////
+// Fetch valid cart count (CUSTOM)          //
+// Counts only cart items with stock > 0    //
+///////////////////////////////////////////////
+
+const fetchValidCartCountPayloadCreator = (currentUserArg, thunkAPI) => {
+  const { getState, extra: sdk, rejectWithValue } = thunkAPI;
+  const { currentUser: stateUser, validCartItemCountTimestamp } = getState().user;
+  // Use passed currentUser if available, otherwise fall back to state
+  const currentUser = currentUserArg || stateUser;
+
+  // Throttle: Don't fetch if we fetched within last 30 seconds
+  const thirtySecondsAgo = new Date().getTime() - 30000;
+  if (validCartItemCountTimestamp > thirtySecondsAgo) {
+    return Promise.resolve({ skipUpdate: true });
+  }
+
+  const cartItems = getCartItems(currentUser);
+  if (!cartItems || cartItems.length === 0) {
+    return Promise.resolve({ validCount: 0 });
+  }
+
+  const cartListingIds = cartItems.map(item => item.listingId);
+
+  return sdk.listings
+    .query({
+      ids: cartListingIds,
+      minStock: 1,
+      'fields.listing': ['title'], // Minimal fields for efficiency
+    })
+    .then(response => {
+      const inStockIds = response.data.data.map(l => l.id.uuid);
+      const validCount = cartItems.reduce((sum, item) => {
+        return inStockIds.includes(item.listingId) ? sum + (item.quantity || 1) : sum;
+      }, 0);
+      return { validCount, inStockIds };
+    })
+    .catch(e => {
+      log.error(e, 'fetch-valid-cart-count-failed');
+      return rejectWithValue(storableError(e));
+    });
+};
+
+export const fetchValidCartCountThunk = createAsyncThunk(
+  'user/fetchValidCartCount',
+  fetchValidCartCountPayloadCreator
+);
+
+// Backward compatible wrapper for the thunk
+export const fetchValidCartCount = (currentUser = null) => dispatch => {
+  return dispatch(fetchValidCartCountThunk(currentUser)).unwrap();
+};
+
 const fetchCurrentUserPayloadCreator = (options, thunkAPI) => {
   const { getState, dispatch, extra: sdk, rejectWithValue } = thunkAPI;
   const state = getState();
@@ -231,6 +284,9 @@ const fetchCurrentUserPayloadCreator = (options, thunkAPI) => {
         if (!currentUser.attributes.emailVerified) {
           dispatch(fetchCurrentUserHasOrders());
         }
+
+        // Fetch valid cart count (items with stock > 0)
+        dispatch(fetchValidCartCountThunk(currentUser));
       }
 
       // Make sure auth info is up to date
@@ -553,6 +609,11 @@ const userSlice = createSlice({
     clearCartInProgress: false,
     clearCartError: null,
     currentCartListingId: null,
+    // Valid cart item count (based on stock availability)
+    validCartItemCount: 0,
+    validCartItemCountInProgress: false,
+    validCartItemCountError: null,
+    validCartItemCountTimestamp: 0,
   },
   reducers: {
     clearCurrentUser: state => {
@@ -562,8 +623,10 @@ const userSlice = createSlice({
       state.currentUserHasListingsError = null;
       state.currentUserSaleNotificationCount = 0;
       state.currentUserOrderNotificationCount = 0;
-
       state.currentUserNotificationCountError = null;
+      // Clear cart count on logout
+      state.validCartItemCount = 0;
+      state.validCartItemCountTimestamp = 0;
     },
     setCurrentUser: (state, action) => {
       state.currentUser = mergeCurrentUser(state.currentUser, action.payload);
@@ -577,6 +640,8 @@ const userSlice = createSlice({
       if (state.currentUser?.attributes?.profile?.privateData) {
         state.currentUser.attributes.profile.privateData.cartItems = [];
       }
+      state.validCartItemCount = 0;
+      state.validCartItemCountTimestamp = 0;
     },
   },
   extraReducers: builder => {
@@ -737,6 +802,7 @@ const userSlice = createSlice({
       .addCase(addListingToCartThunk.fulfilled, state => {
         state.addListingToCartInProgress = false;
         state.currentCartListingId = null;
+        state.validCartItemCountTimestamp = 0; // Force refresh on next fetch
       })
       .addCase(addListingToCartThunk.rejected, (state, action) => {
         state.addListingToCartInProgress = false;
@@ -766,6 +832,7 @@ const userSlice = createSlice({
       .addCase(removeListingFromCartThunk.fulfilled, state => {
         state.removeListingFromCartInProgress = false;
         state.currentCartListingId = null;
+        state.validCartItemCountTimestamp = 0; // Force refresh on next fetch
       })
       .addCase(removeListingFromCartThunk.rejected, (state, action) => {
         state.removeListingFromCartInProgress = false;
@@ -791,6 +858,7 @@ const userSlice = createSlice({
       })
       .addCase(updateCartItemQuantityThunk.fulfilled, state => {
         state.updateCartItemQuantityInProgress = false;
+        state.validCartItemCountTimestamp = 0; // Force refresh on next fetch
       })
       .addCase(updateCartItemQuantityThunk.rejected, (state, action) => {
         state.updateCartItemQuantityInProgress = false;
@@ -808,10 +876,28 @@ const userSlice = createSlice({
       })
       .addCase(clearCartThunk.fulfilled, state => {
         state.clearCartInProgress = false;
+        state.validCartItemCount = 0; // Reset count immediately
+        state.validCartItemCountTimestamp = 0;
       })
       .addCase(clearCartThunk.rejected, (state, action) => {
         state.clearCartInProgress = false;
         state.clearCartError = action.payload?.error || action.payload;
+      })
+      // fetchValidCartCount
+      .addCase(fetchValidCartCountThunk.pending, state => {
+        state.validCartItemCountInProgress = true;
+        state.validCartItemCountError = null;
+      })
+      .addCase(fetchValidCartCountThunk.fulfilled, (state, action) => {
+        state.validCartItemCountInProgress = false;
+        if (!action.payload.skipUpdate) {
+          state.validCartItemCount = action.payload.validCount;
+          state.validCartItemCountTimestamp = new Date().getTime();
+        }
+      })
+      .addCase(fetchValidCartCountThunk.rejected, (state, action) => {
+        state.validCartItemCountInProgress = false;
+        state.validCartItemCountError = action.payload;
       });
   },
 });
