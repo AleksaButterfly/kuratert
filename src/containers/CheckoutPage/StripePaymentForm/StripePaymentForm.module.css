@@ -298,8 +298,7 @@
 
 /* Cancel Klarna Payment Section */
 .cancelKlarnaSection {
-  margin-bottom: 24px;
-  padding: 20px;
+  margin-top: 48px;
   background-color: var(--colorGrey50);
   border-radius: 8px;
   text-align: center;
@@ -314,6 +313,12 @@
 .cancelKlarnaButton {
   composes: buttonDefault from global;
   width: 100%;
-  max-width: 300px;
-  margin: 0 auto;
+}
+
+/* Express checkout hint when shipping required */
+.expressCheckoutHint {
+  font-size: 14px;
+  color: var(--colorGrey600);
+  text-align: center;
+  margin: 0 0 16px 0;
 }

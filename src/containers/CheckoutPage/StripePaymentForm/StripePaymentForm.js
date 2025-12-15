@@ -299,14 +299,14 @@ const KlarnaIcon = () => (
  * Klarna Payment Button component
  */
 const KlarnaPaymentButton = props => {
-  const { onClick, inProgress, intl } = props;
+  const { onClick, inProgress, disabled, intl } = props;
 
   return (
     <button
       type="button"
       className={css.klarnaButton}
       onClick={onClick}
-      disabled={inProgress}
+      disabled={inProgress || disabled}
     >
       {inProgress ? (
         <IconSpinner className={css.klarnaSpinner} />
@@ -328,8 +328,13 @@ const ExpressCheckout = props => {
     onKlarnaClick,
     klarnaInProgress,
     showKlarnaButton,
+    shippingRequired,
+    shippingDetailsFilled,
     intl,
   } = props;
+
+  // Disable express checkout buttons if shipping is required but not filled
+  const expressCheckoutDisabled = shippingRequired && !shippingDetailsFilled;
 
   const showApplePay = canMakePayment?.applePay;
   const showGooglePay = canMakePayment?.googlePay;
@@ -364,11 +369,19 @@ const ExpressCheckout = props => {
         <FormattedMessage id="StripePaymentForm.expressCheckout" />
       </Heading>
 
+      {/* Hint when shipping is required but not filled */}
+      {expressCheckoutDisabled && (
+        <p className={css.expressCheckoutHint}>
+          <FormattedMessage id="StripePaymentForm.fillShippingFirst" />
+        </p>
+      )}
+
       {/* Klarna button - shown first (priority for Norway) */}
       {showKlarnaButton !== false && (
         <KlarnaPaymentButton
           onClick={onKlarnaClick}
           inProgress={klarnaInProgress}
+          disabled={expressCheckoutDisabled}
           intl={intl}
         />
       )}
@@ -379,7 +392,7 @@ const ExpressCheckout = props => {
           type="button"
           className={classNames(css.walletButton, getButtonClass())}
           onClick={handleWalletClick}
-          disabled={walletPaymentInProgress}
+          disabled={walletPaymentInProgress || expressCheckoutDisabled}
         >
           {walletPaymentInProgress ? (
             <IconSpinner className={css.walletSpinner} />
@@ -792,6 +805,16 @@ class StripePaymentForm extends Component {
       hasHandledCardPayment
     );
 
+    // Check if shipping details are filled (for disabling express checkout buttons)
+    const shippingDetailsFilled = !!(
+      values?.recipientName &&
+      values?.recipientPhoneNumber &&
+      values?.recipientAddressLine1 &&
+      values?.recipientPostal &&
+      values?.recipientCity &&
+      values?.recipientCountry
+    );
+
     const submitDisabled = invalid || onetimePaymentNeedsAttention || submitInProgress;
     const hasCardError = this.state.error && !submitInProgress;
     const hasPaymentErrors = confirmCardPaymentError || confirmPaymentError;
@@ -862,16 +885,18 @@ class StripePaymentForm extends Component {
 
     return hasStripeKey ? (
       <Form className={classes} onSubmit={handleSubmit} enforcePagePreloadFor="OrderDetailsPage">
-        <LocationOrShippingDetails
-          askShippingDetails={askShippingDetails}
-          showPickUpLocation={showPickUpLocation}
-          showLocation={showLocation}
-          listingLocation={listingLocation}
-          isFuzzyLocation={isFuzzyLocation}
-          formApi={formApi}
-          locale={locale}
-          intl={intl}
-        />
+        {!showCancelKlarnaUI ? (
+          <LocationOrShippingDetails
+            askShippingDetails={askShippingDetails}
+            showPickUpLocation={showPickUpLocation}
+            showLocation={showLocation}
+            listingLocation={listingLocation}
+            isFuzzyLocation={isFuzzyLocation}
+            formApi={formApi}
+            locale={locale}
+            intl={intl}
+          />
+        ) : null}
 
         {/* Cancel Klarna payment UI - shown when stuck in Klarna pending state */}
         {showCancelKlarnaUI && (
@@ -900,6 +925,8 @@ class StripePaymentForm extends Component {
             onKlarnaClick={this.handleKlarnaClick}
             klarnaInProgress={this.state.klarnaPaymentInProgress}
             showKlarnaButton={showKlarnaButton}
+            shippingRequired={askShippingDetails}
+            shippingDetailsFilled={shippingDetailsFilled}
             intl={intl}
           />
         ) : null}
@@ -982,7 +1009,7 @@ class StripePaymentForm extends Component {
         {initiateOrderError ? (
           <span className={css.errorMessage}>{initiateOrderError.message}</span>
         ) : null}
-        {showInitialMessageInput ? (
+        {showInitialMessageInput && !showCancelKlarnaUI ? (
           <div>
             <Heading as="h3" rootClassName={css.heading}>
               <FormattedMessage id="StripePaymentForm.messageHeading" />
@@ -998,35 +1025,37 @@ class StripePaymentForm extends Component {
             />
           </div>
         ) : null}
-        <div className={css.submitContainer}>
-          {hasPaymentErrors ? (
-            <span className={css.errorMessage}>{paymentErrorMessage}</span>
-          ) : null}
-          <PrimaryButton
-            className={css.submitButton}
-            type="submit"
-            inProgress={submitInProgress}
-            disabled={submitDisabled}
-          >
-            {billingDetailsNeeded ? (
+        {!showCancelKlarnaUI ? (
+          <div className={css.submitContainer}>
+            {hasPaymentErrors ? (
+              <span className={css.errorMessage}>{paymentErrorMessage}</span>
+            ) : null}
+            <PrimaryButton
+              className={css.submitButton}
+              type="submit"
+              inProgress={submitInProgress}
+              disabled={submitDisabled}
+            >
+              {billingDetailsNeeded ? (
+                <FormattedMessage
+                  id="StripePaymentForm.submitPaymentInfo"
+                  values={{ totalPrice: totalPriceMaybe, isBooking: isBookingYesNo }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="StripePaymentForm.submitConfirmPaymentInfo"
+                  values={{ totalPrice: totalPriceMaybe, isBooking: isBookingYesNo }}
+                />
+              )}
+            </PrimaryButton>
+            <p className={css.paymentInfo}>
               <FormattedMessage
-                id="StripePaymentForm.submitPaymentInfo"
-                values={{ totalPrice: totalPriceMaybe, isBooking: isBookingYesNo }}
+                id="StripePaymentForm.submitConfirmPaymentFinePrint"
+                values={{ isBooking: isBookingYesNo, name: providerDisplayName }}
               />
-            ) : (
-              <FormattedMessage
-                id="StripePaymentForm.submitConfirmPaymentInfo"
-                values={{ totalPrice: totalPriceMaybe, isBooking: isBookingYesNo }}
-              />
-            )}
-          </PrimaryButton>
-          <p className={css.paymentInfo}>
-            <FormattedMessage
-              id="StripePaymentForm.submitConfirmPaymentFinePrint"
-              values={{ isBooking: isBookingYesNo, name: providerDisplayName }}
-            />
-          </p>
-        </div>
+            </p>
+          </div>
+        ) : null}
       </Form>
     ) : (
       <div className={css.missingStripeKey}>

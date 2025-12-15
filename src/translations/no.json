@@ -1447,6 +1447,7 @@
   "StripePaymentForm.confirmCardPaymentError": "Kunne ikke autentisere betalingsmetoden din. Vennligst sjekk autentiseringsdetaljene og prøv igjen.",
   "StripePaymentForm.confirmPaymentError": "En betaling er gjennomført, men vi kan ikke bekrefte bestillingen. Vennligst prøv å bekrefte forespørselen på nytt. Hvis bestillingen ikke bekreftes i tide, vil betalingen bli fullt refundert.",
   "StripePaymentForm.expressCheckout": "Hurtigbetaling",
+  "StripePaymentForm.fillShippingFirst": "Vennligst fyll inn leveringsdetaljer ovenfor først",
   "StripePaymentForm.genericError": "Kunne ikke håndtere betalingsdata. Vennligst prøv igjen.",
   "StripePaymentForm.locationDetailsTitle": "Oppføringssted",
   "StripePaymentForm.locationUnknown": "Ukjent sted",
