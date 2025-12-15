@@ -766,10 +766,21 @@ class StripePaymentForm extends Component {
     const billingDetailsNeeded = !(hasHandledCardPayment || confirmPaymentError);
 
     // Determine what payment methods to show based on pending state
-    const showKlarnaButton = !isCardPending && !isKlarnaPending;
-    const showCardInputs = !isKlarnaPending;
-    // Only show cancel UI when user returned from Klarna with a failed payment
-    const showCancelKlarnaUI = isKlarnaPending && klarnaReturnFailed;
+    // isInKlarnaRedirectProcess = user clicked Klarna and is being redirected (before page reload)
+    const isInKlarnaRedirectProcess = this.state.klarnaPaymentInProgress;
+
+    // Show Klarna button unless card payment is in progress, or we returned from failed Klarna
+    const showKlarnaButton = !isCardPending && !klarnaReturnFailed;
+
+    // Hide card inputs when:
+    // 1. Klarna payment is pending (user returned or refreshed while pending), AND
+    // 2. User is NOT in the initial click → redirect process
+    const showCardInputs = !isKlarnaPending || isInKlarnaRedirectProcess;
+
+    // Show cancel UI when:
+    // 1. In pending Klarna state, AND
+    // 2. Either returned from failed payment OR page was refreshed while pending (not in redirect process)
+    const showCancelKlarnaUI = isKlarnaPending && (klarnaReturnFailed || !isInKlarnaRedirectProcess);
 
     const { cardValueValid, paymentMethod } = this.state;
     const hasDefaultPaymentMethod = ensuredDefaultPaymentMethod.id;
