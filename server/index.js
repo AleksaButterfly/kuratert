@@ -154,16 +154,6 @@ if (TRUST_PROXY === 'true') {
   app.set('trust proxy', TRUST_PROXY);
 }
 
-// Redirect www to non-www (root domain)
-app.use((req, res, next) => {
-  const host = req.headers.host;
-  if (host && host.startsWith('www.')) {
-    const newHost = host.replace('www.', '');
-    return res.redirect(301, `https://${newHost}${req.url}`);
-  }
-  next();
-});
-
 app.use(compression());
 app.use('/static', express.static(path.join(buildPath, 'static')));
 app.use(cookieParser());
