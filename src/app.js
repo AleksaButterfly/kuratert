@@ -225,7 +225,7 @@ export const ClientApp = props => {
     return (
       <MaintenanceModeError
         locale={appConfig.localization.locale}
-        messages={{ ...hostedTranslations, ...localeMessages }}
+        messages={{ ...localeMessages, ...hostedTranslations }}
       />
     );
   }
@@ -244,7 +244,7 @@ export const ClientApp = props => {
     <Configurations appConfig={appConfig}>
       <IntlProvider
         locale={appConfig.localization.locale}
-        messages={{ ...hostedTranslations, ...localeMessages }}
+        messages={{ ...localeMessages, ...hostedTranslations }}
         textComponent="span"
       >
         <Provider store={store}>
@@ -281,7 +281,7 @@ export const ServerApp = props => {
     return (
       <MaintenanceModeError
         locale={appConfig.localization.locale}
-        messages={{ ...hostedTranslations, ...localeMessages }}
+        messages={{ ...localeMessages, ...hostedTranslations }}
         helmetContext={helmetContext}
       />
     );
@@ -291,7 +291,7 @@ export const ServerApp = props => {
     <Configurations appConfig={appConfig}>
       <IntlProvider
         locale={appConfig.localization.locale}
-        messages={{ ...hostedTranslations, ...localeMessages }}
+        messages={{ ...localeMessages, ...hostedTranslations }}
         textComponent="span"
       >
         <Provider store={store}>
