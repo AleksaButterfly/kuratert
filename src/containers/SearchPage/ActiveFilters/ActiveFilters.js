@@ -107,7 +107,9 @@ const getFilterLabel = (filterConfig, value, intl, marketplaceCurrency, listingC
 
   // Handle enum/multi-enum filters
   if (enumOptions && enumOptions.length > 0) {
-    const values = value.split(',');
+    // Strip has_all: or has_any: prefix if present
+    const cleanValue = value.replace(/^(has_all:|has_any:)/i, '');
+    const values = cleanValue.split(',');
     const labels = values.map(v => {
       const option = enumOptions.find(opt => opt.option === v);
       return option ? option.label : v;
