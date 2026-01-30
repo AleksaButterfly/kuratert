@@ -20,9 +20,21 @@
 
      /**
       * Custom fonts for Kuratert
+      * - Amen Display: Headlines
+      * - ABC Monument Grotesk Mono: Supporting font
+      * - PP Neue Montreal: Body text
       */
 
-      /* ABC Monument Grotesk Mono - for headings */
+      /* Amen Display - for headlines */
+      @font-face {
+        font-family: "Amen Display";
+        font-style: normal;
+        font-weight: 300;
+        font-display: swap;
+        src: url("/static/fonts/AmenDisplay-Light.otf") format("opentype");
+      }
+
+      /* ABC Monument Grotesk Mono - supporting font */
       @font-face {
         font-family: "ABC Monument Grotesk Mono";
         font-style: normal;
@@ -38,13 +50,48 @@
         src: url("/static/fonts/ABCMonumentGroteskMono-RegularItalic.otf") format("opentype");
       }
 
-      /* Amen Display - for body text */
+      /* PP Neue Montreal - for body text */
       @font-face {
-        font-family: "Amen Display";
+        font-family: "PP Neue Montreal";
         font-style: normal;
-        font-weight: 300;
+        font-weight: 100;
         font-display: swap;
-        src: url("/static/fonts/AmenDisplay-Light.otf") format("opentype");
+        src: url("/static/fonts/PPNeueMontreal-Thin.otf") format("opentype");
+      }
+      @font-face {
+        font-family: "PP Neue Montreal";
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url("/static/fonts/PPNeueMontreal-Book.otf") format("opentype");
+      }
+      @font-face {
+        font-family: "PP Neue Montreal";
+        font-style: italic;
+        font-weight: 400;
+        font-display: swap;
+        src: url("/static/fonts/PPNeueMontreal-Italic.otf") format("opentype");
+      }
+      @font-face {
+        font-family: "PP Neue Montreal";
+        font-style: normal;
+        font-weight: 500;
+        font-display: swap;
+        src: url("/static/fonts/PPNeueMontreal-Medium.otf") format("opentype");
+      }
+      @font-face {
+        font-family: "PP Neue Montreal";
+        font-style: italic;
+        font-weight: 600;
+        font-display: swap;
+        src: url("/static/fonts/PPNeueMontreal-SemiBolditalic.otf") format("opentype");
+      }
+      @font-face {
+        font-family: "PP Neue Montreal";
+        font-style: normal;
+        font-weight: 700;
+        font-display: swap;
+        src: url("/static/fonts/PPNeueMontreal-Bold.otf") format("opentype");
       }
 
      /**

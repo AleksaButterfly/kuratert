@@ -88,9 +88,13 @@
   --colorStatusFinalState: var(--colorGrey600);
 
   /* ================ Font ================ */
-  --fontFamily: 'Amen Display', -apple-system, BlinkMacSystemFont, 'Inter', Helvetica, Arial, sans-serif,
+  /* Body text: PP Neue Montreal */
+  --fontFamily: 'PP Neue Montreal', -apple-system, BlinkMacSystemFont, 'Inter', Helvetica, Arial, sans-serif,
     'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
-  --fontFamilyHeading: 'ABC Monument Grotesk Mono', -apple-system, BlinkMacSystemFont, 'Inter', Helvetica, Arial, monospace;
+  /* Headlines: Amen Display */
+  --fontFamilyHeading: 'Amen Display', -apple-system, BlinkMacSystemFont, 'Inter', Helvetica, Arial, sans-serif;
+  /* Supporting font: ABC Monument Grotesk Mono */
+  --fontFamilySupporting: 'ABC Monument Grotesk Mono', -apple-system, BlinkMacSystemFont, 'Inter', Helvetica, Arial, monospace;
 
   --fontWeightRegular: 400;
   --fontWeightMedium: 500;
