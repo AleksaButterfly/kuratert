@@ -70,6 +70,76 @@
   }
 }
 
+/* Section Book a Call */
+.sectionBookCall {
+  width: 100%;
+  padding: 60px 24px;
+  background-color: var(--colorWhite);
+
+  @media (--viewportMedium) {
+    padding: 80px 24px;
+  }
+
+  @media (--viewportLarge) {
+    padding: 100px 24px;
+  }
+}
+
+.bookCallTitle {
+  font-family: var(--fontFamilyHeading);
+  font-size: 28px;
+  line-height: 36px;
+  font-weight: 300;
+  color: var(--colorGrey900);
+  margin: 0 0 16px 0;
+  letter-spacing: -0.02em;
+
+  @media (--viewportMedium) {
+    font-size: 36px;
+    line-height: 44px;
+    margin: 0 0 20px 0;
+  }
+}
+
+.bookCallSubtitle {
+  font-family: var(--fontFamily);
+  font-size: 16px;
+  line-height: 26px;
+  font-weight: 400;
+  color: var(--colorGrey700);
+  margin: 0 auto 32px auto;
+  max-width: 600px;
+
+  @media (--viewportMedium) {
+    font-size: 18px;
+    line-height: 28px;
+    margin: 0 auto 40px auto;
+  }
+}
+
+.bookCallButton {
+  display: inline-block;
+  padding: 14px 32px;
+  background-color: var(--marketplaceColor);
+  color: var(--colorWhite);
+  font-family: var(--fontFamily);
+  font-size: 16px;
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: var(--marketplaceColorDark);
+    text-decoration: none;
+  }
+
+  @media (--viewportMedium) {
+    padding: 16px 40px;
+    font-size: 18px;
+  }
+}
+
 /* Section Who We Are */
 .sectionWhoWeAre {
   width: 100%;
