@@ -55,25 +55,6 @@ const AboutPage = () => {
             </div>
           </section>
 
-          {/* Section 2: Book a Call */}
-          <section className={css.sectionBookCall}>
-            <div className={css.sectionContent}>
-              <h2 className={css.bookCallTitle}>
-                {intl.formatMessage({ id: 'AboutPage.bookCallTitle' })}
-              </h2>
-              <p className={css.bookCallSubtitle}>
-                {intl.formatMessage({ id: 'AboutPage.bookCallSubtitle' })}
-              </p>
-              <a
-                href="https://calendly.com/cornelia-corneliasvedman"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={css.bookCallButton}
-              >
-                {intl.formatMessage({ id: 'AboutPage.bookCallButton' })}
-              </a>
-            </div>
-          </section>
         </div>
       </LayoutSingleColumn>
     </Page>
