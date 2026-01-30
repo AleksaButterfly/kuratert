@@ -55,6 +55,18 @@ const AboutPage = () => {
             </div>
           </section>
 
+          {/* Section 2: Who We Are */}
+          <section className={css.sectionWhoWeAre}>
+            <div className={css.sectionContent}>
+              <h2 className={css.whoWeAreTitle}>
+                {intl.formatMessage({ id: 'AboutPage.whoWeAreTitle' })}
+              </h2>
+              <p className={css.whoWeAreSubtitle}>
+                {intl.formatMessage({ id: 'AboutPage.whoWeAreSubtitle' })}
+              </p>
+            </div>
+          </section>
+
         </div>
       </LayoutSingleColumn>
     </Page>
