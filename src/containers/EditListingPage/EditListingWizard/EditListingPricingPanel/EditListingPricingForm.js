@@ -12,7 +12,7 @@ import { types as sdkTypes } from '../../../../util/sdkLoader';
 import { FIXED, isBookingProcess } from '../../../../transactions/transaction';
 
 // Import shared components
-import { Button, Form, FieldCurrencyInput } from '../../../../components';
+import { Button, Form, FieldCurrencyInput, FieldCheckbox } from '../../../../components';
 
 import BookingPriceVariants from './BookingPriceVariants';
 import StartTimeInterval from './StartTimeInverval';
@@ -179,6 +179,18 @@ export const EditListingPricingForm = props => (
               pristine={pristine}
             />
           ) : null}
+
+          <div className={css.acceptingOffersWrapper}>
+            <FieldCheckbox
+              id={`${formId}.acceptingOffers`}
+              name="acceptingOffers"
+              label={intl.formatMessage({ id: 'EditListingPricingForm.acceptingOffersLabel' })}
+              value="true"
+            />
+            <p className={css.acceptingOffersInfo}>
+              <FormattedMessage id="EditListingPricingForm.acceptingOffersInfo" />
+            </p>
+          </div>
 
           <Button
             className={css.submitButton}

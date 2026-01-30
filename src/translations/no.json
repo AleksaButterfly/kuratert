@@ -433,6 +433,8 @@
   "EditListingPricingForm.priceVariant.variationNamesMustBeUnique": "Hver variasjon må ha et unikt navn.",
   "EditListingPricingForm.showListingFailed": "Henting av annonsedata mislyktes.",
   "EditListingPricingForm.updateFailed": "Kunne ikke oppdatere annonsen. Vennligst prøv igjen.",
+  "EditListingPricingForm.acceptingOffersLabel": "Godta tilbud fra kjøpere",
+  "EditListingPricingForm.acceptingOffersInfo": "Når aktivert, kan kjøpere gi tilbud på annonsen din i stedet for å kjøpe til oppgitt pris.",
   "EditListingPricingPanel.createListingTitle": "Pris",
   "EditListingPricingPanel.listingPriceCurrencyInvalid": "Annonsevalutaen er forskjellig fra markedsplassens valuta ({marketplaceCurrency}). Du kan ikke redigere prisen.",
   "EditListingPricingPanel.title": "Rediger prisingen for {listingTitle}",

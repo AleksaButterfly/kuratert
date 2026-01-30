@@ -307,8 +307,14 @@ const OrderPanel = props => {
   } = props;
 
   const publicData = listing?.attributes?.publicData || {};
-  const { listingType, unitType, transactionProcessAlias = '', priceVariants, startTimeInterval } =
-    publicData || {};
+  const {
+    listingType,
+    unitType,
+    transactionProcessAlias = '',
+    priceVariants,
+    startTimeInterval,
+    acceptingOffers,
+  } = publicData || {};
 
   const processName = resolveLatestProcessName(transactionProcessAlias.split('/')[0]);
   const lineItemUnitType = lineItemUnitTypeMaybe || `line-item/${unitType}`;
@@ -351,7 +357,9 @@ const OrderPanel = props => {
 
   const showInquiryForm = mounted && !isClosed && isInquiry;
   // if listing is a request, we show the negotiation form (reverse negotiation). User (provider) needs to make an offer first.
-  const showNegotiationForm = mounted && !isClosed && isNegotiation && unitType === REQUEST;
+  // Only show if seller has enabled accepting offers (acceptingOffers !== false for backwards compatibility)
+  const showNegotiationForm =
+    mounted && !isClosed && isNegotiation && unitType === REQUEST && acceptingOffers !== false;
   // if listing is an offer, we show the "request a quote" form as user needs to ask for a quote first from the provider.
   const showRequestQuoteForm = mounted && !isClosed && isNegotiation && unitType === OFFER;
 

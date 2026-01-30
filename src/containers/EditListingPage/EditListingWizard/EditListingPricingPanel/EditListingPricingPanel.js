@@ -37,17 +37,21 @@ const getListingTypeConfig = (publicData, listingTypes) => {
 const getInitialValues = props => {
   const { listing, listingTypes } = props;
   const { publicData } = listing?.attributes || {};
-  const { unitType } = publicData || {};
+  const { unitType, acceptingOffers } = publicData || {};
   const listingTypeConfig = getListingTypeConfig(publicData, listingTypes);
   // Note: publicData contains priceVariationsEnabled if listing is created with priceVariations enabled.
   const isPriceVariationsInUse = isPriceVariationsEnabled(publicData, listingTypeConfig);
+
+  // Convert boolean to array format for FieldCheckbox (checked = ['true'], unchecked = [])
+  const acceptingOffersMaybe = acceptingOffers ? ['true'] : [];
 
   return unitType === FIXED || isPriceVariationsInUse
     ? {
         ...getInitialValuesForPriceVariants(props, isPriceVariationsInUse),
         ...getInitialValuesForStartTimeInterval(props),
+        acceptingOffers: acceptingOffersMaybe,
       }
-    : { price: listing?.attributes?.price };
+    : { price: listing?.attributes?.price, acceptingOffers: acceptingOffersMaybe };
 };
 
 // This is needed to show the listing's price consistently over XHR calls.
@@ -162,7 +166,10 @@ const EditListingPricingPanel = props => {
           className={css.form}
           initialValues={initialValues}
           onSubmit={values => {
-            const { price } = values;
+            const { price, acceptingOffers } = values;
+
+            // Convert checkbox array to boolean (checked = ['true'] -> true, unchecked = [] -> false)
+            const isAcceptingOffers = Array.isArray(acceptingOffers) && acceptingOffers.includes('true');
 
             // New values for listing attributes
             let updateValues = {};
@@ -191,6 +198,7 @@ const EditListingPricingPanel = props => {
                 ...startTimeIntervalChanges,
                 publicData: {
                   priceVariationsEnabled: isPriceVariationsInUse,
+                  acceptingOffers: isAcceptingOffers,
                   ...startTimeIntervalChanges.publicData,
                   ...priceVariantChanges.publicData,
                 },
@@ -203,7 +211,14 @@ const EditListingPricingPanel = props => {
                     },
                   }
                 : {};
-              updateValues = { price, ...priceVariationsEnabledMaybe };
+              updateValues = {
+                price,
+                ...priceVariationsEnabledMaybe,
+                publicData: {
+                  ...(priceVariationsEnabledMaybe.publicData || {}),
+                  acceptingOffers: isAcceptingOffers,
+                },
+              };
             }
 
             // Save the initialValues to state

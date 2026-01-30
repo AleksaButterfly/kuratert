@@ -28,6 +28,20 @@
   }
 }
 
+.acceptingOffersWrapper {
+  margin-bottom: 24px;
+
+  @media (--viewportMedium) {
+    margin-bottom: 32px;
+  }
+}
+
+.acceptingOffersInfo {
+  margin: 8px 0 0 0;
+  font-size: 14px;
+  color: var(--colorGrey500);
+}
+
 .submitButton {
   margin-top: auto;
   margin-bottom: 24px;
