@@ -10,54 +10,6 @@ import FooterContainer from '../../containers/FooterContainer/FooterContainer';
 
 import css from './AboutPage.module.css';
 
-// Team member images (only for those we have)
-import team1 from './images/team-1.avif';
-import team2 from './images/team-2.avif';
-import team3 from './images/team-3.avif';
-
-const teamMembers = [
-  {
-    name: 'Cornelia Svedman',
-    role: 'Founder & CEO',
-    image: team1,
-  },
-  {
-    name: 'Rep. gallerist',
-    role: 'Advisory Board - gallerist',
-    image: team2,
-  },
-  {
-    name: 'Rep. auksjon',
-    role: 'Advisory Board - auksjon',
-    image: team3,
-  },
-  {
-    name: 'Rep. rådgiver',
-    role: 'Advisory Board - rådgiver',
-    image: null,
-  },
-  {
-    name: 'Rep. Museum',
-    role: 'Advisory Board - museum',
-    image: null,
-  },
-  {
-    name: 'Rep. Bergen',
-    role: 'Advisory Board - Bergen',
-    image: null,
-  },
-  {
-    name: 'Rep. Stavanger',
-    role: 'Advisory Board - Stavanger',
-    image: null,
-  },
-  {
-    name: 'Rep. Trondheim',
-    role: 'Advisory Board - Trondheim',
-    image: null,
-  },
-];
-
 const AboutPage = () => {
   const intl = useIntl();
   const config = useConfiguration();
@@ -100,39 +52,6 @@ const AboutPage = () => {
               <p className={css.visionSubtitle}>
                 {intl.formatMessage({ id: 'AboutPage.visionSubtitle' })}
               </p>
-            </div>
-          </section>
-
-          {/* Section 2: Who We Are */}
-          <section className={css.sectionWhoWeAre}>
-            <div className={css.sectionContent}>
-              <h2 className={css.whoWeAreTitle}>
-                {intl.formatMessage({ id: 'AboutPage.whoWeAreTitle' })}
-              </h2>
-              <p className={css.whoWeAreSubtitle}>
-                {intl.formatMessage({ id: 'AboutPage.whoWeAreSubtitle' })}
-              </p>
-
-              {/* Team Grid */}
-              <div className={css.teamGrid}>
-                {teamMembers.map((member, index) => (
-                  <div key={index} className={css.teamMember}>
-                    <div className={css.teamImageWrapper}>
-                      {member.image ? (
-                        <img
-                          src={member.image}
-                          alt={member.name}
-                          className={css.teamImage}
-                        />
-                      ) : (
-                        <div className={css.teamImagePlaceholder} />
-                      )}
-                    </div>
-                    <h3 className={css.teamName}>{member.name}</h3>
-                    <p className={css.teamRole}>{member.role}</p>
-                  </div>
-                ))}
-              </div>
             </div>
           </section>
         </div>
