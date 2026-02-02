@@ -363,28 +363,52 @@ const ViewInSpaceModal = props => {
     const canvas = captureCanvasRef.current;
     const context = canvas.getContext('2d');
 
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    const container = cameraContainerRef.current;
+    if (!container) return;
 
-    // Draw video frame
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const containerRect = container.getBoundingClientRect();
+
+    // Calculate how object-fit: cover scales and crops the video
+    const videoAspect = video.videoWidth / video.videoHeight;
+    const containerAspect = containerRect.width / containerRect.height;
+
+    let drawWidth, drawHeight, offsetX, offsetY;
+
+    if (videoAspect > containerAspect) {
+      // Video is wider - it's scaled by height, cropped on sides
+      drawHeight = video.videoHeight;
+      drawWidth = containerAspect * drawHeight;
+      offsetX = (video.videoWidth - drawWidth) / 2;
+      offsetY = 0;
+    } else {
+      // Video is taller - it's scaled by width, cropped on top/bottom
+      drawWidth = video.videoWidth;
+      drawHeight = drawWidth / containerAspect;
+      offsetX = 0;
+      offsetY = (video.videoHeight - drawHeight) / 2;
+    }
+
+    // Set canvas to match the visible portion's aspect ratio
+    canvas.width = drawWidth;
+    canvas.height = drawHeight;
+
+    // Draw only the visible portion of the video
+    context.drawImage(
+      video,
+      offsetX, offsetY, drawWidth, drawHeight,  // Source (visible portion)
+      0, 0, drawWidth, drawHeight               // Destination (full canvas)
+    );
 
     // Draw product overlay
-    if (productImage && cameraContainerRef.current) {
-      const container = cameraContainerRef.current;
-      const containerRect = container.getBoundingClientRect();
-
-      // Calculate product position and size relative to video
-      const scaleX = video.videoWidth / containerRect.width;
-      const scaleY = video.videoHeight / containerRect.height;
-
+    if (productImage) {
       const productImg = new Image();
       productImg.crossOrigin = 'anonymous';
       productImg.onload = () => {
-        const prodWidth = (productSize / 100) * containerRect.width * scaleX;
+        // Product position/size are percentages of the container, which matches our canvas now
+        const prodWidth = (productSize / 100) * canvas.width;
         const prodHeight = (productImg.height / productImg.width) * prodWidth;
-        const prodX = (productPosition.x / 100) * containerRect.width * scaleX - prodWidth / 2;
-        const prodY = (productPosition.y / 100) * containerRect.height * scaleY - prodHeight / 2;
+        const prodX = (productPosition.x / 100) * canvas.width - prodWidth / 2;
+        const prodY = (productPosition.y / 100) * canvas.height - prodHeight / 2;
 
         context.drawImage(productImg, prodX, prodY, prodWidth, prodHeight);
 
