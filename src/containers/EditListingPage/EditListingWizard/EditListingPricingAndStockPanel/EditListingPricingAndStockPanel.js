@@ -39,6 +39,7 @@ const getInitialValues = (props, marketplaceCurrency) => {
   const currentStock = listing?.currentStock;
 
   const publicData = listing?.attributes?.publicData;
+  const { acceptingOffers } = publicData || {};
   const listingTypeConfig = getListingTypeConfig(publicData, listingTypes);
   const hasInfiniteStock = STOCK_INFINITE_ITEMS.includes(listingTypeConfig?.stockType);
 
@@ -76,6 +77,9 @@ const getInitialValues = (props, marketplaceCurrency) => {
       price: new Money(v.priceInSubunits, currency),
     })) || [];
 
+  // Convert boolean to array format for FieldCheckbox (checked = ['true'], unchecked = [])
+  const acceptingOffersMaybe = acceptingOffers ? ['true'] : [];
+
   return {
     price,
     stock,
@@ -84,6 +88,7 @@ const getInitialValues = (props, marketplaceCurrency) => {
     frameVariants,
     recommendedFrameLabel,
     recommendedFramePrice,
+    acceptingOffers: acceptingOffersMaybe,
   };
 };
 
@@ -191,7 +196,11 @@ const EditListingPricingAndStockPanel = props => {
               frameVariants,
               recommendedFrameLabel,
               recommendedFramePrice,
+              acceptingOffers,
             } = values;
+
+            // Convert checkbox array to boolean (checked = ['true'] -> true, unchecked = [] -> false)
+            const isAcceptingOffers = Array.isArray(acceptingOffers) && acceptingOffers.includes('true');
 
             // Update stock only if the value has changed, or stock is infinity in stockType,
             // but not current stock is a small number (might happen with old listings)
@@ -265,7 +274,10 @@ const EditListingPricingAndStockPanel = props => {
             const updateValues = {
               price,
               ...stockUpdateMaybe,
-              publicData: frameOptionsData,
+              publicData: {
+                ...frameOptionsData,
+                acceptingOffers: isAcceptingOffers,
+              },
             };
             // Save the initialValues to state
             // Otherwise, re-rendering would overwrite the values during XHR call.
@@ -278,6 +290,7 @@ const EditListingPricingAndStockPanel = props => {
                 frameVariants,
                 recommendedFrameLabel,
                 recommendedFramePrice,
+                acceptingOffers,
               },
             });
             onSubmit(updateValues);

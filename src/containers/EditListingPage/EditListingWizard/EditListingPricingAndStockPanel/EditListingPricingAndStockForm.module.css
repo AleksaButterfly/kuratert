@@ -149,3 +149,18 @@
 .additionalFramesSection .frameSubheading {
   margin-bottom: 16px;
 }
+
+/* Accept Offers Section */
+.acceptingOffersWrapper {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--colorGrey100);
+}
+
+.acceptingOffersInfo {
+  margin: 8px 0 0 0;
+  padding-left: 28px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--colorGrey500);
+}

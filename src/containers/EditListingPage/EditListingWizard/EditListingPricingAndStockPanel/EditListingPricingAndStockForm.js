@@ -395,6 +395,19 @@ export const EditListingPricingAndStockForm = props => (
             ) : null}
           </div>
 
+          {/* Accept Offers Section */}
+          <div className={css.acceptingOffersWrapper}>
+            <FieldCheckbox
+              id={`${formId}.acceptingOffers`}
+              name="acceptingOffers"
+              label={intl.formatMessage({ id: 'EditListingPricingForm.acceptingOffersLabel' })}
+              value="true"
+            />
+            <p className={css.acceptingOffersInfo}>
+              <FormattedMessage id="EditListingPricingForm.acceptingOffersInfo" />
+            </p>
+          </div>
+
           <Button
             className={css.submitButton}
             type="submit"
