@@ -431,7 +431,7 @@ export const ListingPageComponent = props => {
   const isOwnListing =
     userAndListingAuthorAvailable && currentListing.author.id.uuid === currentUser.id.uuid;
 
-  const { listingType, transactionProcessAlias, unitType, frameOptions, shippingEnabled, pickupEnabled, shippingPriceInSubunitsOneItem } = publicData;
+  const { listingType, transactionProcessAlias, unitType, frameOptions, shippingEnabled, pickupEnabled, shippingPriceInSubunitsOneItem, acceptingOffers } = publicData;
   if (!(listingType && transactionProcessAlias && unitType)) {
     return (
       <ErrorPage topbar={topbar} scrollingDisabled={scrollingDisabled} intl={intl} invalidListing />
@@ -904,20 +904,22 @@ export const ListingPageComponent = props => {
                   )}
                 </button>
               )}
-              <button
-                className={css.makeOfferButton}
-                onClick={() => {
-                  if (isAuthenticated) {
-                    setMakeOfferModalOpen(true);
-                  } else {
-                    const state = { from: `${location.pathname}${location.search}${location.hash}` };
-                    history.push(pathByRouteName('SignupPage', routeConfiguration, {}), state);
-                  }
-                }}
-                disabled={isOwnListing || !hasStock}
-              >
-                <FormattedMessage id="ListingPage.makeAnOffer" />
-              </button>
+              {acceptingOffers !== false && (
+                <button
+                  className={css.makeOfferButton}
+                  onClick={() => {
+                    if (isAuthenticated) {
+                      setMakeOfferModalOpen(true);
+                    } else {
+                      const state = { from: `${location.pathname}${location.search}${location.hash}` };
+                      history.push(pathByRouteName('SignupPage', routeConfiguration, {}), state);
+                    }
+                  }}
+                  disabled={isOwnListing || !hasStock}
+                >
+                  <FormattedMessage id="ListingPage.makeAnOffer" />
+                </button>
+              )}
               <button
                 className={css.contactSellerButton}
                 onClick={onContactUser}
