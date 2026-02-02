@@ -245,7 +245,9 @@ const ViewInSpaceModal = props => {
         originY: 'center',
       });
 
-      const targetWidth = canvas.width * 0.3;
+      // Use productSize from camera mode if available, otherwise default to 30%
+      const sizePercent = productSize / 100;
+      const targetWidth = canvas.width * sizePercent;
       const scale = targetWidth / img.width;
       img.scale(scale * productScale);
 
@@ -279,7 +281,7 @@ const ViewInSpaceModal = props => {
     };
 
     imgElement.src = productImage;
-  }, [productImage, productScale]);
+  }, [productImage, productScale, productSize]);
 
   // Start camera stream
   const startCamera = useCallback(async () => {
