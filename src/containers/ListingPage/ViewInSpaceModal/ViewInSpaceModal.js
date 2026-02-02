@@ -184,10 +184,16 @@ const ViewInSpaceModal = props => {
 
     const fabricModule = await import('fabric');
     const { FabricImage } = fabricModule;
-    const canvas = fabricCanvasRef.current;
 
     return new Promise((resolve) => {
       FabricImage.fromURL(imageSrc, { crossOrigin: 'anonymous' }).then(img => {
+        // Check if canvas still exists (modal might have been closed)
+        const canvas = fabricCanvasRef.current;
+        if (!canvas) {
+          resolve();
+          return;
+        }
+
         const scale = Math.min(
           canvas.width / img.width,
           canvas.height / img.height
@@ -217,10 +223,10 @@ const ViewInSpaceModal = props => {
 
     const fabricModule = await import('fabric');
     const { FabricImage } = fabricModule;
-    const canvas = fabricCanvasRef.current;
 
-    if (productObjectRef.current) {
-      canvas.remove(productObjectRef.current);
+    // Remove existing product if canvas is available
+    if (productObjectRef.current && fabricCanvasRef.current) {
+      fabricCanvasRef.current.remove(productObjectRef.current);
       productObjectRef.current = null;
     }
 
@@ -228,6 +234,10 @@ const ViewInSpaceModal = props => {
     imgElement.crossOrigin = 'anonymous';
 
     imgElement.onload = () => {
+      // Check if canvas still exists (modal might have been closed)
+      const canvas = fabricCanvasRef.current;
+      if (!canvas) return;
+
       const img = new FabricImage(imgElement, {
         left: canvas.width / 2,
         top: canvas.height / 2,
