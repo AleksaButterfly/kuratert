@@ -704,6 +704,7 @@
   "BookDigitalViewingForm.messageLabel": "Melding til {authorDisplayName} (valgfritt)",
   "BookDigitalViewingForm.messagePlaceholder": "Legg til eventuelle detaljer eller spørsmål...",
   "BookDigitalViewingForm.submitButtonText": "Send Forespørsel",
+  "BookDigitalViewingForm.autoMessage": "Jeg ønsker å booke en digital visning for {date} klokken {time}",
   "InquiryWithoutPaymentForm.ctaButton": "Send en forespørsel",
   "IntegerRangeFilter.labelSelectedPlain": "{minValue} - {maxValue}",
   "IntegerRangeFilter.rangeInputsLabel": "Område:",

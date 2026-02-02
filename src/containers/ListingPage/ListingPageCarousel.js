@@ -1122,7 +1122,24 @@ export const ListingPageComponent = props => {
           inProgress={sendDigitalViewingInProgress}
           onSubmit={values => {
             const { viewingDate, viewingTime, message } = values;
-            onSendDigitalViewingRequest(currentListing, viewingDate, viewingTime, message).then(
+
+            // Format the date for display
+            const formattedDate = viewingDate?.date
+              ? intl.formatDate(viewingDate.date, {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })
+              : '';
+
+            // Create the auto-message using translations
+            const autoMessage = intl.formatMessage(
+              { id: 'BookDigitalViewingForm.autoMessage' },
+              { date: formattedDate, time: viewingTime }
+            );
+
+            onSendDigitalViewingRequest(currentListing, autoMessage, message).then(
               transactionId => {
                 if (transactionId) {
                   setDigitalViewingModalOpen(false);
@@ -1285,8 +1302,8 @@ const mapDispatchToProps = dispatch => ({
   onFetchTransactionLineItems: params => dispatch(fetchTransactionLineItems(params)),
   onSendInquiry: (listing, message) => dispatch(sendInquiry(listing, message)),
   onSendOffer: (listing, offerPrice, message, deliveryMethod, frameInfo) => dispatch(sendOffer(listing, offerPrice, message, deliveryMethod, frameInfo)),
-  onSendDigitalViewingRequest: (listing, viewingDate, viewingTime, message) =>
-    dispatch(sendDigitalViewingRequest(listing, viewingDate, viewingTime, message)),
+  onSendDigitalViewingRequest: (listing, autoMessage, message) =>
+    dispatch(sendDigitalViewingRequest(listing, autoMessage, message)),
   onInitializeCardPaymentData: () => dispatch(initializeCardPaymentData()),
   onFetchTimeSlots: (listingId, start, end, timeZone, options) =>
     dispatch(fetchTimeSlots(listingId, start, end, timeZone, options)),

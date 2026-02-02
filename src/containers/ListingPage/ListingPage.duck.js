@@ -258,7 +258,7 @@ export const sendInquiry = (listing, message) => (dispatch, getState, sdk) => {
 // Send Digital Viewing Request //
 //////////////////////////////
 const sendDigitalViewingRequestPayloadCreator = (
-  { listing, viewingDate, viewingTime, message },
+  { listing, autoMessage, message },
   { dispatch, rejectWithValue, extra: sdk }
 ) => {
   const processAlias = listing?.attributes?.publicData?.transactionProcessAlias;
@@ -280,24 +280,12 @@ const sendDigitalViewingRequestPayloadCreator = (
     params: { listingId },
   };
 
-  // Format the date for display
-  const formattedDate = viewingDate?.date
-    ? new Intl.DateTimeFormat('en-GB', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      }).format(viewingDate.date)
-    : '';
-
   return sdk.transactions
     .initiate(bodyParams)
     .then(response => {
       const transactionId = response.data.data.id;
 
       // Send the auto-generated message about the digital viewing request
-      const autoMessage = `I want to book a digital viewing for ${formattedDate} at ${viewingTime}`;
-
       return sdk.messages
         .send({ transactionId, content: autoMessage })
         .then(() => {
@@ -322,13 +310,13 @@ export const sendDigitalViewingRequestThunk = createAsyncThunk(
   sendDigitalViewingRequestPayloadCreator
 );
 // Backward compatible wrapper for the thunk
-export const sendDigitalViewingRequest = (listing, viewingDate, viewingTime, message) => (
+export const sendDigitalViewingRequest = (listing, autoMessage, message) => (
   dispatch,
   getState,
   sdk
 ) => {
   return dispatch(
-    sendDigitalViewingRequestThunk({ listing, viewingDate, viewingTime, message })
+    sendDigitalViewingRequestThunk({ listing, autoMessage, message })
   ).unwrap();
 };
 

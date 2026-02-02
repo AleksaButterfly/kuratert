@@ -704,6 +704,7 @@
   "BookDigitalViewingForm.messageLabel": "Message to {authorDisplayName} (optional)",
   "BookDigitalViewingForm.messagePlaceholder": "Add any additional details or questions...",
   "BookDigitalViewingForm.submitButtonText": "Send Request",
+  "BookDigitalViewingForm.autoMessage": "I want to book a digital viewing for {date} at {time}",
   "InquiryWithoutPaymentForm.ctaButton": "Send an inquiry",
   "IntegerRangeFilter.labelSelectedPlain": "{minValue} - {maxValue}",
   "IntegerRangeFilter.rangeInputsLabel": "Range:",
