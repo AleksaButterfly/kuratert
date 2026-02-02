@@ -43,6 +43,30 @@
   width: 100%;
 }
 
+.backButton {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  color: var(--colorGrey700);
+  cursor: pointer;
+  font-size: 14px;
+  transition: color 0.2s ease;
+}
+
+.backButton:hover {
+  color: var(--colorGrey900);
+}
+
+.backButton svg {
+  fill: none;
+}
+
 .title {
   composes: marketplaceModalTitleStyles from global;
   margin-bottom: 8px;
@@ -54,6 +78,67 @@
   color: var(--colorGrey500);
   margin: 0 0 24px 0;
   text-align: center;
+}
+
+/* Mode Selection */
+.modeSelection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 500px;
+  margin-bottom: 24px;
+}
+
+@media (--viewportMedium) {
+  .modeSelection {
+    flex-direction: row;
+    gap: 24px;
+  }
+}
+
+.modeOption {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  background-color: var(--colorWhite);
+  border: 2px solid var(--colorGrey200);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.modeOption:hover {
+  border-color: var(--marketplaceColor);
+  background-color: var(--colorGrey50);
+}
+
+.modeOption svg {
+  color: var(--colorGrey500);
+  margin-bottom: 16px;
+  fill: none;
+  transition: color 0.2s ease;
+}
+
+.modeOption:hover svg {
+  color: var(--marketplaceColor);
+}
+
+.modeTitle {
+  composes: marketplaceBodyFontStyles from global;
+  font-weight: var(--fontWeightSemiBold);
+  color: var(--colorGrey900);
+  margin: 0 0 8px 0;
+}
+
+.modeHint {
+  composes: marketplaceTinyFontStyles from global;
+  color: var(--colorGrey500);
+  margin: 0;
 }
 
 .canvasContainer {
@@ -141,6 +226,152 @@
   display: none;
 }
 
+/* Camera Mode Styles */
+.cameraContainer {
+  width: 100%;
+  max-width: 800px;
+  aspect-ratio: 4 / 3;
+  background-color: var(--colorBlack);
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+@media (--viewportMedium) {
+  .cameraContainer {
+    aspect-ratio: 16 / 9;
+    min-height: 450px;
+  }
+}
+
+.cameraVideo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cameraLoading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.cameraError {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+  background-color: var(--colorGrey100);
+}
+
+.cameraError svg {
+  color: var(--colorGrey400);
+  margin-bottom: 16px;
+  fill: none;
+}
+
+.cameraErrorText {
+  composes: marketplaceBodyFontStyles from global;
+  color: var(--colorGrey700);
+  margin: 0 0 16px 0;
+}
+
+.retryButton {
+  padding: 10px 20px;
+  background-color: var(--marketplaceColor);
+  color: var(--colorWhite);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: var(--fontWeightSemiBold);
+  transition: background-color 0.2s ease;
+}
+
+.retryButton:hover {
+  background-color: var(--marketplaceColorDark);
+}
+
+/* Product Overlay on Camera */
+.productOverlay {
+  position: absolute;
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+}
+
+.productOverlayImage {
+  width: 100%;
+  height: auto;
+  display: block;
+  pointer-events: none;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.productOverlayBorder {
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  border: 3px dashed rgba(255, 255, 255, 0.8);
+  pointer-events: none;
+}
+
+/* Camera Controls */
+.cameraControls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 16px;
+  background-color: var(--colorGrey50);
+  border-radius: 8px;
+  width: 100%;
+  max-width: 800px;
+}
+
+.captureButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  background-color: var(--colorWhite);
+  border: 4px solid var(--colorGrey300);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--marketplaceColor);
+}
+
+.captureButton:hover {
+  border-color: var(--marketplaceColor);
+  transform: scale(1.05);
+}
+
+.captureButton:active {
+  transform: scale(0.95);
+}
+
+.captureButton svg {
+  fill: currentColor;
+}
+
+/* Regular Controls */
 .controls {
   display: flex;
   flex-wrap: wrap;
@@ -234,7 +465,17 @@
     padding: 16px;
   }
 
+  .backButton {
+    top: 8px;
+    left: 8px;
+  }
+
   .controls {
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .cameraControls {
     gap: 8px;
     padding: 12px;
   }
@@ -247,7 +488,21 @@
     padding: 8px 10px;
   }
 
+  .captureButton {
+    width: 56px;
+    height: 56px;
+  }
+
   .downloadButton span {
     display: none;
+  }
+
+  .modeOption {
+    padding: 24px 16px;
+  }
+
+  .modeOption svg {
+    width: 36px;
+    height: 36px;
   }
 }
