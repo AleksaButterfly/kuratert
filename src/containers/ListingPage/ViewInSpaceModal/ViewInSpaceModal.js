@@ -238,9 +238,13 @@ const ViewInSpaceModal = props => {
       const canvas = fabricCanvasRef.current;
       if (!canvas) return;
 
+      // Use productPosition from camera mode (as percentage), convert to canvas coordinates
+      const posX = (productPosition.x / 100) * canvas.width;
+      const posY = (productPosition.y / 100) * canvas.height;
+
       const img = new FabricImage(imgElement, {
-        left: canvas.width / 2,
-        top: canvas.height / 2,
+        left: posX,
+        top: posY,
         originX: 'center',
         originY: 'center',
       });
@@ -281,7 +285,7 @@ const ViewInSpaceModal = props => {
     };
 
     imgElement.src = productImage;
-  }, [productImage, productScale, productSize]);
+  }, [productImage, productScale, productSize, productPosition]);
 
   // Start camera stream
   const startCamera = useCallback(async () => {
@@ -392,35 +396,20 @@ const ViewInSpaceModal = props => {
     canvas.width = drawWidth;
     canvas.height = drawHeight;
 
-    // Draw only the visible portion of the video
+    // Draw only the visible portion of the video (without product - product will be added in edit mode)
     context.drawImage(
       video,
       offsetX, offsetY, drawWidth, drawHeight,  // Source (visible portion)
       0, 0, drawWidth, drawHeight               // Destination (full canvas)
     );
 
-    // Draw product overlay
-    if (productImage) {
-      const productImg = new Image();
-      productImg.crossOrigin = 'anonymous';
-      productImg.onload = () => {
-        // Product position/size are percentages of the container, which matches our canvas now
-        const prodWidth = (productSize / 100) * canvas.width;
-        const prodHeight = (productImg.height / productImg.width) * prodWidth;
-        const prodX = (productPosition.x / 100) * canvas.width - prodWidth / 2;
-        const prodY = (productPosition.y / 100) * canvas.height - prodHeight / 2;
-
-        context.drawImage(productImg, prodX, prodY, prodWidth, prodHeight);
-
-        // Get the combined image
-        const imageSrc = canvas.toDataURL('image/png');
-        setRoomImage(imageSrc);
-        stopCamera();
-        setMode('edit');
-      };
-      productImg.src = productImage;
-    }
-  }, [productImage, productPosition, productSize, stopCamera]);
+    // Get the room image without the product baked in
+    // The product will be added as an adjustable overlay in edit mode
+    const imageSrc = canvas.toDataURL('image/png');
+    setRoomImage(imageSrc);
+    stopCamera();
+    setMode('edit');
+  }, [stopCamera]);
 
   // Handle room image upload
   const handleRoomImageUpload = async (e) => {
