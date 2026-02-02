@@ -301,6 +301,12 @@ const ViewInSpaceModal = props => {
 
       setIsLoading(false);
     } catch (error) {
+      // AbortError happens when play() is interrupted by a new request - this is not a real error
+      if (error.name === 'AbortError') {
+        console.log('Camera play() interrupted - new request in progress');
+        return;
+      }
+
       console.error('Camera error:', error);
       setIsLoading(false);
 
@@ -551,7 +557,7 @@ const ViewInSpaceModal = props => {
       return;
     }
     setMode('camera');
-    startCamera();
+    // Note: startCamera() is called by the useEffect when mode changes to 'camera'
   };
 
   // Start upload mode
