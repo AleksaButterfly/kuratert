@@ -206,9 +206,11 @@
 /* Table */
 .tableWrapper {
   overflow-x: auto;
+  max-width: calc(100vw - 48px); /* Account for container padding */
 
   @media (--viewportMedium) {
     overflow: unset;
+    max-width: unset;
   }
 }
 

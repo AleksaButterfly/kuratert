@@ -254,6 +254,84 @@ export const sendInquiry = (listing, message) => (dispatch, getState, sdk) => {
   return dispatch(sendInquiryThunk({ listing, message })).unwrap();
 };
 
+//////////////////////////////
+// Send Digital Viewing Request //
+//////////////////////////////
+const sendDigitalViewingRequestPayloadCreator = (
+  { listing, viewingDate, viewingTime, message },
+  { dispatch, rejectWithValue, extra: sdk }
+) => {
+  const processAlias = listing?.attributes?.publicData?.transactionProcessAlias;
+  if (!processAlias) {
+    const error = new Error('No transaction process attached to listing');
+    log.error(error, 'listing-process-missing', {
+      listingId: listing?.id?.uuid,
+    });
+    return rejectWithValue(storableError(error));
+  }
+
+  const listingId = listing?.id;
+  const [processName, alias] = processAlias.split('/');
+  const transitions = getProcess(processName)?.transitions;
+
+  const bodyParams = {
+    transition: transitions.INQUIRE,
+    processAlias,
+    params: { listingId },
+  };
+
+  // Format the date for display
+  const formattedDate = viewingDate?.date
+    ? new Intl.DateTimeFormat('en-GB', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      }).format(viewingDate.date)
+    : '';
+
+  return sdk.transactions
+    .initiate(bodyParams)
+    .then(response => {
+      const transactionId = response.data.data.id;
+
+      // Send the auto-generated message about the digital viewing request
+      const autoMessage = `I want to book a digital viewing for ${formattedDate} at ${viewingTime}`;
+
+      return sdk.messages
+        .send({ transactionId, content: autoMessage })
+        .then(() => {
+          // If there's a custom message, send it as a second message
+          if (message && message.trim()) {
+            return sdk.messages.send({ transactionId, content: message }).then(() => {
+              dispatch(setCurrentUserHasOrders());
+              return transactionId;
+            });
+          }
+          dispatch(setCurrentUserHasOrders());
+          return transactionId;
+        });
+    })
+    .catch(e => {
+      return rejectWithValue(storableError(e));
+    });
+};
+
+export const sendDigitalViewingRequestThunk = createAsyncThunk(
+  'ListingPage/sendDigitalViewingRequest',
+  sendDigitalViewingRequestPayloadCreator
+);
+// Backward compatible wrapper for the thunk
+export const sendDigitalViewingRequest = (listing, viewingDate, viewingTime, message) => (
+  dispatch,
+  getState,
+  sdk
+) => {
+  return dispatch(
+    sendDigitalViewingRequestThunk({ listing, viewingDate, viewingTime, message })
+  ).unwrap();
+};
+
 ////////////////
 // Send Offer //
 ////////////////
@@ -466,6 +544,8 @@ const initialState = {
   inquiryModalOpenForListingId: null,
   sendOfferInProgress: false,
   sendOfferError: null,
+  sendDigitalViewingInProgress: false,
+  sendDigitalViewingError: null,
 };
 
 const listingPageSlice = createSlice({
@@ -595,6 +675,17 @@ const listingPageSlice = createSlice({
       .addCase(sendOfferThunk.rejected, (state, action) => {
         state.sendOfferInProgress = false;
         state.sendOfferError = action.payload;
+      })
+      .addCase(sendDigitalViewingRequestThunk.pending, state => {
+        state.sendDigitalViewingInProgress = true;
+        state.sendDigitalViewingError = null;
+      })
+      .addCase(sendDigitalViewingRequestThunk.fulfilled, state => {
+        state.sendDigitalViewingInProgress = false;
+      })
+      .addCase(sendDigitalViewingRequestThunk.rejected, (state, action) => {
+        state.sendDigitalViewingInProgress = false;
+        state.sendDigitalViewingError = action.payload;
       });
   },
 });

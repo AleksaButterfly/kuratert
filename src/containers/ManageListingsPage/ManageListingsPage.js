@@ -12,7 +12,12 @@ import {
   hasPermissionToPostListings,
   showCreateListingLinkForUser,
 } from '../../util/userHelpers';
-import { NO_ACCESS_PAGE_POST_LISTINGS } from '../../util/urlHelpers';
+import {
+  NO_ACCESS_PAGE_POST_LISTINGS,
+  LISTING_PAGE_DRAFT_VARIANT,
+  LISTING_PAGE_PENDING_APPROVAL_VARIANT,
+  createSlug,
+} from '../../util/urlHelpers';
 import { propTypes } from '../../util/types';
 import { isErrorNoPermissionToPostListings } from '../../util/errors';
 import { isScrollingDisabled, manageDisableScrolling } from '../../ducks/ui.duck';
@@ -481,6 +486,7 @@ export const ManageListingsPageComponent = props => {
                       const firstImage = listing.images?.[0];
                       const listingId = listing.id.uuid;
                       const isDraft = state === 'draft';
+                      const isPendingApproval = state === 'pendingApproval';
                       const isMenuOpen = listingMenuOpen?.id?.uuid === listingId;
 
                       // Stock info
@@ -589,13 +595,12 @@ export const ManageListingsPageComponent = props => {
                                       </button>
                                     )}
                                     <NamedLink
-                                      name="ListingPage"
+                                      name={isDraft || isPendingApproval ? 'ListingPageVariant' : 'ListingPage'}
                                       params={{
                                         id: listingId,
-                                        slug:
-                                          listing.attributes.title
-                                            ?.replace(/\s+/g, '-')
-                                            .toLowerCase() || 'listing',
+                                        slug: createSlug(listing.attributes.title || 'listing'),
+                                        ...(isDraft ? { variant: LISTING_PAGE_DRAFT_VARIANT } : {}),
+                                        ...(isPendingApproval ? { variant: LISTING_PAGE_PENDING_APPROVAL_VARIANT } : {}),
                                       }}
                                       className={css.dropdownItem}
                                       onClick={() => setListingMenuOpen(null)}

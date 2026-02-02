@@ -82,6 +82,7 @@ import NotFoundPage from '../NotFoundPage/NotFoundPage';
 import {
   sendInquiry,
   sendOffer,
+  sendDigitalViewingRequest,
   setInitialValues,
   fetchTimeSlots,
   fetchTransactionLineItems,
@@ -101,6 +102,7 @@ import ActionBarMaybe from './ActionBarMaybe';
 import ListingImageGallery from './ListingImageGallery/ListingImageGallery';
 import InquiryForm from './InquiryForm/InquiryForm';
 import MakeOfferForm from './MakeOfferForm/MakeOfferForm';
+import { BookDigitalViewingForm } from './BookDigitalViewingForm';
 import ViewInSpaceModal from './ViewInSpaceModal';
 import { pathByRouteName } from '../../util/routes';
 
@@ -315,6 +317,7 @@ export const ListingPageComponent = props => {
     props.inquiryModalOpenForListingId === props.params.id
   );
   const [makeOfferModalOpen, setMakeOfferModalOpen] = useState(false);
+  const [digitalViewingModalOpen, setDigitalViewingModalOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isViewInSpaceModalOpen, setIsViewInSpaceModalOpen] = useState(false);
@@ -345,10 +348,13 @@ export const ListingPageComponent = props => {
     sendInquiryError,
     sendOfferInProgress,
     sendOfferError,
+    sendDigitalViewingInProgress,
+    sendDigitalViewingError,
     history,
     callSetInitialValues,
     onSendInquiry,
     onSendOffer,
+    onSendDigitalViewingRequest,
     onInitializeCardPaymentData,
     config,
     routeConfiguration,
@@ -921,6 +927,20 @@ export const ListingPageComponent = props => {
                 </button>
               )}
               <button
+                className={css.bookDigitalViewingButton}
+                onClick={() => {
+                  if (isAuthenticated) {
+                    setDigitalViewingModalOpen(true);
+                  } else {
+                    const state = { from: `${location.pathname}${location.search}${location.hash}` };
+                    history.push(pathByRouteName('SignupPage', routeConfiguration, {}), state);
+                  }
+                }}
+                disabled={isOwnListing}
+              >
+                <FormattedMessage id="ListingPage.bookDigitalViewing" />
+              </button>
+              <button
                 className={css.contactSellerButton}
                 onClick={onContactUser}
                 disabled={isOwnListing}
@@ -1084,6 +1104,39 @@ export const ListingPageComponent = props => {
         />
       </Modal>
 
+      {/* Book Digital Viewing Modal */}
+      <Modal
+        id="ListingPage.digitalViewing"
+        contentClassName={css.inquiryModalContent}
+        isOpen={isAuthenticated && digitalViewingModalOpen}
+        onClose={() => setDigitalViewingModalOpen(false)}
+        usePortal
+        onManageDisableScrolling={onManageDisableScrolling}
+      >
+        <BookDigitalViewingForm
+          className={css.inquiryForm}
+          submitButtonWrapperClassName={css.inquirySubmitButtonWrapper}
+          listingTitle={title}
+          authorDisplayName={authorDisplayName}
+          sendDigitalViewingError={sendDigitalViewingError}
+          inProgress={sendDigitalViewingInProgress}
+          onSubmit={values => {
+            const { viewingDate, viewingTime, message } = values;
+            onSendDigitalViewingRequest(currentListing, viewingDate, viewingTime, message).then(
+              transactionId => {
+                if (transactionId) {
+                  setDigitalViewingModalOpen(false);
+                  const orderDetailsPath = pathByRouteName('OrderDetailsPage', routeConfiguration, {
+                    id: transactionId?.uuid,
+                  });
+                  history.push(orderDetailsPath);
+                }
+              }
+            );
+          }}
+        />
+      </Modal>
+
       {/* View in Your Space Modal */}
       <ViewInSpaceModal
         isOpen={isViewInSpaceModalOpen}
@@ -1167,6 +1220,8 @@ const mapStateToProps = state => {
     sendInquiryError,
     sendOfferInProgress,
     sendOfferError,
+    sendDigitalViewingInProgress,
+    sendDigitalViewingError,
     lineItems,
     fetchLineItemsInProgress,
     fetchLineItemsError,
@@ -1211,6 +1266,8 @@ const mapStateToProps = state => {
     sendInquiryError,
     sendOfferInProgress,
     sendOfferError,
+    sendDigitalViewingInProgress,
+    sendDigitalViewingError,
     // Favorites
     addListingToFavoritesInProgress,
     removeListingFromFavoritesInProgress,
@@ -1228,6 +1285,8 @@ const mapDispatchToProps = dispatch => ({
   onFetchTransactionLineItems: params => dispatch(fetchTransactionLineItems(params)),
   onSendInquiry: (listing, message) => dispatch(sendInquiry(listing, message)),
   onSendOffer: (listing, offerPrice, message, deliveryMethod, frameInfo) => dispatch(sendOffer(listing, offerPrice, message, deliveryMethod, frameInfo)),
+  onSendDigitalViewingRequest: (listing, viewingDate, viewingTime, message) =>
+    dispatch(sendDigitalViewingRequest(listing, viewingDate, viewingTime, message)),
   onInitializeCardPaymentData: () => dispatch(initializeCardPaymentData()),
   onFetchTimeSlots: (listingId, start, end, timeZone, options) =>
     dispatch(fetchTimeSlots(listingId, start, end, timeZone, options)),
