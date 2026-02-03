@@ -11,60 +11,26 @@ import FilterPopup from '../FilterPopup/FilterPopup';
 
 import css from './ColorFilter.module.css';
 
-// Map color option values to hex colors
-const COLOR_MAP = {
-  black: '#000000',
-  white: '#FFFFFF',
-  grey: '#808080',
-  gray: '#808080',
-  beige: '#D4C4B0',
-  brown: '#8B5A3C',
-  red: '#D0021B',
-  orange: '#FF6B35',
-  yellow: '#FFD700',
-  gold: '#C9A961',
-  green: '#7ED321',
-  blue: '#4A90E2',
-  purple: '#9013FE',
-  pink: '#FF69B4',
-  navy: '#001F3F',
-  teal: '#008080',
-  coral: '#FF7F50',
-  maroon: '#800000',
-  olive: '#808000',
-  silver: '#C0C0C0',
-  tan: '#D2B48C',
-  cream: '#FFFDD0',
-  ivory: '#FFFFF0',
-  burgundy: '#800020',
-  lavender: '#E6E6FA',
-  mint: '#98FF98',
-  peach: '#FFCBA4',
-  turquoise: '#40E0D0',
-  magenta: '#FF00FF',
-  cyan: '#00FFFF',
-  lime: '#00FF00',
-  indigo: '#4B0082',
-  violet: '#EE82EE',
-  khaki: '#C3B091',
+// Special color values that need custom handling
+const SPECIAL_COLORS = {
   multicolor: 'linear-gradient(135deg, #FF0000, #FF7F00, #FFFF00, #00FF00, #0000FF, #8B00FF)',
 };
 
-// Get hex color from option value
-const getColorHex = option => {
+// Get color value from option - uses option directly as CSS color
+const getColorValue = option => {
   const normalizedOption = option?.toLowerCase().replace(/\s+/g, '');
-  return COLOR_MAP[normalizedOption] || '#CCCCCC';
+  // Check for special colors first, otherwise use the option value directly as CSS color
+  return SPECIAL_COLORS[normalizedOption] || option;
 };
 
+// Light colors that need dark checkmark
+const LIGHT_COLORS = ['white', 'ivory', 'cream', 'beige', 'yellow', 'lime', 'mint', 'peach', 'lavender', 'silver', 'khaki', 'tan', 'pink', 'cyan', 'aqua', 'lightyellow', 'lightgreen', 'lightpink', 'lightblue', 'lightgray', 'lightgrey'];
+
 // Check if color is light (for showing dark checkmark)
-const isLightColor = hex => {
-  if (hex.startsWith('linear-gradient')) return true;
-  const color = hex.replace('#', '');
-  const r = parseInt(color.substr(0, 2), 16);
-  const g = parseInt(color.substr(2, 2), 16);
-  const b = parseInt(color.substr(4, 2), 16);
-  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-  return brightness > 155;
+const isLightColor = colorValue => {
+  if (colorValue?.startsWith('linear-gradient')) return true;
+  const normalizedColor = colorValue?.toLowerCase().replace(/\s+/g, '');
+  return LIGHT_COLORS.includes(normalizedColor);
 };
 
 // Checkmark icon component
@@ -76,10 +42,9 @@ const CheckIcon = ({ className }) => (
 
 // Color swatch field component
 const ColorSwatchField = ({ id, name, option, label }) => {
-  const colorHex = getColorHex(option);
-  const isLight = isLightColor(colorHex);
+  const colorValue = getColorValue(option);
+  const isLight = isLightColor(option);
   const isWhite = option?.toLowerCase() === 'white';
-  const isMulticolor = option?.toLowerCase() === 'multicolor';
 
   return (
     <Field name={name} type="checkbox" value={option}>
@@ -103,7 +68,7 @@ const ColorSwatchField = ({ id, name, option, label }) => {
             <span
               className={css.swatch}
               style={{
-                background: isMulticolor ? colorHex : colorHex,
+                background: colorValue,
               }}
             >
               {isSelected && (
