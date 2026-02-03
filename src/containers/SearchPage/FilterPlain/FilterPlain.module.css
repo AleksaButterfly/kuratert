@@ -51,6 +51,7 @@
 .label,
 .labelSelected {
   composes: marketplaceSmallFontStyles from global;
+  font-family: var(--fontFamily);
   font-weight: var(--fontWeightBold);
 
   /* Baseline adjustment for label text */
