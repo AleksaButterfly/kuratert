@@ -94,6 +94,7 @@
 
 .text {
   composes: marketplaceListingAttributeFontStyles from global;
+  font-family: var(--fontFamilySupporting);
   color: var(--colorGrey700);
   margin-top: -1px;
   margin-bottom: 1px;
