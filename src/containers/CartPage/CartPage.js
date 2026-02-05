@@ -368,14 +368,16 @@ export const CartPageComponent = props => {
                   // Check delivery method availability for all items in this seller's group
                   const shippingAvailable = isDeliveryMethodAvailable(listings, 'shipping');
                   const pickupAvailable = isDeliveryMethodAvailable(listings, 'pickup');
-                  const hasMultipleDeliveryMethods = shippingAvailable && pickupAvailable;
-                  const hasSingleDeliveryMethod = (shippingAvailable || pickupAvailable) && !hasMultipleDeliveryMethods;
-                  const noDeliveryMethodAvailable = !shippingAvailable && !pickupAvailable;
+                  const quoteAvailable = isDeliveryMethodAvailable(listings, 'quote');
+                  const availableMethodsCount = (shippingAvailable ? 1 : 0) + (pickupAvailable ? 1 : 0) + (quoteAvailable ? 1 : 0);
+                  const hasMultipleDeliveryMethods = availableMethodsCount > 1;
+                  const hasSingleDeliveryMethod = availableMethodsCount === 1;
+                  const noDeliveryMethodAvailable = availableMethodsCount === 0;
 
-                  // Check if items have incompatible delivery methods (some only shipping, some only pickup)
+                  // Check if items have incompatible delivery methods (some only shipping, some only pickup, some only quote)
                   const hasIncompatibleDeliveryMethods = listings.length > 1 && noDeliveryMethodAvailable && listings.some(l => {
                     const pd = l?.attributes?.publicData;
-                    return pd?.shippingEnabled || pd?.pickupEnabled;
+                    return pd?.shippingEnabled || pd?.pickupEnabled || pd?.quoteEnabled;
                   });
 
                   // Check if pickup locations differ across listings
@@ -386,10 +388,14 @@ export const CartPageComponent = props => {
                   const uniquePickupLocations = [...new Set(pickupLocations)];
                   const hasMultiplePickupLocations = uniquePickupLocations.length > 1;
 
-                  // Determine selected delivery method
-                  const selectedDeliveryMethod = deliveryMethodBySeller[authorId] ||
-                    (shippingAvailable && !pickupAvailable ? 'shipping' :
-                     !shippingAvailable && pickupAvailable ? 'pickup' : null);
+                  // Determine selected delivery method (auto-select if only one available)
+                  const getSingleMethod = () => {
+                    if (shippingAvailable && !pickupAvailable && !quoteAvailable) return 'shipping';
+                    if (pickupAvailable && !shippingAvailable && !quoteAvailable) return 'pickup';
+                    if (quoteAvailable && !shippingAvailable && !pickupAvailable) return 'quote';
+                    return null;
+                  };
+                  const selectedDeliveryMethod = deliveryMethodBySeller[authorId] || getSingleMethod();
 
                   // Calculate shipping fee only if shipping is selected
                   const shippingFee = selectedDeliveryMethod === 'shipping'
@@ -600,7 +606,7 @@ export const CartPageComponent = props => {
                           )}
 
                           {/* Delivery method selector */}
-                          {(shippingAvailable || pickupAvailable) && (
+                          {(shippingAvailable || pickupAvailable || quoteAvailable) && (
                             <div className={css.deliveryMethodSection}>
                               <label className={css.deliveryMethodLabel}>
                                 <FormattedMessage id="CartPage.deliveryMethodLabel" />
@@ -617,12 +623,21 @@ export const CartPageComponent = props => {
                                     <option value="" disabled>
                                       {intl.formatMessage({ id: 'CartPage.selectDeliveryMethod' })}
                                     </option>
-                                    <option value="shipping">
-                                      {intl.formatMessage({ id: 'CartPage.deliveryShipping' })}
-                                    </option>
-                                    <option value="pickup">
-                                      {intl.formatMessage({ id: 'CartPage.deliveryPickup' })}
-                                    </option>
+                                    {shippingAvailable && (
+                                      <option value="shipping">
+                                        {intl.formatMessage({ id: 'CartPage.deliveryShipping' })}
+                                      </option>
+                                    )}
+                                    {pickupAvailable && (
+                                      <option value="pickup">
+                                        {intl.formatMessage({ id: 'CartPage.deliveryPickup' })}
+                                      </option>
+                                    )}
+                                    {quoteAvailable && (
+                                      <option value="quote">
+                                        {intl.formatMessage({ id: 'CartPage.deliveryQuote' })}
+                                      </option>
+                                    )}
                                   </select>
                                   {deliveryMethodErrors[authorId] && (
                                     <p className={css.deliveryErrorMessage}>
@@ -634,7 +649,9 @@ export const CartPageComponent = props => {
                                 <span className={css.deliveryMethodSingle}>
                                   {selectedDeliveryMethod === 'shipping'
                                     ? intl.formatMessage({ id: 'CartPage.deliveryShipping' })
-                                    : intl.formatMessage({ id: 'CartPage.deliveryPickup' })}
+                                    : selectedDeliveryMethod === 'pickup'
+                                    ? intl.formatMessage({ id: 'CartPage.deliveryPickup' })
+                                    : intl.formatMessage({ id: 'CartPage.deliveryQuote' })}
                                 </span>
                               )}
                               {/* Multiple pickup locations notice */}

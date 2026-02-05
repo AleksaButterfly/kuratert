@@ -16,8 +16,20 @@ const DeliveryInfoMaybe = props => {
   const deliveryMethod = protectedData?.deliveryMethod;
   const isShipping = deliveryMethod === 'shipping';
   const isPickup = deliveryMethod === 'pickup';
+  const isQuote = deliveryMethod === 'quote';
 
-  if (isPickup) {
+  if (isQuote) {
+    return (
+      <div className={classes}>
+        <Heading as="h3" rootClassName={css.sectionHeading}>
+          <FormattedMessage id="TransactionPanel.quoteInfoHeading" />
+        </Heading>
+        <div className={css.quoteInfoContent}>
+          <FormattedMessage id="TransactionPanel.quoteMessage" />
+        </div>
+      </div>
+    );
+  } else if (isPickup) {
     const pickupLocation = listing?.attributes?.publicData?.location || {};
     return (
       <div className={classes}>

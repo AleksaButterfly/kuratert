@@ -22,6 +22,9 @@ const getItemQuantityAndLineItems = (orderData, publicData, currency, listings) 
   const deliveryMethod = orderData && orderData.deliveryMethod;
   const isShipping = deliveryMethod === 'shipping';
   const isPickup = deliveryMethod === 'pickup';
+  const isQuote = deliveryMethod === 'quote';
+  // Quote delivery method: buyer requests custom shipping quote, no shipping fee added
+  // Delivery will be arranged via messages between buyer and seller
   const { shippingPriceInSubunitsOneItem, shippingPriceInSubunitsAdditionalItems } =
     publicData || {};
 
@@ -125,6 +128,8 @@ const getOfferQuantityAndLineItems = orderData => {
 const getNegotiatedItemQuantityAndLineItems = (orderData, publicData, currency) => {
   const deliveryMethod = orderData && orderData.deliveryMethod;
   const isShipping = deliveryMethod === 'shipping';
+  // Quote delivery method: no shipping fee, arranged via messages
+  const isQuote = deliveryMethod === 'quote';
   const { shippingPriceInSubunitsOneItem } = publicData || {};
 
   // Frame line item

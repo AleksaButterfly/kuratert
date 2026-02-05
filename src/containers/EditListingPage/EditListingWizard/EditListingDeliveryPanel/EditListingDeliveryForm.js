@@ -6,7 +6,7 @@ import classNames from 'classnames';
 import appSettings from '../../../../config/settings';
 import { FormattedMessage, useIntl } from '../../../../util/reactIntl';
 import { propTypes } from '../../../../util/types';
-import { displayDeliveryPickup, displayDeliveryShipping } from '../../../../util/configHelpers';
+import { displayDeliveryPickup, displayDeliveryShipping, displayDeliveryQuote } from '../../../../util/configHelpers';
 import {
   autocompleteSearchRequired,
   autocompletePlaceSelected,
@@ -92,9 +92,11 @@ export const EditListingDeliveryForm = props => (
 
       const displayShipping = displayDeliveryShipping(listingTypeConfig);
       const displayPickup = displayDeliveryPickup(listingTypeConfig);
-      const displayMultipleDelivery = displayShipping && displayPickup;
+      const displayQuote = displayDeliveryQuote(listingTypeConfig);
+      const displayMultipleDelivery = (displayShipping ? 1 : 0) + (displayPickup ? 1 : 0) + (displayQuote ? 1 : 0) > 1;
       const shippingEnabled = displayShipping && values.deliveryOptions?.includes('shipping');
       const pickupEnabled = displayPickup && values.deliveryOptions?.includes('pickup');
+      const quoteEnabled = displayQuote && values.deliveryOptions?.includes('quote');
 
       const addressRequiredMessage = intl.formatMessage({
         id: 'EditListingDeliveryForm.addressRequired',
@@ -113,10 +115,11 @@ export const EditListingDeliveryForm = props => (
       const submitReady = (updated && pristine) || ready;
       const submitInProgress = updateInProgress;
       const submitDisabled =
-        invalid || disabled || submitInProgress || (!shippingEnabled && !pickupEnabled);
+        invalid || disabled || submitInProgress || (!shippingEnabled && !pickupEnabled && !quoteEnabled);
 
       const shippingLabel = intl.formatMessage({ id: 'EditListingDeliveryForm.shippingLabel' });
       const pickupLabel = intl.formatMessage({ id: 'EditListingDeliveryForm.pickupLabel' });
+      const quoteLabel = intl.formatMessage({ id: 'EditListingDeliveryForm.quoteLabel' });
 
       const pickupClasses = classNames({
         [css.deliveryOption]: displayMultipleDelivery,
@@ -284,6 +287,19 @@ export const EditListingDeliveryForm = props => (
               />
             ) : null}
           </div>
+
+          <FieldCheckbox
+            id={formId ? `${formId}.quote` : 'quote'}
+            className={classNames(css.deliveryCheckbox, { [css.hidden]: !displayQuote })}
+            name="deliveryOptions"
+            label={quoteLabel}
+            value="quote"
+          />
+          {quoteEnabled && (
+            <p className={css.quoteInfoText}>
+              <FormattedMessage id="EditListingDeliveryForm.quoteInfoText" />
+            </p>
+          )}
 
           <Button
             className={css.submitButton}

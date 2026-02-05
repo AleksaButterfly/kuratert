@@ -49,6 +49,7 @@ const queryCartListingsPayloadCreator = (config, thunkAPI) => {
       'publicData.cardStyle',
       'publicData.pickupEnabled',
       'publicData.shippingEnabled',
+      'publicData.quoteEnabled',
       'publicData.shippingPriceInSubunitsOneItem',
       'publicData.shippingPriceInSubunitsAdditionalItems',
       'publicData.priceVariationsEnabled',

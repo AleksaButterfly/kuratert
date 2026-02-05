@@ -157,7 +157,6 @@
   flex-shrink: 0;
   width: 128px;
   height: 128px;
-  border-radius: 8px;
   overflow: hidden;
   background-color: var(--colorWhite);
 }

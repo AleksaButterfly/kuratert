@@ -925,6 +925,10 @@ export const displayDeliveryShipping = listingTypeConfig => {
   return listingTypeConfig?.defaultListingFields?.shipping !== false;
 };
 
+export const displayDeliveryQuote = listingTypeConfig => {
+  return listingTypeConfig?.defaultListingFields?.quote !== false;
+};
+
 export const requireListingImage = listingTypeConfig => {
   return listingTypeConfig?.defaultListingFields?.images !== false;
 };

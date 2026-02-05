@@ -437,7 +437,7 @@ export const ListingPageComponent = props => {
   const isOwnListing =
     userAndListingAuthorAvailable && currentListing.author.id.uuid === currentUser.id.uuid;
 
-  const { listingType, transactionProcessAlias, unitType, frameOptions, shippingEnabled, pickupEnabled, shippingPriceInSubunitsOneItem, acceptingOffers } = publicData;
+  const { listingType, transactionProcessAlias, unitType, frameOptions, shippingEnabled, pickupEnabled, quoteEnabled, shippingPriceInSubunitsOneItem, acceptingOffers } = publicData;
   if (!(listingType && transactionProcessAlias && unitType)) {
     return (
       <ErrorPage topbar={topbar} scrollingDisabled={scrollingDisabled} intl={intl} invalidListing />
@@ -1067,6 +1067,7 @@ export const ListingPageComponent = props => {
           inProgress={sendOfferInProgress}
           shippingEnabled={shippingEnabled}
           pickupEnabled={pickupEnabled}
+          quoteEnabled={quoteEnabled}
           shippingPriceInSubunits={shippingPriceInSubunitsOneItem}
           hasFrameOptions={hasFrameOptions}
           frameVariants={frameVariants}

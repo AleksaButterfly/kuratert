@@ -61,9 +61,20 @@ const DeliveryMethodMaybe = props => {
     hasStock,
     formId,
     intl,
+    pickupEnabled,
+    shippingEnabled,
+    quoteEnabled,
   } = props;
   const showDeliveryMethodSelector = displayDeliveryMethod && hasMultipleDeliveryMethods;
   const showSingleDeliveryMethod = displayDeliveryMethod && deliveryMethod;
+
+  const getDeliveryMethodLabel = method => {
+    if (method === 'shipping') return intl.formatMessage({ id: 'ProductOrderForm.shippingOption' });
+    if (method === 'pickup') return intl.formatMessage({ id: 'ProductOrderForm.pickupOption' });
+    if (method === 'quote') return intl.formatMessage({ id: 'ProductOrderForm.quoteOption' });
+    return '';
+  };
+
   return !hasStock ? null : showDeliveryMethodSelector ? (
     <FieldSelect
       id={`${formId}.deliveryMethod`}
@@ -75,12 +86,21 @@ const DeliveryMethodMaybe = props => {
       <option disabled value="">
         {intl.formatMessage({ id: 'ProductOrderForm.selectDeliveryMethodOption' })}
       </option>
-      <option value={'pickup'}>
-        {intl.formatMessage({ id: 'ProductOrderForm.pickupOption' })}
-      </option>
-      <option value={'shipping'}>
-        {intl.formatMessage({ id: 'ProductOrderForm.shippingOption' })}
-      </option>
+      {pickupEnabled && (
+        <option value={'pickup'}>
+          {intl.formatMessage({ id: 'ProductOrderForm.pickupOption' })}
+        </option>
+      )}
+      {shippingEnabled && (
+        <option value={'shipping'}>
+          {intl.formatMessage({ id: 'ProductOrderForm.shippingOption' })}
+        </option>
+      )}
+      {quoteEnabled && (
+        <option value={'quote'}>
+          {intl.formatMessage({ id: 'ProductOrderForm.quoteOption' })}
+        </option>
+      )}
     </FieldSelect>
   ) : showSingleDeliveryMethod ? (
     <div className={css.deliveryField}>
@@ -88,9 +108,7 @@ const DeliveryMethodMaybe = props => {
         {intl.formatMessage({ id: 'ProductOrderForm.deliveryMethodLabel' })}
       </H3>
       <p className={css.singleDeliveryMethodSelected}>
-        {deliveryMethod === 'shipping'
-          ? intl.formatMessage({ id: 'ProductOrderForm.shippingOption' })
-          : intl.formatMessage({ id: 'ProductOrderForm.pickupOption' })}
+        {getDeliveryMethodLabel(deliveryMethod)}
       </p>
       <FieldTextInput
         id={`${formId}.deliveryMethod`}
@@ -134,6 +152,9 @@ const renderForm = formRenderProps => {
     payoutDetailsWarning,
     marketplaceName,
     values,
+    pickupEnabled,
+    shippingEnabled,
+    quoteEnabled,
   } = formRenderProps;
 
   // Note: don't add custom logic before useEffect
@@ -257,6 +278,9 @@ const renderForm = formRenderProps => {
         hasStock={hasStock}
         formId={formId}
         intl={intl}
+        pickupEnabled={pickupEnabled}
+        shippingEnabled={shippingEnabled}
+        quoteEnabled={quoteEnabled}
       />
 
       {showBreakdown ? (
@@ -332,13 +356,14 @@ const ProductOrderForm = props => {
     currentStock,
     pickupEnabled,
     shippingEnabled,
+    quoteEnabled,
     displayDeliveryMethod,
     allowOrdersOfMultipleItems,
   } = props;
 
   // Should not happen for listings that go through EditListingWizard.
   // However, this might happen for imported listings.
-  if (displayDeliveryMethod && !pickupEnabled && !shippingEnabled) {
+  if (displayDeliveryMethod && !pickupEnabled && !shippingEnabled && !quoteEnabled) {
     return (
       <p className={css.error}>
         <FormattedMessage id="ProductOrderForm.noDeliveryMethodSet" />
@@ -349,15 +374,22 @@ const ProductOrderForm = props => {
   const hasOneItemLeft = currentStock && currentStock === 1;
   const hasOneItemMode = !allowOrdersOfMultipleItems && currentStock > 0;
   const quantityMaybe = hasOneItemLeft || hasOneItemMode ? { quantity: '1' } : {};
-  const deliveryMethodMaybe =
-    shippingEnabled && !pickupEnabled
-      ? { deliveryMethod: 'shipping' }
-      : !shippingEnabled && pickupEnabled
-      ? { deliveryMethod: 'pickup' }
-      : !shippingEnabled && !pickupEnabled
-      ? { deliveryMethod: 'none' }
-      : {};
-  const hasMultipleDeliveryMethods = pickupEnabled && shippingEnabled;
+
+  // Count enabled delivery methods
+  const enabledMethodsCount = (pickupEnabled ? 1 : 0) + (shippingEnabled ? 1 : 0) + (quoteEnabled ? 1 : 0);
+
+  // Determine default delivery method when only one is enabled
+  const getSingleDeliveryMethod = () => {
+    if (shippingEnabled && !pickupEnabled && !quoteEnabled) return 'shipping';
+    if (pickupEnabled && !shippingEnabled && !quoteEnabled) return 'pickup';
+    if (quoteEnabled && !shippingEnabled && !pickupEnabled) return 'quote';
+    if (!shippingEnabled && !pickupEnabled && !quoteEnabled) return 'none';
+    return null; // Multiple methods enabled
+  };
+
+  const singleMethod = getSingleDeliveryMethod();
+  const deliveryMethodMaybe = singleMethod ? { deliveryMethod: singleMethod } : {};
+  const hasMultipleDeliveryMethods = enabledMethodsCount > 1;
   const initialValues = { ...quantityMaybe, ...deliveryMethodMaybe };
 
   return (
@@ -365,6 +397,9 @@ const ProductOrderForm = props => {
       initialValues={initialValues}
       hasMultipleDeliveryMethods={hasMultipleDeliveryMethods}
       displayDeliveryMethod={displayDeliveryMethod}
+      pickupEnabled={pickupEnabled}
+      shippingEnabled={shippingEnabled}
+      quoteEnabled={quoteEnabled}
       {...props}
       intl={intl}
       render={renderForm}

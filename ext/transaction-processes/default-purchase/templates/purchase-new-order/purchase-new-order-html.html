@@ -202,11 +202,22 @@
                 <p style="font-size:16px;line-height:1.4;margin:16px 0;color:#484848;font-weight:700">
                   {{t "PurchaseNewOrder.MarkAsShipped" "If the order has not been marked as shipped within two weeks, it will expire automatically and you won't get paid."}}
                   </p>
-                {{else}}
+                {{/eq}}
+                {{#eq "quote" protected-data.deliveryMethod}}
+                <p style="font-size:16px;line-height:1.4;margin:16px 0;color:#484848">
+                  {{#if protected-data.cartItems}}{{t "PurchaseNewOrder.CartQuoteDetails" "The buyer requested a custom shipping quote. Please use the <salelink>order details</salelink> page to discuss delivery options and price with {customerDisplayName}. Once you've agreed on shipping and delivered the items, mark the order as delivered to receive your payment." customerDisplayName=customer.display-name salelink=(html-tag "a" target=(concat "_blank") style=(concat "text-decoration:none;color:" (asset "design/branding.json" "marketplaceColors.notificationPrimaryButton" "#007DF2")) href=(concat marketplace.url "/sale/" (url-encode id) "/"))}}{{else}}{{t "PurchaseNewOrder.QuoteDetails" "The buyer requested a custom shipping quote for {listingTitle}. Please use the <salelink>order details</salelink> page to discuss delivery options and price with {customerDisplayName}. Once you've agreed on shipping and delivered the item, mark it as delivered to receive your payment." listingTitle=listing.title customerDisplayName=customer.display-name salelink=(html-tag "a" target=(concat "_blank") style=(concat "text-decoration:none;color:" (asset "design/branding.json" "marketplaceColors.notificationPrimaryButton" "#007DF2")) href=(concat marketplace.url "/sale/" (url-encode id) "/"))}}{{/if}}
+                  </p>
+                <p style="font-size:16px;line-height:1.4;margin:16px 0;color:#484848;font-weight:700">
+                  {{t "PurchaseNewOrder.MarkAsDelivered" "If the order has not been marked as delivered within two weeks, it will expire automatically and you won't get paid."}}
+                  </p>
+                {{/eq}}
+                {{#eq "pickup" protected-data.deliveryMethod}}
                 <p style="font-size:16px;line-height:1.4;margin:16px 0;color:#484848">
                   {{#if protected-data.cartItems}}{{t "PurchaseNewOrder.CartDeliveryDetails" "Once {customerDisplayName} has picked up the items, remember to mark the order as delivered from <salelink>order details</salelink> to receive your payment." customerDisplayName=customer.display-name salelink=(html-tag "a" target=(concat "_blank") style=(concat "text-decoration:none;color:" (asset "design/branding.json" "marketplaceColors.notificationPrimaryButton" "#007DF2")) href=(concat marketplace.url "/sale/" (url-encode id) "/"))}}{{else}}{{t "PurchaseNewOrder.DeliveryDetails" "Once {customerDisplayName} has picked up {listingTitle}, remember to mark it as delivered from <salelink>order details</salelink> to receive your payment." customerDisplayName=customer.display-name listingTitle=listing.title salelink=(html-tag "a" target=(concat "_blank") style=(concat "text-decoration:none;color:" (asset "design/branding.json" "marketplaceColors.notificationPrimaryButton" "#007DF2")) href=(concat marketplace.url "/sale/" (url-encode id) "/"))}}{{/if}}
-
-                <p style="font-size:16px;line-height:1.4;margin:16px 0;color:#484848;font-weight:700">{{t "PurchaseNewOrder.MarkAsDelivered" "If the order has not been marked as delivered within two weeks, it will expire automatically and you won't get paid."}}</p>
+                  </p>
+                <p style="font-size:16px;line-height:1.4;margin:16px 0;color:#484848;font-weight:700">
+                  {{t "PurchaseNewOrder.MarkAsDelivered" "If the order has not been marked as delivered within two weeks, it will expire automatically and you won't get paid."}}
+                  </p>
                 {{/eq}}
                 <table style="padding:16px 0 0" align="center" border="0" cellPadding="0" cellSpacing="0" role="presentation" width="100%">
                   <tbody>

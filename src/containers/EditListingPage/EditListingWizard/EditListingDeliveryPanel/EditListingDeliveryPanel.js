@@ -9,7 +9,7 @@ import {
   STOCK_MULTIPLE_ITEMS,
   propTypes,
 } from '../../../../util/types';
-import { displayDeliveryPickup, displayDeliveryShipping } from '../../../../util/configHelpers';
+import { displayDeliveryPickup, displayDeliveryShipping, displayDeliveryQuote } from '../../../../util/configHelpers';
 import { types as sdkTypes } from '../../../../util/sdkLoader';
 
 // Import shared components
@@ -29,7 +29,8 @@ const getInitialValues = props => {
   const listingTypeConfig = listingTypes.find(conf => conf.listingType === listingType);
   const displayShipping = displayDeliveryShipping(listingTypeConfig);
   const displayPickup = displayDeliveryPickup(listingTypeConfig);
-  const displayMultipleDelivery = displayShipping && displayPickup;
+  const displayQuote = displayDeliveryQuote(listingTypeConfig);
+  const displayMultipleDelivery = (displayShipping ? 1 : 0) + (displayPickup ? 1 : 0) + (displayQuote ? 1 : 0) > 1;
 
   // Only render current search if full place object is available in the URL params
   // TODO bounds are missing - those need to be queried directly from Google Places
@@ -39,6 +40,7 @@ const getInitialValues = props => {
   const {
     shippingEnabled,
     pickupEnabled,
+    quoteEnabled,
     shippingPriceInSubunitsOneItem,
     shippingPriceInSubunitsAdditionalItems,
   } = publicData;
@@ -49,6 +51,9 @@ const getInitialValues = props => {
   }
   if (pickupEnabled || (!displayMultipleDelivery && displayPickup)) {
     deliveryOptions.push('pickup');
+  }
+  if (quoteEnabled) {
+    deliveryOptions.push('quote');
   }
 
   const currency = price?.currency || marketplaceCurrency;
@@ -164,6 +169,7 @@ const EditListingDeliveryPanel = props => {
 
             const shippingEnabled = deliveryOptions.includes('shipping');
             const pickupEnabled = deliveryOptions.includes('pickup');
+            const quoteEnabled = deliveryOptions.includes('quote');
             const address = location?.selectedPlace?.address || null;
             const origin = location?.selectedPlace?.origin || null;
 
@@ -189,6 +195,7 @@ const EditListingDeliveryPanel = props => {
                 ...pickupDataMaybe,
                 shippingEnabled,
                 ...shippingDataMaybe,
+                quoteEnabled,
               },
             };
 

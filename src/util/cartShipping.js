@@ -41,14 +41,14 @@ export const calculateShippingFee = (
 
 /**
  * Get available delivery methods for cart items
- * Returns which methods (shipping/pickup) are available for ALL items
+ * Returns which methods (shipping/pickup/quote) are available for ALL items
  *
  * @param {Array} cartItems - Array of cart items with listing data
- * @returns {Object} { shipping: boolean, pickup: boolean, requiresNegotiation: boolean }
+ * @returns {Object} { shipping: boolean, pickup: boolean, quote: boolean, requiresNegotiation: boolean }
  */
 export const getCartDeliveryCompatibility = cartItems => {
   if (!cartItems || cartItems.length === 0) {
-    return { shipping: false, pickup: false, requiresNegotiation: false };
+    return { shipping: false, pickup: false, quote: false, requiresNegotiation: false };
   }
 
   // Check if all items support each delivery method
@@ -58,12 +58,13 @@ export const getCartDeliveryCompatibility = cartItems => {
       return {
         shipping: acc.shipping && !!publicData?.shippingEnabled,
         pickup: acc.pickup && !!publicData?.pickupEnabled,
+        quote: acc.quote && !!publicData?.quoteEnabled,
       };
     },
-    { shipping: true, pickup: true }
+    { shipping: true, pickup: true, quote: true }
   );
 
-  const hasAnyMethod = methods.shipping || methods.pickup;
+  const hasAnyMethod = methods.shipping || methods.pickup || methods.quote;
   const requiresNegotiation = !hasAnyMethod;
 
   return {
@@ -122,7 +123,7 @@ export const calculateCartShippingFee = (listings, getQuantityForListing, curren
  * Check if a delivery method is available for given cart items
  *
  * @param {Array} listings - Array of listing entities
- * @param {string} method - 'shipping' or 'pickup'
+ * @param {string} method - 'shipping', 'pickup', or 'quote'
  * @returns {boolean} True if all items support the method
  */
 export const isDeliveryMethodAvailable = (listings, method) => {
@@ -130,7 +131,16 @@ export const isDeliveryMethodAvailable = (listings, method) => {
     return false;
   }
 
-  const fieldName = method === 'shipping' ? 'shippingEnabled' : 'pickupEnabled';
+  const fieldNameMap = {
+    shipping: 'shippingEnabled',
+    pickup: 'pickupEnabled',
+    quote: 'quoteEnabled',
+  };
+  const fieldName = fieldNameMap[method];
+
+  if (!fieldName) {
+    return false;
+  }
 
   return listings.every(listing => {
     const publicData = listing.attributes?.publicData;

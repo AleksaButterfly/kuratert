@@ -7,6 +7,7 @@ import { FormattedMessage, useIntl } from '../../util/reactIntl';
 import {
   displayDeliveryPickup,
   displayDeliveryShipping,
+  displayDeliveryQuote,
   displayPrice,
 } from '../../util/configHelpers';
 import {
@@ -366,11 +367,12 @@ const OrderPanel = props => {
   const supportedProcessesInfo = getSupportedProcessesInfo();
   const isKnownProcess = supportedProcessesInfo.map(info => info.name).includes(processName);
 
-  const { pickupEnabled, shippingEnabled } = listing?.attributes?.publicData || {};
+  const { pickupEnabled, shippingEnabled, quoteEnabled } = listing?.attributes?.publicData || {};
 
   const listingTypeConfig = validListingTypes.find(conf => conf.listingType === listingType);
   const displayShipping = displayDeliveryShipping(listingTypeConfig);
   const displayPickup = displayDeliveryPickup(listingTypeConfig);
+  const displayQuote = displayDeliveryQuote(listingTypeConfig);
   const allowOrdersOfMultipleItems = [STOCK_MULTIPLE_ITEMS, STOCK_INFINITE_MULTIPLE_ITEMS].includes(
     listingTypeConfig?.stockType
   );
@@ -531,7 +533,8 @@ const OrderPanel = props => {
             allowOrdersOfMultipleItems={allowOrdersOfMultipleItems}
             pickupEnabled={pickupEnabled && displayPickup}
             shippingEnabled={shippingEnabled && displayShipping}
-            displayDeliveryMethod={displayPickup || displayShipping}
+            quoteEnabled={quoteEnabled && displayQuote}
+            displayDeliveryMethod={displayPickup || displayShipping || displayQuote}
             onContactUser={onContactUser}
             {...sharedProps}
           />

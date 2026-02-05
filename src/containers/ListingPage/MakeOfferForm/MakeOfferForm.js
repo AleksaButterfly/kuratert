@@ -40,6 +40,7 @@ const MakeOfferForm = props => {
     inProgress,
     shippingEnabled,
     pickupEnabled,
+    quoteEnabled,
     shippingPriceInSubunits,
     frameVariants,
     hasFrameOptions,
@@ -55,9 +56,19 @@ const MakeOfferForm = props => {
   // Determine delivery method availability
   const hasShipping = !!shippingEnabled;
   const hasPickup = !!pickupEnabled;
-  const hasMultipleDeliveryMethods = hasShipping && hasPickup;
-  const hasSingleDeliveryMethod = (hasShipping || hasPickup) && !hasMultipleDeliveryMethods;
-  const singleDeliveryMethod = hasSingleDeliveryMethod ? (hasShipping ? 'shipping' : 'pickup') : null;
+  const hasQuote = !!quoteEnabled;
+  const enabledMethodsCount = (hasShipping ? 1 : 0) + (hasPickup ? 1 : 0) + (hasQuote ? 1 : 0);
+  const hasMultipleDeliveryMethods = enabledMethodsCount > 1;
+  const hasSingleDeliveryMethod = enabledMethodsCount === 1;
+
+  // Determine single delivery method if only one is available
+  const getSingleMethod = () => {
+    if (hasShipping && !hasPickup && !hasQuote) return 'shipping';
+    if (hasPickup && !hasShipping && !hasQuote) return 'pickup';
+    if (hasQuote && !hasShipping && !hasPickup) return 'quote';
+    return null;
+  };
+  const singleDeliveryMethod = hasSingleDeliveryMethod ? getSingleMethod() : null;
 
   // Set initial values with single delivery method if only one is available
   const initialValues = {
@@ -138,7 +149,7 @@ const MakeOfferForm = props => {
             />
 
             {/* Delivery Method Selection */}
-            {(hasShipping || hasPickup) && (
+            {(hasShipping || hasPickup || hasQuote) && (
               <div className={css.deliveryMethodSection}>
                 <label className={css.deliveryMethodLabel}>
                   <FormattedMessage id="MakeOfferForm.deliveryMethodLabel" />
@@ -153,12 +164,21 @@ const MakeOfferForm = props => {
                         <option value="" disabled>
                           {intl.formatMessage({ id: 'MakeOfferForm.selectDeliveryMethod' })}
                         </option>
-                        <option value="shipping">
-                          {intl.formatMessage({ id: 'MakeOfferForm.deliveryShipping' })}
-                        </option>
-                        <option value="pickup">
-                          {intl.formatMessage({ id: 'MakeOfferForm.deliveryPickup' })}
-                        </option>
+                        {hasShipping && (
+                          <option value="shipping">
+                            {intl.formatMessage({ id: 'MakeOfferForm.deliveryShipping' })}
+                          </option>
+                        )}
+                        {hasPickup && (
+                          <option value="pickup">
+                            {intl.formatMessage({ id: 'MakeOfferForm.deliveryPickup' })}
+                          </option>
+                        )}
+                        {hasQuote && (
+                          <option value="quote">
+                            {intl.formatMessage({ id: 'MakeOfferForm.deliveryQuote' })}
+                          </option>
+                        )}
                       </select>
                     )}
                   </Field>
@@ -166,7 +186,9 @@ const MakeOfferForm = props => {
                   <span className={css.deliveryMethodSingle}>
                     {singleDeliveryMethod === 'shipping'
                       ? intl.formatMessage({ id: 'MakeOfferForm.deliveryShipping' })
-                      : intl.formatMessage({ id: 'MakeOfferForm.deliveryPickup' })}
+                      : singleDeliveryMethod === 'pickup'
+                      ? intl.formatMessage({ id: 'MakeOfferForm.deliveryPickup' })
+                      : intl.formatMessage({ id: 'MakeOfferForm.deliveryQuote' })}
                   </span>
                 )}
                 {/* Show shipping price when shipping is selected */}
