@@ -1096,16 +1096,18 @@
 }
 
 .relatedListingsWrapper {
-  max-width: 1440px;
-  margin: 0 auto;
+  width: 100%;
+  margin: 0;
   padding: 0 24px;
 
   @media (--viewportMedium) {
-    padding: 0 48px;
+    padding: 0 24px;
   }
 
   @media (--viewportLarge) {
-    padding: 0 72px;
+    max-width: var(--contentMaxWidthPages);
+    padding: 0 24px;
+    margin: 0 auto;
   }
 }
 
