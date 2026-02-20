@@ -164,6 +164,9 @@ export const EditListingPricingAndStockForm = props => (
       const hasInfiniteStock = STOCK_INFINITE_ITEMS.includes(listingType?.stockType);
       const currentStock = values.stock;
 
+      // Check if auction mode is enabled
+      const isAuctionEnabled = Array.isArray(values?.isAuction) && values.isAuction.includes('true');
+
       const classes = classNames(rootClassName || css.root, className);
       const submitReady = (updated && pristine) || ready;
       const submitInProgress = updateInProgress;
@@ -186,21 +189,25 @@ export const EditListingPricingAndStockForm = props => (
               <FormattedMessage id="EditListingPricingAndStockForm.showListingFailed" />
             </p>
           ) : null}
-          <FieldCurrencyInput
-            id={`${formId}.price`}
-            name="price"
-            className={css.input}
-            autoFocus={autoFocus}
-            label={intl.formatMessage(
-              { id: 'EditListingPricingAndStockForm.pricePerProduct' },
-              { unitType }
-            )}
-            placeholder={intl.formatMessage({
-              id: 'EditListingPricingAndStockForm.priceInputPlaceholder',
-            })}
-            currencyConfig={appSettings.getCurrencyFormatting(marketplaceCurrency)}
-            validate={priceValidators}
-          />
+
+          {/* Price - shown when auction is NOT enabled */}
+          {!isAuctionEnabled && (
+            <FieldCurrencyInput
+              id={`${formId}.price`}
+              name="price"
+              className={css.input}
+              autoFocus={autoFocus}
+              label={intl.formatMessage(
+                { id: 'EditListingPricingAndStockForm.pricePerProduct' },
+                { unitType }
+              )}
+              placeholder={intl.formatMessage({
+                id: 'EditListingPricingAndStockForm.priceInputPlaceholder',
+              })}
+              currencyConfig={appSettings.getCurrencyFormatting(marketplaceCurrency)}
+              validate={priceValidators}
+            />
+          )}
 
           <UpdateStockToInfinityCheckboxMaybe
             formId={formId}
@@ -395,16 +402,76 @@ export const EditListingPricingAndStockForm = props => (
             ) : null}
           </div>
 
-          {/* Accept Offers Section */}
-          <div className={css.acceptingOffersWrapper}>
+          {/* Accept Offers Section - only show when not auction */}
+          {!isAuctionEnabled && (
+            <div className={css.acceptingOffersWrapper}>
+              <FieldCheckbox
+                id={`${formId}.acceptingOffers`}
+                name="acceptingOffers"
+                label={intl.formatMessage({ id: 'EditListingPricingForm.acceptingOffersLabel' })}
+                value="true"
+              />
+              <p className={css.acceptingOffersInfo}>
+                <FormattedMessage id="EditListingPricingForm.acceptingOffersInfo" />
+              </p>
+            </div>
+          )}
+
+          {/* Auction Toggle */}
+          <div className={css.auctionWrapper}>
             <FieldCheckbox
-              id={`${formId}.acceptingOffers`}
-              name="acceptingOffers"
-              label={intl.formatMessage({ id: 'EditListingPricingForm.acceptingOffersLabel' })}
+              id={`${formId}.isAuction`}
+              name="isAuction"
+              label={intl.formatMessage({ id: 'EditListingPricingForm.isAuctionLabel' })}
               value="true"
             />
-            <p className={css.acceptingOffersInfo}>
-              <FormattedMessage id="EditListingPricingForm.acceptingOffersInfo" />
+            <p className={css.auctionInfo}>
+              <FormattedMessage id="EditListingPricingForm.isAuctionInfo" />
+            </p>
+          </div>
+
+          {/* Auction Fields - shown when auction is enabled */}
+          {isAuctionEnabled && (
+            <div className={css.auctionFieldsWrapper}>
+              <FieldCurrencyInput
+                id={`${formId}.auctionEstimateLow`}
+                name="auctionEstimateLow"
+                className={css.input}
+                label={intl.formatMessage({ id: 'EditListingPricingForm.auctionEstimateLowLabel' })}
+                placeholder={intl.formatMessage({ id: 'EditListingPricingAndStockForm.priceInputPlaceholder' })}
+                currencyConfig={appSettings.getCurrencyFormatting(marketplaceCurrency)}
+                validate={priceValidators}
+              />
+              <FieldCurrencyInput
+                id={`${formId}.auctionEstimateHigh`}
+                name="auctionEstimateHigh"
+                className={css.input}
+                label={intl.formatMessage({ id: 'EditListingPricingForm.auctionEstimateHighLabel' })}
+                placeholder={intl.formatMessage({ id: 'EditListingPricingAndStockForm.priceInputPlaceholder' })}
+                currencyConfig={appSettings.getCurrencyFormatting(marketplaceCurrency)}
+                validate={priceValidators}
+              />
+              <FieldTextInput
+                id={`${formId}.auctionLink`}
+                name="auctionLink"
+                type="url"
+                className={css.input}
+                label={intl.formatMessage({ id: 'EditListingPricingForm.auctionLinkLabel' })}
+                placeholder={intl.formatMessage({ id: 'EditListingPricingForm.auctionLinkPlaceholder' })}
+              />
+            </div>
+          )}
+
+          {/* Reserved Toggle */}
+          <div className={css.reservedWrapper}>
+            <FieldCheckbox
+              id={`${formId}.isReserved`}
+              name="isReserved"
+              label={intl.formatMessage({ id: 'EditListingPricingForm.isReservedLabel' })}
+              value="true"
+            />
+            <p className={css.reservedInfo}>
+              <FormattedMessage id="EditListingPricingForm.isReservedInfo" />
             </p>
           </div>
 

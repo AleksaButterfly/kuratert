@@ -12,7 +12,7 @@ import { types as sdkTypes } from '../../../../util/sdkLoader';
 import { FIXED, isBookingProcess } from '../../../../transactions/transaction';
 
 // Import shared components
-import { Button, Form, FieldCurrencyInput, FieldCheckbox } from '../../../../components';
+import { Button, Form, FieldCurrencyInput, FieldCheckbox, FieldTextInput } from '../../../../components';
 
 import BookingPriceVariants from './BookingPriceVariants';
 import StartTimeInterval from './StartTimeInverval';
@@ -137,38 +137,89 @@ export const EditListingPricingForm = props => (
       const isBookingPriceVariationsInUse = isBooking && isPriceVariationsInUse;
       const isUsingPriceVariants = isFixedLengthBooking || isBookingPriceVariationsInUse;
 
+      // Check if auction mode is enabled
+      const isAuctionEnabled = Array.isArray(formValues?.isAuction) && formValues.isAuction.includes('true');
+
       return (
         <Form onSubmit={handleSubmit} className={classes}>
           <ErrorMessages fetchErrors={fetchErrors} />
 
-          {isUsingPriceVariants ? (
-            <BookingPriceVariants
-              formId={formId}
-              formApi={formApi}
-              autoFocus={autoFocus}
-              className={css.input}
-              marketplaceCurrency={marketplaceCurrency}
-              unitType={unitType}
-              isPriceVariationsInUse={isBookingPriceVariationsInUse}
-              initialLengthOfPriceVariants={formInitialValues?.priceVariants?.length || 0}
-              listingMinimumPriceSubUnits={listingMinimumPriceSubUnits}
+          {/* Auction Toggle */}
+          <div className={css.auctionWrapper}>
+            <FieldCheckbox
+              id={`${formId}.isAuction`}
+              name="isAuction"
+              label={intl.formatMessage({ id: 'EditListingPricingForm.isAuctionLabel' })}
+              value="true"
             />
+            <p className={css.auctionInfo}>
+              <FormattedMessage id="EditListingPricingForm.isAuctionInfo" />
+            </p>
+          </div>
+
+          {/* Auction Fields - shown when auction is enabled */}
+          {isAuctionEnabled ? (
+            <div className={css.auctionFieldsWrapper}>
+              <FieldCurrencyInput
+                id={`${formId}auctionEstimateLow`}
+                name="auctionEstimateLow"
+                className={css.input}
+                label={intl.formatMessage({ id: 'EditListingPricingForm.auctionEstimateLowLabel' })}
+                placeholder={intl.formatMessage({ id: 'EditListingPricingForm.priceInputPlaceholder' })}
+                currencyConfig={appSettings.getCurrencyFormatting(marketplaceCurrency)}
+                validate={priceValidators}
+              />
+              <FieldCurrencyInput
+                id={`${formId}auctionEstimateHigh`}
+                name="auctionEstimateHigh"
+                className={css.input}
+                label={intl.formatMessage({ id: 'EditListingPricingForm.auctionEstimateHighLabel' })}
+                placeholder={intl.formatMessage({ id: 'EditListingPricingForm.priceInputPlaceholder' })}
+                currencyConfig={appSettings.getCurrencyFormatting(marketplaceCurrency)}
+                validate={priceValidators}
+              />
+              <FieldTextInput
+                id={`${formId}auctionLink`}
+                name="auctionLink"
+                type="url"
+                className={css.input}
+                label={intl.formatMessage({ id: 'EditListingPricingForm.auctionLinkLabel' })}
+                placeholder={intl.formatMessage({ id: 'EditListingPricingForm.auctionLinkPlaceholder' })}
+              />
+            </div>
           ) : (
-            <FieldCurrencyInput
-              id={`${formId}price`}
-              name="price"
-              className={css.input}
-              autoFocus={autoFocus}
-              label={intl.formatMessage(
-                { id: 'EditListingPricingForm.pricePerProduct' },
-                { unitType }
+            /* Regular Price Fields - shown when auction is NOT enabled */
+            <>
+              {isUsingPriceVariants ? (
+                <BookingPriceVariants
+                  formId={formId}
+                  formApi={formApi}
+                  autoFocus={autoFocus}
+                  className={css.input}
+                  marketplaceCurrency={marketplaceCurrency}
+                  unitType={unitType}
+                  isPriceVariationsInUse={isBookingPriceVariationsInUse}
+                  initialLengthOfPriceVariants={formInitialValues?.priceVariants?.length || 0}
+                  listingMinimumPriceSubUnits={listingMinimumPriceSubUnits}
+                />
+              ) : (
+                <FieldCurrencyInput
+                  id={`${formId}price`}
+                  name="price"
+                  className={css.input}
+                  autoFocus={autoFocus}
+                  label={intl.formatMessage(
+                    { id: 'EditListingPricingForm.pricePerProduct' },
+                    { unitType }
+                  )}
+                  placeholder={intl.formatMessage({
+                    id: 'EditListingPricingForm.priceInputPlaceholder',
+                  })}
+                  currencyConfig={appSettings.getCurrencyFormatting(marketplaceCurrency)}
+                  validate={priceValidators}
+                />
               )}
-              placeholder={intl.formatMessage({
-                id: 'EditListingPricingForm.priceInputPlaceholder',
-              })}
-              currencyConfig={appSettings.getCurrencyFormatting(marketplaceCurrency)}
-              validate={priceValidators}
-            />
+            </>
           )}
 
           {isFixedLengthBooking ? (
@@ -180,17 +231,33 @@ export const EditListingPricingForm = props => (
             />
           ) : null}
 
-          <div className={css.acceptingOffersWrapper}>
+          {/* Reserved Toggle */}
+          <div className={css.reservedWrapper}>
             <FieldCheckbox
-              id={`${formId}.acceptingOffers`}
-              name="acceptingOffers"
-              label={intl.formatMessage({ id: 'EditListingPricingForm.acceptingOffersLabel' })}
+              id={`${formId}.isReserved`}
+              name="isReserved"
+              label={intl.formatMessage({ id: 'EditListingPricingForm.isReservedLabel' })}
               value="true"
             />
-            <p className={css.acceptingOffersInfo}>
-              <FormattedMessage id="EditListingPricingForm.acceptingOffersInfo" />
+            <p className={css.reservedInfo}>
+              <FormattedMessage id="EditListingPricingForm.isReservedInfo" />
             </p>
           </div>
+
+          {/* Accepting Offers Toggle - only show when not auction */}
+          {!isAuctionEnabled && (
+            <div className={css.acceptingOffersWrapper}>
+              <FieldCheckbox
+                id={`${formId}.acceptingOffers`}
+                name="acceptingOffers"
+                label={intl.formatMessage({ id: 'EditListingPricingForm.acceptingOffersLabel' })}
+                value="true"
+              />
+              <p className={css.acceptingOffersInfo}>
+                <FormattedMessage id="EditListingPricingForm.acceptingOffersInfo" />
+              </p>
+            </div>
+          )}
 
           <Button
             className={css.submitButton}

@@ -37,21 +37,41 @@ const getListingTypeConfig = (publicData, listingTypes) => {
 const getInitialValues = props => {
   const { listing, listingTypes } = props;
   const { publicData } = listing?.attributes || {};
-  const { unitType, acceptingOffers } = publicData || {};
+  const { unitType, acceptingOffers, isAuction, auctionEstimateLow, auctionEstimateHigh, auctionLink, isReserved } = publicData || {};
   const listingTypeConfig = getListingTypeConfig(publicData, listingTypes);
   // Note: publicData contains priceVariationsEnabled if listing is created with priceVariations enabled.
   const isPriceVariationsInUse = isPriceVariationsEnabled(publicData, listingTypeConfig);
 
   // Convert boolean to array format for FieldCheckbox (checked = ['true'], unchecked = [])
   const acceptingOffersMaybe = acceptingOffers ? ['true'] : [];
+  const isAuctionMaybe = isAuction ? ['true'] : [];
+  const isReservedMaybe = isReserved ? ['true'] : [];
+
+  // Convert auction estimate values from subunits to Money objects
+  const marketplaceCurrency = listing?.attributes?.price?.currency || 'NOK';
+  const auctionEstimateLowMoney = auctionEstimateLow ? new Money(auctionEstimateLow, marketplaceCurrency) : null;
+  const auctionEstimateHighMoney = auctionEstimateHigh ? new Money(auctionEstimateHigh, marketplaceCurrency) : null;
 
   return unitType === FIXED || isPriceVariationsInUse
     ? {
         ...getInitialValuesForPriceVariants(props, isPriceVariationsInUse),
         ...getInitialValuesForStartTimeInterval(props),
         acceptingOffers: acceptingOffersMaybe,
+        isAuction: isAuctionMaybe,
+        auctionEstimateLow: auctionEstimateLowMoney,
+        auctionEstimateHigh: auctionEstimateHighMoney,
+        auctionLink: auctionLink || '',
+        isReserved: isReservedMaybe,
       }
-    : { price: listing?.attributes?.price, acceptingOffers: acceptingOffersMaybe };
+    : {
+        price: listing?.attributes?.price,
+        acceptingOffers: acceptingOffersMaybe,
+        isAuction: isAuctionMaybe,
+        auctionEstimateLow: auctionEstimateLowMoney,
+        auctionEstimateHigh: auctionEstimateHighMoney,
+        auctionLink: auctionLink || '',
+        isReserved: isReservedMaybe,
+      };
 };
 
 // This is needed to show the listing's price consistently over XHR calls.
@@ -166,10 +186,16 @@ const EditListingPricingPanel = props => {
           className={css.form}
           initialValues={initialValues}
           onSubmit={values => {
-            const { price, acceptingOffers } = values;
+            const { price, acceptingOffers, isAuction, auctionEstimateLow, auctionEstimateHigh, auctionLink, isReserved } = values;
 
-            // Convert checkbox array to boolean (checked = ['true'] -> true, unchecked = [] -> false)
+            // Convert checkbox arrays to booleans (checked = ['true'] -> true, unchecked = [] -> false)
             const isAcceptingOffers = Array.isArray(acceptingOffers) && acceptingOffers.includes('true');
+            const isAuctionListing = Array.isArray(isAuction) && isAuction.includes('true');
+            const isListingReserved = Array.isArray(isReserved) && isReserved.includes('true');
+
+            // Extract auction estimate values (convert Money to subunits)
+            const auctionEstimateLowSubunits = auctionEstimateLow?.amount || null;
+            const auctionEstimateHighSubunits = auctionEstimateHigh?.amount || null;
 
             // New values for listing attributes
             let updateValues = {};
@@ -199,6 +225,11 @@ const EditListingPricingPanel = props => {
                 publicData: {
                   priceVariationsEnabled: isPriceVariationsInUse,
                   acceptingOffers: isAcceptingOffers,
+                  isAuction: isAuctionListing,
+                  auctionEstimateLow: isAuctionListing ? auctionEstimateLowSubunits : null,
+                  auctionEstimateHigh: isAuctionListing ? auctionEstimateHighSubunits : null,
+                  auctionLink: isAuctionListing ? (auctionLink || null) : null,
+                  isReserved: isListingReserved,
                   ...startTimeIntervalChanges.publicData,
                   ...priceVariantChanges.publicData,
                 },
@@ -211,12 +242,21 @@ const EditListingPricingPanel = props => {
                     },
                   }
                 : {};
+
+              // For auction listings, we still need a price for the API, use low estimate as placeholder
+              const listingPrice = isAuctionListing ? auctionEstimateLow : price;
+
               updateValues = {
-                price,
+                price: listingPrice,
                 ...priceVariationsEnabledMaybe,
                 publicData: {
                   ...(priceVariationsEnabledMaybe.publicData || {}),
-                  acceptingOffers: isAcceptingOffers,
+                  acceptingOffers: isAuctionListing ? false : isAcceptingOffers,
+                  isAuction: isAuctionListing,
+                  auctionEstimateLow: isAuctionListing ? auctionEstimateLowSubunits : null,
+                  auctionEstimateHigh: isAuctionListing ? auctionEstimateHighSubunits : null,
+                  auctionLink: isAuctionListing ? (auctionLink || null) : null,
+                  isReserved: isListingReserved,
                 },
               };
             }

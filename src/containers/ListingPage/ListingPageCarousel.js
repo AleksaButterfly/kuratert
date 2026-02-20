@@ -20,6 +20,7 @@ import {
   displayDeliveryShipping,
 } from '../../util/configHelpers';
 import { types as sdkTypes } from '../../util/sdkLoader';
+import { formatMoney } from '../../util/currency';
 import {
   LISTING_PAGE_DRAFT_VARIANT,
   LISTING_PAGE_PENDING_APPROVAL_VARIANT,
@@ -440,7 +441,7 @@ export const ListingPageComponent = props => {
   const isOwnListing =
     userAndListingAuthorAvailable && currentListing.author.id.uuid === currentUser.id.uuid;
 
-  const { listingType, transactionProcessAlias, unitType, frameOptions, shippingEnabled, pickupEnabled, quoteEnabled, shippingPriceInSubunitsOneItem, acceptingOffers } = publicData;
+  const { listingType, transactionProcessAlias, unitType, frameOptions, shippingEnabled, pickupEnabled, quoteEnabled, shippingPriceInSubunitsOneItem, acceptingOffers, isAuction, auctionEstimateLow, auctionEstimateHigh, auctionLink, isReserved } = publicData;
   if (!(listingType && transactionProcessAlias && unitType)) {
     return (
       <ErrorPage topbar={topbar} scrollingDisabled={scrollingDisabled} intl={intl} invalidListing />
@@ -476,6 +477,14 @@ export const ListingPageComponent = props => {
   const authorDisplayName = userDisplayNameAsString(ensuredAuthor, '');
 
   const { formattedPrice } = priceData(price, config.currency, intl);
+
+  // Format auction estimates if this is an auction listing
+  const formattedAuctionEstimateLow = isAuction && auctionEstimateLow
+    ? formatMoney(intl, new sdkTypes.Money(auctionEstimateLow, price?.currency || config.currency))
+    : null;
+  const formattedAuctionEstimateHigh = isAuction && auctionEstimateHigh
+    ? formatMoney(intl, new sdkTypes.Money(auctionEstimateHigh, price?.currency || config.currency))
+    : null;
 
   // Calculate Kunstavgift (5% Art Tax)
   const kunstavgiftAmount = price?.amount ? Math.round(price.amount * 0.05) : 0;
@@ -774,16 +783,39 @@ export const ListingPageComponent = props => {
               </div>
             </div>
 
-            {/* Price */}
+            {/* Price or Auction Estimate or Reserved Status */}
             <div className={css.priceSection}>
-              <p className={css.currentPrice}>{formattedPrice}</p>
-              {formattedKunstavgift && (
-                <p className={css.kunstavgiftNote}>
+              {isReserved ? (
+                <>
+                  <p className={css.reservedStatus}>
+                    <FormattedMessage id="ListingPage.reservedStatus" />
+                  </p>
+                  <p className={css.reservedMessage}>
+                    <FormattedMessage id="ListingPage.reservedMessage" />
+                  </p>
+                </>
+              ) : isAuction && formattedAuctionEstimateLow && formattedAuctionEstimateHigh ? (
+                <p className={css.auctionEstimate}>
                   <FormattedMessage
-                    id="ListingPage.kunstavgiftNote"
-                    values={{ amount: formattedKunstavgift }}
+                    id="ListingPage.auctionEstimate"
+                    values={{
+                      lowEstimate: formattedAuctionEstimateLow,
+                      highEstimate: formattedAuctionEstimateHigh
+                    }}
                   />
                 </p>
+              ) : (
+                <>
+                  <p className={css.currentPrice}>{formattedPrice}</p>
+                  {formattedKunstavgift && (
+                    <p className={css.kunstavgiftNote}>
+                      <FormattedMessage
+                        id="ListingPage.kunstavgiftNote"
+                        values={{ amount: formattedKunstavgift }}
+                      />
+                    </p>
+                  )}
+                </>
               )}
             </div>
 
@@ -918,60 +950,81 @@ export const ListingPageComponent = props => {
 
             {/* Action buttons */}
             <div className={css.actionsSection}>
-              {isPurchase && (
-                <button
-                  className={isInCart ? css.addedToCartButton : css.addToCartButton}
-                  onClick={() => {
-                    if (!isAuthenticated) {
-                      const state = { from: `${location.pathname}${location.search}${location.hash}` };
-                      history.push(pathByRouteName('SignupPage', routeConfiguration, {}), state);
-                    } else {
-                      handleAddToCart();
-                    }
-                  }}
-                  disabled={isOwnListing || addListingToCartInProgress || !hasStock || isInCart}
+              {/* Auction listing - show View at Auction button */}
+              {isAuction && auctionLink ? (
+                <a
+                  href={auctionLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={css.viewAtAuctionButton}
                 >
-                  {addListingToCartInProgress ? (
-                    <FormattedMessage id="ListingPage.addingToCart" />
-                  ) : isInCart ? (
-                    <FormattedMessage id="ListingPage.addedToCart" />
-                  ) : !hasStock ? (
-                    <FormattedMessage id="ListingPage.outOfStock" />
-                  ) : (
-                    <FormattedMessage id="ListingPage.addToCart" />
+                  <FormattedMessage id="ListingPage.viewAtAuction" />
+                </a>
+              ) : isReserved ? (
+                /* Reserved listing - only show contact seller */
+                null
+              ) : (
+                /* Regular listing - show purchase buttons */
+                <>
+                  {isPurchase && (
+                    <button
+                      className={isInCart ? css.addedToCartButton : css.addToCartButton}
+                      onClick={() => {
+                        if (!isAuthenticated) {
+                          const state = { from: `${location.pathname}${location.search}${location.hash}` };
+                          history.push(pathByRouteName('SignupPage', routeConfiguration, {}), state);
+                        } else {
+                          handleAddToCart();
+                        }
+                      }}
+                      disabled={isOwnListing || addListingToCartInProgress || !hasStock || isInCart}
+                    >
+                      {addListingToCartInProgress ? (
+                        <FormattedMessage id="ListingPage.addingToCart" />
+                      ) : isInCart ? (
+                        <FormattedMessage id="ListingPage.addedToCart" />
+                      ) : !hasStock ? (
+                        <FormattedMessage id="ListingPage.outOfStock" />
+                      ) : (
+                        <FormattedMessage id="ListingPage.addToCart" />
+                      )}
+                    </button>
                   )}
-                </button>
+                  {acceptingOffers !== false && (
+                    <button
+                      className={css.makeOfferButton}
+                      onClick={() => {
+                        if (isAuthenticated) {
+                          setMakeOfferModalOpen(true);
+                        } else {
+                          const state = { from: `${location.pathname}${location.search}${location.hash}` };
+                          history.push(pathByRouteName('SignupPage', routeConfiguration, {}), state);
+                        }
+                      }}
+                      disabled={isOwnListing || !hasStock}
+                    >
+                      <FormattedMessage id="ListingPage.makeAnOffer" />
+                    </button>
+                  )}
+                </>
               )}
-              {acceptingOffers !== false && (
+              {/* Show digital viewing and contact buttons for all listing types except reserved */}
+              {!isReserved && (
                 <button
-                  className={css.makeOfferButton}
+                  className={css.bookDigitalViewingButton}
                   onClick={() => {
                     if (isAuthenticated) {
-                      setMakeOfferModalOpen(true);
+                      setDigitalViewingModalOpen(true);
                     } else {
                       const state = { from: `${location.pathname}${location.search}${location.hash}` };
                       history.push(pathByRouteName('SignupPage', routeConfiguration, {}), state);
                     }
                   }}
-                  disabled={isOwnListing || !hasStock}
+                  disabled={isOwnListing}
                 >
-                  <FormattedMessage id="ListingPage.makeAnOffer" />
+                  <FormattedMessage id="ListingPage.bookDigitalViewing" />
                 </button>
               )}
-              <button
-                className={css.bookDigitalViewingButton}
-                onClick={() => {
-                  if (isAuthenticated) {
-                    setDigitalViewingModalOpen(true);
-                  } else {
-                    const state = { from: `${location.pathname}${location.search}${location.hash}` };
-                    history.push(pathByRouteName('SignupPage', routeConfiguration, {}), state);
-                  }
-                }}
-                disabled={isOwnListing}
-              >
-                <FormattedMessage id="ListingPage.bookDigitalViewing" />
-              </button>
               <button
                 className={css.contactSellerButton}
                 onClick={onContactUser}

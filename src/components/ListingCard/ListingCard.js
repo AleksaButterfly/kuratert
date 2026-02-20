@@ -11,6 +11,7 @@ import {
 } from '../../util/configHelpers';
 import { lazyLoadWithDimensions } from '../../util/uiHelpers';
 import { formatMoney } from '../../util/currency';
+import { types as sdkTypes } from '../../util/sdkLoader';
 import { ensureListing, ensureUser } from '../../util/data';
 import { richText } from '../../util/richText';
 import { createSlug } from '../../util/urlHelpers';
@@ -24,6 +25,8 @@ import {
 } from '../../components';
 
 import css from './ListingCard.module.css';
+
+const { Money } = sdkTypes;
 
 const MIN_LENGTH_FOR_LONG_WORDS = 10;
 
@@ -53,6 +56,31 @@ const PriceMaybe = props => {
   const showPrice = displayPrice(listingTypeConfig);
   if (!showPrice && price) {
     return null;
+  }
+
+  // Check if this is an auction listing
+  const isAuction = publicData?.isAuction === true;
+  const auctionEstimateLow = publicData?.auctionEstimateLow;
+  const auctionEstimateHigh = publicData?.auctionEstimateHigh;
+
+  // For auction listings, show estimate range
+  if (isAuction && auctionEstimateLow && auctionEstimateHigh) {
+    const currency = price?.currency || config.currency;
+    const lowEstimateMoney = new Money(auctionEstimateLow, currency);
+    const highEstimateMoney = new Money(auctionEstimateHigh, currency);
+    const formattedLow = formatMoney(intl, lowEstimateMoney);
+    const formattedHigh = formatMoney(intl, highEstimateMoney);
+
+    return (
+      <div className={css.price}>
+        <span className={css.auctionEstimate}>
+          <FormattedMessage
+            id="ListingCard.auctionEstimate"
+            values={{ lowEstimate: formattedLow, highEstimate: formattedHigh }}
+          />
+        </span>
+      </div>
+    );
   }
 
   const isPriceVariationsInUse = isPriceVariationsEnabled(publicData, listingTypeConfig);
@@ -85,6 +113,16 @@ const PriceMaybe = props => {
 };
 
 /**
+ * ReservedBadge
+ * Shows a "Reserved" badge on the listing card
+ */
+const ReservedBadge = ({ intl }) => (
+  <div className={css.reservedBadge}>
+    <FormattedMessage id="ListingCard.reserved" />
+  </div>
+);
+
+/**
  * ListingCardImage
  * Component responsible for rendering the image part of the listing card.
  * It either renders the first image from the listing's images array with lazy loading,
@@ -101,6 +139,8 @@ const PriceMaybe = props => {
  * @param {string} props.variantPrefix image variant prefix (e.g. "listing-card")
  * @param {boolean} props.showListingImage whether to show actual listing image or not
  * @param {Object?} props.style the background color for the listing card with no image
+ * @param {boolean} props.isReserved whether the listing is reserved
+ * @param {Object} props.intl intl object for translations
  * @returns {JSX.Element} listing image with fixed aspect ratio or fallback preview
  */
 const ListingCardImage = props => {
@@ -114,6 +154,8 @@ const ListingCardImage = props => {
     variantPrefix,
     showListingImage,
     style,
+    isReserved,
+    intl,
   } = props;
 
   const firstImage =
@@ -137,6 +179,7 @@ const ListingCardImage = props => {
         variants={variants}
         sizes={renderSizes}
       />
+      {isReserved && <ReservedBadge intl={intl} />}
     </AspectRatioWrapper>
   ) : (
     <ListingCardThumbnail
@@ -205,6 +248,9 @@ export const ListingCard = props => {
       }
     : null;
 
+  // Check if listing is reserved
+  const isReserved = publicData?.isReserved === true;
+
   return (
     <NamedLink className={classes} name="ListingPage" params={{ id, slug }}>
       <ListingCardImage
@@ -218,6 +264,8 @@ export const ListingCard = props => {
         variantPrefix={variantPrefix}
         style={cardStyle}
         showListingImage={showListingImage}
+        isReserved={isReserved}
+        intl={intl}
       />
       <div className={css.info}>
         <div className={css.mainInfo}>

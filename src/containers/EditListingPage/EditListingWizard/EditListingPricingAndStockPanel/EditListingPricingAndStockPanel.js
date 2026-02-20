@@ -39,7 +39,7 @@ const getInitialValues = (props, marketplaceCurrency) => {
   const currentStock = listing?.currentStock;
 
   const publicData = listing?.attributes?.publicData;
-  const { acceptingOffers } = publicData || {};
+  const { acceptingOffers, isAuction, auctionEstimateLow, auctionEstimateHigh, auctionLink, isReserved } = publicData || {};
   const listingTypeConfig = getListingTypeConfig(publicData, listingTypes);
   const hasInfiniteStock = STOCK_INFINITE_ITEMS.includes(listingTypeConfig?.stockType);
 
@@ -79,6 +79,12 @@ const getInitialValues = (props, marketplaceCurrency) => {
 
   // Convert boolean to array format for FieldCheckbox (checked = ['true'], unchecked = [])
   const acceptingOffersMaybe = acceptingOffers ? ['true'] : [];
+  const isAuctionMaybe = isAuction ? ['true'] : [];
+  const isReservedMaybe = isReserved ? ['true'] : [];
+
+  // Convert auction estimate values from subunits to Money objects
+  const auctionEstimateLowMoney = auctionEstimateLow ? new Money(auctionEstimateLow, currency) : null;
+  const auctionEstimateHighMoney = auctionEstimateHigh ? new Money(auctionEstimateHigh, currency) : null;
 
   return {
     price,
@@ -89,6 +95,11 @@ const getInitialValues = (props, marketplaceCurrency) => {
     recommendedFrameLabel,
     recommendedFramePrice,
     acceptingOffers: acceptingOffersMaybe,
+    isAuction: isAuctionMaybe,
+    auctionEstimateLow: auctionEstimateLowMoney,
+    auctionEstimateHigh: auctionEstimateHighMoney,
+    auctionLink: auctionLink || '',
+    isReserved: isReservedMaybe,
   };
 };
 
@@ -197,10 +208,21 @@ const EditListingPricingAndStockPanel = props => {
               recommendedFrameLabel,
               recommendedFramePrice,
               acceptingOffers,
+              isAuction,
+              auctionEstimateLow,
+              auctionEstimateHigh,
+              auctionLink,
+              isReserved,
             } = values;
 
-            // Convert checkbox array to boolean (checked = ['true'] -> true, unchecked = [] -> false)
+            // Convert checkbox arrays to booleans (checked = ['true'] -> true, unchecked = [] -> false)
             const isAcceptingOffers = Array.isArray(acceptingOffers) && acceptingOffers.includes('true');
+            const isAuctionListing = Array.isArray(isAuction) && isAuction.includes('true');
+            const isListingReserved = Array.isArray(isReserved) && isReserved.includes('true');
+
+            // Extract auction estimate values (convert Money to subunits)
+            const auctionEstimateLowSubunits = auctionEstimateLow?.amount || null;
+            const auctionEstimateHighSubunits = auctionEstimateHigh?.amount || null;
 
             // Update stock only if the value has changed, or stock is infinity in stockType,
             // but not current stock is a small number (might happen with old listings)
@@ -270,20 +292,28 @@ const EditListingPricingAndStockPanel = props => {
                 }
               : { frameOptions: { enabled: false, variants: [] } };
 
+            // For auction listings, we still need a price for the API, use low estimate as placeholder
+            const listingPrice = isAuctionListing ? auctionEstimateLow : price;
+
             // New values for listing attributes
             const updateValues = {
-              price,
+              price: listingPrice,
               ...stockUpdateMaybe,
               publicData: {
                 ...frameOptionsData,
-                acceptingOffers: isAcceptingOffers,
+                acceptingOffers: isAuctionListing ? false : isAcceptingOffers,
+                isAuction: isAuctionListing,
+                auctionEstimateLow: isAuctionListing ? auctionEstimateLowSubunits : null,
+                auctionEstimateHigh: isAuctionListing ? auctionEstimateHighSubunits : null,
+                auctionLink: isAuctionListing ? (auctionLink || null) : null,
+                isReserved: isListingReserved,
               },
             };
             // Save the initialValues to state
             // Otherwise, re-rendering would overwrite the values during XHR call.
             setState({
               initialValues: {
-                price,
+                price: listingPrice,
                 stock: stockUpdateMaybe?.stockUpdate?.newTotal || stock,
                 stockTypeInfinity,
                 frameEnabled,
@@ -291,6 +321,11 @@ const EditListingPricingAndStockPanel = props => {
                 recommendedFrameLabel,
                 recommendedFramePrice,
                 acceptingOffers,
+                isAuction,
+                auctionEstimateLow,
+                auctionEstimateHigh,
+                auctionLink,
+                isReserved,
               },
             });
             onSubmit(updateValues);
