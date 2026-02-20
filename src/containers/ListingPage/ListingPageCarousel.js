@@ -104,6 +104,7 @@ import InquiryForm from './InquiryForm/InquiryForm';
 import MakeOfferForm from './MakeOfferForm/MakeOfferForm';
 import { BookDigitalViewingForm } from './BookDigitalViewingForm';
 import ViewInSpaceModal from './ViewInSpaceModal';
+import SectionRelatedListings from './SectionRelatedListings/SectionRelatedListings';
 import { pathByRouteName } from '../../util/routes';
 
 import css from './ListingPage.module.css';
@@ -368,6 +369,8 @@ export const ListingPageComponent = props => {
     // Cart
     addListingToCartInProgress,
     onAddListingToCart,
+    // Related listings
+    relatedListings,
     ...restOfProps
   } = props;
 
@@ -473,6 +476,15 @@ export const ListingPageComponent = props => {
   const authorDisplayName = userDisplayNameAsString(ensuredAuthor, '');
 
   const { formattedPrice } = priceData(price, config.currency, intl);
+
+  // Calculate Kunstavgift (5% Art Tax)
+  const kunstavgiftAmount = price?.amount ? Math.round(price.amount * 0.05) : 0;
+  const formattedKunstavgift = kunstavgiftAmount > 0
+    ? intl.formatNumber(kunstavgiftAmount / 100, {
+        style: 'currency',
+        currency: price?.currency || 'NOK',
+      })
+    : null;
 
   // Get category label
   const categoryLabel = getCategoryLabel(publicData, config.categoryConfiguration);
@@ -765,6 +777,14 @@ export const ListingPageComponent = props => {
             {/* Price */}
             <div className={css.priceSection}>
               <p className={css.currentPrice}>{formattedPrice}</p>
+              {formattedKunstavgift && (
+                <p className={css.kunstavgiftNote}>
+                  <FormattedMessage
+                    id="ListingPage.kunstavgiftNote"
+                    values={{ amount: formattedKunstavgift }}
+                  />
+                </p>
+              )}
             </div>
 
             {/* Description */}
@@ -784,7 +804,19 @@ export const ListingPageComponent = props => {
                   {specifications.map(spec => (
                     <div key={spec.key} className={css.specItem}>
                       <span className={css.specLabel}>{spec.label}</span>
-                      <span className={css.specValue}>{spec.value}</span>
+                      <span className={css.specValue}>
+                        {spec.key === 'selger' ? (
+                          <NamedLink
+                            className={css.sellerLink}
+                            name="SellerListingsPage"
+                            params={{ sellerName: encodeURIComponent(spec.value) }}
+                          >
+                            {spec.value}
+                          </NamedLink>
+                        ) : (
+                          spec.value
+                        )}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -974,6 +1006,11 @@ export const ListingPageComponent = props => {
               )}
             </div>
           </div>
+        </div>
+
+        {/* Related Listings Section */}
+        <div className={css.relatedListingsWrapper}>
+          <SectionRelatedListings listings={relatedListings} />
         </div>
       </LayoutSingleColumn>
 
@@ -1244,6 +1281,7 @@ const mapStateToProps = state => {
     fetchLineItemsInProgress,
     fetchLineItemsError,
     inquiryModalOpenForListingId,
+    relatedListingRefs,
   } = state.ListingPage;
   const {
     currentUser,
@@ -1264,6 +1302,11 @@ const mapStateToProps = state => {
     const listings = getMarketplaceEntities(state, [ref]);
     return listings.length === 1 ? listings[0] : null;
   };
+
+  // Get related listings from refs
+  const relatedListings = relatedListingRefs?.length > 0
+    ? getMarketplaceEntities(state, relatedListingRefs)
+    : [];
 
   return {
     isAuthenticated,
@@ -1292,6 +1335,8 @@ const mapStateToProps = state => {
     currentFavoriteListingId,
     // Cart
     addListingToCartInProgress,
+    // Related listings
+    relatedListings,
   };
 };
 

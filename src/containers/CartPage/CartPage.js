@@ -406,13 +406,19 @@ export const CartPageComponent = props => {
                   const isFreeShipping = selectedDeliveryMethod === 'shipping' &&
                     shippingAvailable && (!shippingFee || shippingFee.amount === 0);
 
-                  // Calculate total
-                  const sellerTotal = shippingFee
-                    ? new Money(itemsSubtotal.amount + shippingFee.amount, currency)
-                    : itemsSubtotal;
+                  // Calculate kunstavgift (5% art tax on items subtotal)
+                  const kunstavgiftAmount = Math.round(itemsSubtotal.amount * 0.05);
+                  const kunstavgiftFee = new Money(kunstavgiftAmount, currency);
+
+                  // Calculate total (items + shipping + kunstavgift)
+                  const totalAmount = itemsSubtotal.amount +
+                    (shippingFee?.amount || 0) +
+                    kunstavgiftAmount;
+                  const sellerTotal = new Money(totalAmount, currency);
 
                   const formattedItemsSubtotal = formatMoney(intl, itemsSubtotal);
                   const formattedShippingFee = shippingFee ? formatMoney(intl, shippingFee) : null;
+                  const formattedKunstavgift = formatMoney(intl, kunstavgiftFee);
                   const formattedSellerTotal = formatMoney(intl, sellerTotal);
 
                   // Handler for delivery method change
@@ -678,6 +684,12 @@ export const CartPageComponent = props => {
                                 <span className={css.summaryValue}>{formattedShippingFee}</span>
                               </div>
                             )}
+                            <div className={css.summaryRow}>
+                              <span className={css.summaryLabel}>
+                                <FormattedMessage id="CartPage.kunstavgift" />
+                              </span>
+                              <span className={css.summaryValue}>{formattedKunstavgift}</span>
+                            </div>
                           </div>
 
                           <div className={css.totalRow}>

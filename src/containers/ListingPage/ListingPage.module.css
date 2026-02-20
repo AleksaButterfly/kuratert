@@ -842,6 +842,7 @@
    ============================================= */
 
 .listingPageGrid {
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -957,9 +958,8 @@
 /* Price section */
 .priceSection {
   display: flex;
-  align-items: baseline;
-  gap: 12px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 4px;
   margin-bottom: 12px;
 }
 
@@ -968,6 +968,14 @@
   font-size: 36px;
   line-height: 40px;
   color: var(--colorGrey900);
+  margin: 0;
+}
+
+.kunstavgiftNote {
+  font-family: var(--fontFamily);
+  font-size: 14px;
+  line-height: 21px;
+  color: var(--colorGrey500);
   margin: 0;
 }
 
@@ -1074,6 +1082,31 @@
   font-size: 14px;
   line-height: 21px;
   color: var(--colorGrey900);
+}
+
+.sellerLink {
+  color: var(--colorGrey900);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: var(--colorGrey700);
+  }
+}
+
+.relatedListingsWrapper {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 24px;
+
+  @media (--viewportMedium) {
+    padding: 0 48px;
+  }
+
+  @media (--viewportLarge) {
+    padding: 0 72px;
+  }
 }
 
 /* Trust badges section */

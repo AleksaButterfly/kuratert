@@ -22,6 +22,7 @@ import { loadData as ProfilePageLoader } from './ProfilePage/ProfilePage.duck';
 import { loadData as RequestQuotePageLoader } from './RequestQuotePage/RequestQuotePage.duck';
 import { loadData as SearchPageLoader } from './SearchPage/SearchPage.duck';
 import { loadData as SellerLandingPageLoader } from './SellerLandingPage/SellerLandingPage.duck';
+import { loadData as SellerListingsPageLoader } from './SellerListingsPage/SellerListingsPage.duck';
 import { loadData as StripePayoutPageLoader } from './StripePayoutPage/StripePayoutPage.duck';
 import { loadData as TermsOfServicePageLoader } from './TermsOfServicePage/TermsOfServicePage.duck';
 import {
@@ -93,6 +94,9 @@ const getPageDataLoadingAPI = () => {
     },
     SellerLandingPage: {
       loadData: SellerLandingPageLoader,
+    },
+    SellerListingsPage: {
+      loadData: SellerListingsPageLoader,
     },
     StripePayoutPage: {
       loadData: StripePayoutPageLoader,

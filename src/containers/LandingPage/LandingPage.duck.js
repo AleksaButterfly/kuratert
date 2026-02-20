@@ -22,14 +22,25 @@ const queryListingsPayloadCreator = (
   } = config.layout.listingImage;
   const aspectRatio = aspectHeight / aspectWidth;
 
+  const queryParams = {
+    perPage,
+    minStock: 1,
+    meta_isFeatured: true,
+    include: ['author', 'images'],
+    'fields.image': [`variants.${variantPrefix}`, `variants.${variantPrefix}-2x`],
+    ...createImageVariantConfig(`${variantPrefix}`, 400, aspectRatio),
+    ...createImageVariantConfig(`${variantPrefix}-2x`, 800, aspectRatio),
+  };
+
   return sdk.listings
-    .query({
-      perPage,
-      minStock: 1,
-      include: ['author', 'images'],
-      'fields.image': [`variants.${variantPrefix}`, `variants.${variantPrefix}-2x`],
-      ...createImageVariantConfig(`${variantPrefix}`, 400, aspectRatio),
-      ...createImageVariantConfig(`${variantPrefix}-2x`, 800, aspectRatio),
+    .query(queryParams)
+    .then(response => {
+      // If no featured listings, fallback to latest
+      if (response.data.data.length === 0) {
+        const { meta_isFeatured, ...fallbackParams } = queryParams;
+        return sdk.listings.query(fallbackParams);
+      }
+      return response;
     })
     .then(response => {
       const listings = response.data.data;

@@ -21,8 +21,7 @@ const getItemQuantityAndLineItems = (orderData, publicData, currency, listings) 
   const quantity = orderData ? orderData.stockReservationQuantity : null;
   const deliveryMethod = orderData && orderData.deliveryMethod;
   const isShipping = deliveryMethod === 'shipping';
-  const isPickup = deliveryMethod === 'pickup';
-  const isQuote = deliveryMethod === 'quote';
+
   // Quote delivery method: buyer requests custom shipping quote, no shipping fee added
   // Delivery will be arranged via messages between buyer and seller
   const { shippingPriceInSubunitsOneItem, shippingPriceInSubunitsAdditionalItems } =
@@ -100,20 +99,20 @@ const getItemQuantityAndLineItems = (orderData, publicData, currency, listings) 
   // Frame line item (only for single item purchases, not cart items - cart items have frame in their unit price)
   const frameInfo = orderData?.frameInfo;
   const framePriceInSubunits = parseInt(frameInfo?.framePriceInSubunits, 10) || 0;
-  const frameLineItem = !hasCartItems && framePriceInSubunits > 0
-    ? [
-        {
-          code: 'line-item/frame',
-          unitPrice: new Money(framePriceInSubunits, currency),
-          quantity: 1,
-          includeFor: ['customer', 'provider'],
-        },
-      ]
-    : [];
+  const frameLineItem =
+    !hasCartItems && framePriceInSubunits > 0
+      ? [
+          {
+            code: 'line-item/frame',
+            unitPrice: new Money(framePriceInSubunits, currency),
+            quantity: 1,
+            includeFor: ['customer', 'provider'],
+          },
+        ]
+      : [];
 
   return { quantity, extraLineItems: [...frameLineItem, ...deliveryLineItem] };
 };
-
 
 const getOfferQuantityAndLineItems = orderData => {
   return { quantity: 1, extraLineItems: [] };
@@ -128,28 +127,29 @@ const getOfferQuantityAndLineItems = orderData => {
 const getNegotiatedItemQuantityAndLineItems = (orderData, publicData, currency) => {
   const deliveryMethod = orderData && orderData.deliveryMethod;
   const isShipping = deliveryMethod === 'shipping';
-  // Quote delivery method: no shipping fee, arranged via messages
-  const isQuote = deliveryMethod === 'quote';
+
   const { shippingPriceInSubunitsOneItem } = publicData || {};
 
   // Frame line item
   const frameInfo = orderData?.frameInfo;
   const framePriceInSubunits = parseInt(frameInfo?.framePriceInSubunits, 10) || 0;
-  const frameLineItem = framePriceInSubunits > 0
-    ? [
-        {
-          code: 'line-item/frame',
-          unitPrice: new Money(framePriceInSubunits, currency),
-          quantity: 1,
-          includeFor: ['customer', 'provider'],
-        },
-      ]
-    : [];
+  const frameLineItem =
+    framePriceInSubunits > 0
+      ? [
+          {
+            code: 'line-item/frame',
+            unitPrice: new Money(framePriceInSubunits, currency),
+            quantity: 1,
+            includeFor: ['customer', 'provider'],
+          },
+        ]
+      : [];
 
   // Shipping line item
-  const totalShippingFee = isShipping && shippingPriceInSubunitsOneItem
-    ? new Money(shippingPriceInSubunitsOneItem, currency)
-    : null;
+  const totalShippingFee =
+    isShipping && shippingPriceInSubunitsOneItem
+      ? new Money(shippingPriceInSubunitsOneItem, currency)
+      : null;
 
   const deliveryLineItem = !!totalShippingFee
     ? [
@@ -247,7 +247,13 @@ const getDateRangeQuantityAndLineItems = (orderData, code) => {
  * @param {Array} cartListings - Array of cart item listings for cart checkout
  * @returns {Array} lineItems
  */
-exports.transactionLineItems = (listing, orderData, providerCommission, customerCommission, cartListings = []) => {
+exports.transactionLineItems = (
+  listing,
+  orderData,
+  providerCommission,
+  customerCommission,
+  cartListings = []
+) => {
   const publicData = listing.attributes.publicData;
   // Note: the unitType needs to be one of the following:
   // day, night, hour, fixed, or item (these are related to payment processes)
@@ -272,13 +278,13 @@ exports.transactionLineItems = (listing, orderData, providerCommission, customer
   const isPriceInSubunitsValid = Number.isInteger(priceInSubunits) && priceInSubunits >= 0;
 
   // Check if offer is valid (either Money instance or object with amount/currency)
-  const isValidOffer = offer && (
-    offer instanceof Money ||
-    (typeof offer.amount === 'number' && offer.currency)
-  );
+  const isValidOffer =
+    offer && (offer instanceof Money || (typeof offer.amount === 'number' && offer.currency));
   // Normalize offer to Money if it's a plain object
   const normalizedOffer = isValidOffer
-    ? (offer instanceof Money ? offer : new Money(offer.amount, offer.currency))
+    ? offer instanceof Money
+      ? offer
+      : new Money(offer.amount, offer.currency)
     : null;
 
   // Calculate unit price
@@ -356,9 +362,7 @@ exports.transactionLineItems = (listing, orderData, providerCommission, customer
 
   // Determine the quantity for the main listing
   const mainListingQuantity = mainQuantity || stockReservationQuantity || quantity;
-  const quantityOrSeats = !!units && !!seats
-    ? { units, seats }
-    : { quantity: mainListingQuantity };
+  const quantityOrSeats = !!units && !!seats ? { units, seats } : { quantity: mainListingQuantity };
 
   // Main listing line item
   const mainListingLineItem = {
@@ -409,6 +413,20 @@ exports.transactionLineItems = (listing, orderData, providerCommission, customer
     return sum + itemTotal;
   }, 0);
 
+  // Kunstavgift (5% Art Tax) - applies to order subtotal (items only, before shipping/fees)
+  const kunstavgiftAmount = Math.round(totalOrderAmount * 0.05);
+  const kunstavgiftLineItem =
+    kunstavgiftAmount > 0
+      ? [
+          {
+            code: 'line-item/kunstavgift',
+            unitPrice: new Money(kunstavgiftAmount, currency),
+            quantity: 1,
+            includeFor: ['customer'],
+          },
+        ]
+      : [];
+
   const orderForCommission = {
     ...mainListingLineItem,
     unitPrice: new Money(totalOrderAmount, currency),
@@ -420,6 +438,7 @@ exports.transactionLineItems = (listing, orderData, providerCommission, customer
   const lineItems = [
     ...orderLineItems,
     ...extraLineItems,
+    ...kunstavgiftLineItem,
     ...getProviderCommissionMaybe(providerCommission, orderForCommission, currency),
     ...getCustomerCommissionMaybe(customerCommission, orderForCommission, currency),
   ];

@@ -26,6 +26,7 @@ const InboxPage = loadable(() => import(/* webpackChunkName: "InboxPage" */ '../
 const MakeOfferPage = loadable(() => import(/* webpackChunkName: "MakeOfferPage" */ '../containers/MakeOfferPage/MakeOfferPage'));
 const LandingPage = loadable(() => import(/* webpackChunkName: "LandingPage" */ '../containers/LandingPage/LandingPage'));
 const SellerLandingPage = loadable(() => import(/* webpackChunkName: "SellerLandingPage" */ '../containers/SellerLandingPage/SellerLandingPage'));
+const SellerListingsPage = loadable(() => import(/* webpackChunkName: "SellerListingsPage" */ '../containers/SellerListingsPage/SellerListingsPage'));
 const AboutPage = loadable(() => import(/* webpackChunkName: "AboutPage" */ '../containers/AboutPage/AboutPage'));
 const ContactPage = loadable(() => import(/* webpackChunkName: "ContactPage" */ '../containers/ContactPage/ContactPage'));
 const FAQPage = loadable(() => import(/* webpackChunkName: "FAQPage" */ '../containers/FAQPage/FAQPage'));
@@ -132,6 +133,13 @@ const routeConfiguration = (layoutConfig, accessControlConfig) => {
     },
     // NOTE: when the private marketplace feature is enabled, the '/s' route is disallowed by the robots.txt resource.
     // If you add new routes that start with '/s*' (e.g. /support), you should add them to the robotsPrivateMarketplace.txt file.
+    {
+      path: '/seller/:sellerName',
+      name: 'SellerListingsPage',
+      ...authForPrivateMarketplace,
+      component: SellerListingsPage,
+      loadData: pageDataLoadingAPI.SellerListingsPage.loadData,
+    },
     {
       path: '/s',
       name: 'SearchPage',

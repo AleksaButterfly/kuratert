@@ -407,6 +407,7 @@ export const LINE_ITEM_PROVIDER_COMMISSION = 'line-item/provider-commission';
 export const LINE_ITEM_SHIPPING_FEE = 'line-item/shipping-fee';
 export const LINE_ITEM_PICKUP_FEE = 'line-item/pickup-fee';
 export const LINE_ITEM_FRAME = 'line-item/frame';
+export const LINE_ITEM_KUNSTAVGIFT = 'line-item/kunstavgift';
 
 export const LINE_ITEMS = [
   LINE_ITEM_NIGHT,
@@ -422,6 +423,7 @@ export const LINE_ITEMS = [
   LINE_ITEM_SHIPPING_FEE,
   LINE_ITEM_PICKUP_FEE,
   LINE_ITEM_FRAME,
+  LINE_ITEM_KUNSTAVGIFT,
 ];
 export const LISTING_UNIT_TYPES = [
   LINE_ITEM_NIGHT,

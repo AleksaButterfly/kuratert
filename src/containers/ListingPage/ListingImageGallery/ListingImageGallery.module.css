@@ -1,7 +1,13 @@
 @import '../../../styles/customMediaQueries.css';
 
 :global(.image-gallery-thumbnails-container) {
+  display: flex;
+  gap: 8px;
   text-align: left !important;
+
+  @media (--viewportLarge) {
+    flex-wrap: nowrap;
+  }
 }
 :global(.image-gallery-thumbnails) {
   padding-top: 16px;
@@ -27,13 +33,22 @@
 
 :global(.image-gallery-thumbnails-wrapper) {
   @media (--viewportLarge) {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
+    display: flex;
+    overflow-x: auto;
+    gap: 8px;
+    padding-bottom: 8px;
+
+    /* Hide scrollbar but keep functionality */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 }
 
 :global(.image-gallery-thumbnail) {
+  flex-shrink: 0;
   width: auto;
   border-radius: 0;
   border: 2px solid transparent;
@@ -58,7 +73,8 @@
   }
 
   @media (--viewportLarge) {
-    width: 100% !important;
+    width: calc((100% - 16px) / 3) !important;
+    max-width: 150px;
     aspect-ratio: 1;
 
     &:first-child,
@@ -85,7 +101,7 @@
 }
 
 :global(.image-gallery-slide-wrapper) {
-  background-color: var(--colorGrey100);
+  background-color: var(--colorGrey50);
   border: none;
   aspect-ratio: 1;
   overflow: hidden;
@@ -167,8 +183,9 @@
 }
 
 .item {
-  max-width: 100%;
-  max-height: 100%;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 /* View in Your Space button */

@@ -1,0 +1,44 @@
+@import '../../../styles/customMediaQueries.css';
+
+.root {
+  padding: 48px 0;
+  border-top: 1px solid var(--colorGrey100);
+  margin-top: 48px;
+
+  @media (--viewportMedium) {
+    padding: 64px 0;
+    margin-top: 64px;
+  }
+}
+
+.title {
+  font-family: var(--fontFamilyHeading);
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 400;
+  color: var(--colorGrey900);
+  letter-spacing: -0.02em;
+  margin: 0 0 24px;
+
+  @media (--viewportMedium) {
+    font-size: 28px;
+    line-height: 36px;
+    margin: 0 0 32px;
+  }
+}
+
+.listingsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+
+  @media (--viewportMedium) {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+
+  @media (--viewportLarge) {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 40px;
+  }
+}

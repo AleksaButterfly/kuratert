@@ -470,6 +470,135 @@ const fetchMonthlyTimeSlots = (dispatch, listing) => {
   return Promise.all([]);
 };
 
+////////////////////////////
+// Fetch Related Listings //
+////////////////////////////
+
+// Calculate similarity score between two listings
+const calculateSimilarity = (listingPublicData, currentListingPublicData) => {
+  let score = 0;
+  const { kategori, tema, color, medium, selger } = currentListingPublicData;
+
+  // Same category: +3 points
+  if (listingPublicData.kategori && kategori && listingPublicData.kategori === kategori) {
+    score += 3;
+  }
+
+  // Same seller: +2 points
+  if (listingPublicData.selger && selger && listingPublicData.selger === selger) {
+    score += 2;
+  }
+
+  // Overlapping themes: +1 per match
+  if (Array.isArray(listingPublicData.tema) && Array.isArray(tema)) {
+    listingPublicData.tema.forEach(t => {
+      if (tema.includes(t)) {
+        score += 1;
+      }
+    });
+  }
+
+  // Overlapping colors: +1 per match
+  if (Array.isArray(listingPublicData.color) && Array.isArray(color)) {
+    listingPublicData.color.forEach(c => {
+      if (color.includes(c)) {
+        score += 1;
+      }
+    });
+  }
+
+  // Same medium: +1 point
+  if (listingPublicData.medium && medium && listingPublicData.medium === medium) {
+    score += 1;
+  }
+
+  return score;
+};
+
+const fetchRelatedListingsPayloadCreator = (
+  { currentListing, config },
+  { dispatch, rejectWithValue, extra: sdk }
+) => {
+  const currentListingId = currentListing?.id?.uuid;
+  const publicData = currentListing?.attributes?.publicData || {};
+
+  const {
+    aspectWidth = 1,
+    aspectHeight = 1,
+    variantPrefix = 'listing-card',
+  } = config.layout.listingImage;
+  const aspectRatio = aspectHeight / aspectWidth;
+
+  return sdk.listings
+    .query({
+      perPage: 100,
+      minStock: 1,
+      include: ['author', 'images'],
+      'fields.listing': [
+        'title',
+        'price',
+        'publicData.kategori',
+        'publicData.tema',
+        'publicData.color',
+        'publicData.medium',
+        'publicData.selger',
+        'publicData.listingType',
+        'publicData.transactionProcessAlias',
+        'publicData.unitType',
+        'publicData.cardStyle',
+      ],
+      'fields.user': ['profile.displayName', 'profile.abbreviatedName'],
+      'fields.image': [
+        // Same variants as showListing to avoid overwriting with less data
+        'variants.scaled-small',
+        'variants.scaled-medium',
+        'variants.scaled-large',
+        'variants.scaled-xlarge',
+        `variants.${variantPrefix}`,
+        `variants.${variantPrefix}-2x`,
+        `variants.${variantPrefix}-4x`,
+        `variants.${variantPrefix}-6x`,
+      ],
+      ...createImageVariantConfig(`${variantPrefix}`, 400, aspectRatio),
+      ...createImageVariantConfig(`${variantPrefix}-2x`, 800, aspectRatio),
+      ...createImageVariantConfig(`${variantPrefix}-4x`, 1600, aspectRatio),
+      ...createImageVariantConfig(`${variantPrefix}-6x`, 2400, aspectRatio),
+      'limit.images': 1,
+    })
+    .then(response => {
+      const listingFields = config?.listing?.listingFields;
+      const sanitizeConfig = { listingFields };
+      dispatch(addMarketplaceEntities(response, sanitizeConfig));
+
+      // Score and filter listings
+      const scored = response.data.data
+        .filter(listing => listing.id.uuid !== currentListingId)
+        .map(listing => ({
+          listing,
+          score: calculateSimilarity(listing.attributes.publicData || {}, publicData),
+        }))
+        .filter(item => item.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 6);
+
+      return scored.map(s => ({ id: s.listing.id, type: 'listing' }));
+    })
+    .catch(e => {
+      // Don't fail the page load for related listings
+      console.error('Failed to fetch related listings:', e);
+      return [];
+    });
+};
+
+export const fetchRelatedListingsThunk = createAsyncThunk(
+  'ListingPage/fetchRelatedListings',
+  fetchRelatedListingsPayloadCreator
+);
+// Backward compatible wrapper for the thunk
+export const fetchRelatedListings = (currentListing, config) => dispatch => {
+  return dispatch(fetchRelatedListingsThunk({ currentListing, config })).unwrap();
+};
+
 //////////////////////////////////
 // Fetch Transaction Line Items //
 //////////////////////////////////
@@ -534,6 +663,8 @@ const initialState = {
   sendOfferError: null,
   sendDigitalViewingInProgress: false,
   sendDigitalViewingError: null,
+  relatedListingRefs: [],
+  fetchRelatedListingsInProgress: false,
 };
 
 const listingPageSlice = createSlice({
@@ -674,6 +805,17 @@ const listingPageSlice = createSlice({
       .addCase(sendDigitalViewingRequestThunk.rejected, (state, action) => {
         state.sendDigitalViewingInProgress = false;
         state.sendDigitalViewingError = action.payload;
+      })
+      .addCase(fetchRelatedListingsThunk.pending, state => {
+        state.fetchRelatedListingsInProgress = true;
+      })
+      .addCase(fetchRelatedListingsThunk.fulfilled, (state, action) => {
+        state.fetchRelatedListingsInProgress = false;
+        state.relatedListingRefs = action.payload;
+      })
+      .addCase(fetchRelatedListingsThunk.rejected, state => {
+        state.fetchRelatedListingsInProgress = false;
+        state.relatedListingRefs = [];
       });
   },
 });
@@ -693,8 +835,8 @@ export const loadData = (params, search, config) => (dispatch, getState, sdk) =>
       ? state.ListingPage.inquiryModalOpenForListingId
       : null;
 
-  // Clear old line-items
-  dispatch(setInitialValues({ lineItems: null, inquiryModalOpenForListingId }));
+  // Clear old line-items and related listings
+  dispatch(setInitialValues({ lineItems: null, inquiryModalOpenForListingId, relatedListingRefs: [] }));
 
   const ownListingVariants = [LISTING_PAGE_DRAFT_VARIANT, LISTING_PAGE_PENDING_APPROVAL_VARIANT];
   if (ownListingVariants.includes(params.variant)) {
@@ -726,6 +868,12 @@ export const loadData = (params, search, config) => (dispatch, getState, sdk) =>
       // We are not interested to return them from loadData call.
       fetchMonthlyTimeSlots(dispatch, listing);
     }
+
+    // Fetch related listings (don't wait for this, run in parallel)
+    if (listing && !hasNoViewingRights) {
+      dispatch(fetchRelatedListings(listing, config));
+    }
+
     return response;
   });
 };
