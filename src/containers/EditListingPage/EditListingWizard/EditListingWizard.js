@@ -231,8 +231,13 @@ const tabCompleted = (tab, listing, config) => {
     shippingEnabled,
     pickupEnabled,
     cardStyle,
+    isAuction,
+    auctionEstimateLow,
   } = publicData || {};
   const deliveryOptionPicked = publicData && (shippingEnabled || pickupEnabled);
+
+  // For auction listings, check if auction estimate exists instead of regular price
+  const hasValidPricing = isAuction ? !!auctionEstimateLow : !!price;
 
   switch (tab) {
     case DETAILS:
@@ -245,9 +250,9 @@ const tabCompleted = (tab, listing, config) => {
         hasValidListingFieldsInExtendedData(publicData, privateData, config)
       );
     case PRICING:
-      return !!price;
+      return hasValidPricing;
     case PRICING_AND_STOCK:
-      return !!price;
+      return hasValidPricing;
     case DELIVERY:
       return !!deliveryOptionPicked;
     case LOCATION:
