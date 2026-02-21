@@ -30,8 +30,9 @@ const ListingCard = props => {
     aspectHeight = 1,
     variantPrefix = 'listing-card',
   } = config.layout.listingImage;
+  // Use scaled variants (non-cropped) for object-fit: contain display
   const variants = firstImage
-    ? Object.keys(firstImage?.attributes?.variants).filter(k => k.startsWith(variantPrefix))
+    ? Object.keys(firstImage?.attributes?.variants).filter(k => k.startsWith('scaled-'))
     : [];
 
   const pricePerUnit = intl.formatMessage(

@@ -160,8 +160,9 @@ const ListingCardImage = props => {
 
   const firstImage =
     currentListing.images && currentListing.images.length > 0 ? currentListing.images[0] : null;
+  // Use scaled variants (non-cropped) for object-fit: contain display
   const variants = firstImage
-    ? Object.keys(firstImage?.attributes?.variants).filter(k => k.startsWith(variantPrefix))
+    ? Object.keys(firstImage?.attributes?.variants).filter(k => k.startsWith('scaled-'))
     : [];
 
   // Render the listing image only if listing images are enabled in the listing type

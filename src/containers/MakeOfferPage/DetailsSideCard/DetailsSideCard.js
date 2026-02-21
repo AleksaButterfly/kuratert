@@ -50,8 +50,9 @@ const DetailsSideCard = props => {
 
   const { aspectWidth = 1, aspectHeight = 1, variantPrefix = 'listing-card' } =
     layoutListingImageConfig || {};
+  // Use scaled variants (non-cropped) for object-fit: contain display
   const variants = firstImage
-    ? Object.keys(firstImage?.attributes?.variants).filter(k => k.startsWith(variantPrefix))
+    ? Object.keys(firstImage?.attributes?.variants).filter(k => k.startsWith('scaled-'))
     : [];
 
   return (

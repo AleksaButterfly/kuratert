@@ -478,10 +478,10 @@ export const CartPageComponent = props => {
                                 : null;
 
                               const firstImage = listing?.images?.[0];
-                              const variantPrefix = config.layout?.listingImage?.variantPrefix || 'listing-card';
+                              // Use scaled variants (non-cropped) for object-fit: contain display
                               const variants = firstImage
                                 ? Object.keys(firstImage?.attributes?.variants || {}).filter(k =>
-                                    k.startsWith(variantPrefix)
+                                    k.startsWith('scaled-')
                                   )
                                 : [];
 

@@ -19,8 +19,9 @@ const DetailCardImage = props => {
   } = props;
   const classes = classNames(rootClassName || css.detailCardImageWrapper, className);
   const { aspectWidth = 1, aspectHeight = 1, variantPrefix = 'listing-card' } = listingImageConfig;
+  // Use scaled variants (non-cropped) for object-fit: contain display
   const variants = image
-    ? Object.keys(image?.attributes?.variants).filter(k => k.startsWith(variantPrefix))
+    ? Object.keys(image?.attributes?.variants).filter(k => k.startsWith('scaled-'))
     : [];
 
   return (

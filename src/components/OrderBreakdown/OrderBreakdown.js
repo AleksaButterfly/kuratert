@@ -166,10 +166,10 @@ export const OrderBreakdownComponent = props => {
 
             const imageUrl = cartItem?.imageUrl;
             const firstImage = isMainListing ? listing?.images?.[0] : null;
-            const variantPrefix = config.layout?.listingImage?.variantPrefix || 'listing-card';
+            // Use scaled variants (non-cropped) for object-fit: contain display
             const variants = firstImage
               ? Object.keys(firstImage?.attributes?.variants || {}).filter(k =>
-                  k.startsWith(variantPrefix)
+                  k.startsWith('scaled-')
                 )
               : [];
 
