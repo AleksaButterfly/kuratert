@@ -511,7 +511,8 @@ export const ListingPageComponent = props => {
   const images = currentListing.images || [];
   const variantPrefix = config.layout.listingImage.variantPrefix;
   const imageVariants = ['scaled-small', 'scaled-medium', 'scaled-large', 'scaled-xlarge'];
-  const thumbnailVariants = [variantPrefix, `${variantPrefix}-2x`, `${variantPrefix}-4x`];
+  // Use scaled variants for thumbnails too (non-cropped)
+  const thumbnailVariants = ['scaled-small', 'scaled-medium'];
 
   // Share functionality
   const getShareUrl = () => {
