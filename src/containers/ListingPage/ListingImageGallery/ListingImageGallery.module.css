@@ -101,7 +101,7 @@
 }
 
 :global(.image-gallery-slide-wrapper) {
-  background-color: var(--colorGrey50);
+  background-color: var(--colorWhite);
   border: none;
   aspect-ratio: 1;
   overflow: hidden;
@@ -185,7 +185,7 @@
 .item {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 /* View in Your Space button */
