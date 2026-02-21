@@ -536,6 +536,7 @@ const fetchRelatedListingsPayloadCreator = (
       include: ['author', 'images'],
       'fields.listing': [
         'title',
+        'description',
         'price',
         'publicData.kategori',
         'publicData.tema',
@@ -546,6 +547,12 @@ const fetchRelatedListingsPayloadCreator = (
         'publicData.transactionProcessAlias',
         'publicData.unitType',
         'publicData.cardStyle',
+        'publicData.isAuction',
+        'publicData.auctionEstimateLow',
+        'publicData.auctionEstimateHigh',
+        'publicData.auctionLink',
+        'publicData.isReserved',
+        'publicData.acceptingOffers',
       ],
       'fields.user': ['profile.displayName', 'profile.abbreviatedName'],
       'fields.image': [
