@@ -293,7 +293,11 @@ const EditListingPricingAndStockPanel = props => {
               : { frameOptions: { enabled: false, variants: [] } };
 
             // For auction listings, we still need a price for the API, use low estimate as placeholder
-            const listingPrice = isAuctionListing ? auctionEstimateLow : price;
+            // Fallback to a minimum price if auction estimate is not set yet
+            const fallbackPrice = new Money(100, marketplaceCurrency); // Minimum 1.00 in currency
+            const listingPrice = isAuctionListing
+              ? (auctionEstimateLow || fallbackPrice)
+              : price;
 
             // New values for listing attributes
             const updateValues = {
