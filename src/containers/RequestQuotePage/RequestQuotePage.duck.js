@@ -41,8 +41,14 @@ const showListingPayloadCreator = (
     include: ['author', 'author.profileImage', 'images'],
     'fields.image': [
       // Cropped variants for listing thumbnail images
+      'variants.scaled-small',
+      'variants.scaled-medium',
+      'variants.scaled-large',
+      'variants.scaled-xlarge',
       `variants.${variantPrefix}`,
       `variants.${variantPrefix}-2x`,
+      `variants.${variantPrefix}-4x`,
+      `variants.${variantPrefix}-6x`,
 
       // Avatars
       'variants.square-small',
@@ -50,6 +56,8 @@ const showListingPayloadCreator = (
     ],
     ...createImageVariantConfig(`${variantPrefix}`, 400, aspectRatio),
     ...createImageVariantConfig(`${variantPrefix}-2x`, 800, aspectRatio),
+    ...createImageVariantConfig(`${variantPrefix}-4x`, 1600, aspectRatio),
+    ...createImageVariantConfig(`${variantPrefix}-6x`, 2400, aspectRatio),
   };
 
   return sdk.listings
