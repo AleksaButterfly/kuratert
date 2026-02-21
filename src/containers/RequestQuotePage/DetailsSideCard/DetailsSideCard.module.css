@@ -23,7 +23,7 @@
 
 .detailsAspectWrapper {
   position: relative;
-  background-color: var(--colorGrey100); /* Loading BG color */
+  background-color: var(--colorWhite); /* Loading BG color */
 }
 
 .rootForImage {
@@ -34,7 +34,7 @@
   left: 0;
   right: 0;
   width: 100%;
-  object-fit: cover;
+  object-fit: contain;
 
   @media (--viewportLarge) {
     border-radius: 2px 2px 0 0;

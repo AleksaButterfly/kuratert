@@ -63,7 +63,7 @@
 }
 
 .aspectratioWrapper {
-  background: var(--colorGrey100); /* Loading BG color */
+  background: var(--colorWhite); /* Loading BG color */
 }
 
 .rootForImage {
@@ -74,7 +74,7 @@
   left: 0;
   right: 0;
   width: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .info {

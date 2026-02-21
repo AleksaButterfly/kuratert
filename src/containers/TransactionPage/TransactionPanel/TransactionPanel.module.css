@@ -52,7 +52,7 @@
   display: none;
   width: 100%;
   position: relative;
-  background-color: var(--colorGrey100); /* Loading BG color */
+  background-color: var(--colorWhite); /* Loading BG color */
 
   @media (--viewportLarge) {
     display: block;
@@ -67,7 +67,7 @@
   left: 0;
   right: 0;
   width: 100%;
-  object-fit: cover;
+  object-fit: contain;
 
   @media (--viewportLarge) {
     border-radius: 2px 2px 0 0;
@@ -107,7 +107,7 @@
 /* Passed-in props for DetailCardImage subcomponent */
 .imageWrapperMobile {
   position: relative;
-  background-color: var(--colorGrey100); /* Loading BG color */
+  background-color: var(--colorWhite); /* Loading BG color */
 
   @media (--viewportLarge) {
     display: none;
