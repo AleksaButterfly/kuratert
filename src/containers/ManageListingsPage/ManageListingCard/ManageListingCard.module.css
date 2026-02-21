@@ -60,6 +60,7 @@
   width: 100%;
   border: solid 1px var(--colorGrey100);
   border-radius: var(--borderRadiusMedium);
+  object-fit: cover;
 }
 
 .menubarWrapper {
