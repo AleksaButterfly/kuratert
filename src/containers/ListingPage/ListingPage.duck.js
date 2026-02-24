@@ -533,7 +533,7 @@ const fetchRelatedListingsPayloadCreator = (
     .query({
       perPage: 100,
       minStock: 1,
-      include: ['author', 'images'],
+      include: ['author', 'author.profileImage', 'images'],
       'fields.listing': [
         'title',
         'description',
@@ -554,7 +554,7 @@ const fetchRelatedListingsPayloadCreator = (
         'publicData.isReserved',
         'publicData.acceptingOffers',
       ],
-      'fields.user': ['profile.displayName', 'profile.abbreviatedName'],
+      'fields.user': ['profile.displayName', 'profile.abbreviatedName', 'profile.bio'],
       'fields.image': [
         // Same variants as showListing to avoid overwriting with less data
         'variants.scaled-small',
