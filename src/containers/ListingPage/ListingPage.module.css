@@ -1037,7 +1037,8 @@
   font-size: 16px;
   line-height: 25.6px;
   color: var(--colorGrey700);
-  margin: 0;
+  margin-top: 16px;
+  margin-bottom: 0;
   white-space: pre-line;
 }
 
@@ -1374,15 +1375,14 @@
 
 /* Author card section */
 .authorCardSection {
-  padding: 24px;
-  background-color: var(--colorGrey50);
 }
 
 .authorCardHeader {
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-bottom: 16px;
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .authorAvatar {
