@@ -570,7 +570,6 @@ const fetchRelatedListingsPayloadCreator = (
       ...createImageVariantConfig(`${variantPrefix}-2x`, 800, aspectRatio),
       ...createImageVariantConfig(`${variantPrefix}-4x`, 1600, aspectRatio),
       ...createImageVariantConfig(`${variantPrefix}-6x`, 2400, aspectRatio),
-      'limit.images': 1,
     })
     .then(response => {
       const listingFields = config?.listing?.listingFields;
