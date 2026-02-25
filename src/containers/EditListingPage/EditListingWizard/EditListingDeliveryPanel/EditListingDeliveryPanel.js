@@ -41,7 +41,6 @@ const getInitialValues = props => {
     shippingEnabled,
     pickupEnabled,
     quoteEnabled,
-    notApplicableEnabled,
     shippingPriceInSubunitsOneItem,
     shippingPriceInSubunitsAdditionalItems,
   } = publicData;
@@ -55,9 +54,6 @@ const getInitialValues = props => {
   }
   if (quoteEnabled) {
     deliveryOptions.push('quote');
-  }
-  if (notApplicableEnabled) {
-    deliveryOptions.push('notApplicable');
   }
 
   const currency = price?.currency || marketplaceCurrency;
@@ -174,7 +170,6 @@ const EditListingDeliveryPanel = props => {
             const shippingEnabled = deliveryOptions.includes('shipping');
             const pickupEnabled = deliveryOptions.includes('pickup');
             const quoteEnabled = deliveryOptions.includes('quote');
-            const notApplicableEnabled = deliveryOptions.includes('notApplicable');
             const address = location?.selectedPlace?.address || null;
             const origin = location?.selectedPlace?.origin || null;
 
@@ -201,7 +196,6 @@ const EditListingDeliveryPanel = props => {
                 shippingEnabled,
                 ...shippingDataMaybe,
                 quoteEnabled,
-                notApplicableEnabled,
               },
             };
 

@@ -97,7 +97,6 @@ export const EditListingDeliveryForm = props => (
       const shippingEnabled = displayShipping && values.deliveryOptions?.includes('shipping');
       const pickupEnabled = displayPickup && values.deliveryOptions?.includes('pickup');
       const quoteEnabled = displayQuote && values.deliveryOptions?.includes('quote');
-      const notApplicableEnabled = values.deliveryOptions?.includes('notApplicable');
 
       const addressRequiredMessage = intl.formatMessage({
         id: 'EditListingDeliveryForm.addressRequired',
@@ -116,12 +115,11 @@ export const EditListingDeliveryForm = props => (
       const submitReady = (updated && pristine) || ready;
       const submitInProgress = updateInProgress;
       const submitDisabled =
-        invalid || disabled || submitInProgress || (!shippingEnabled && !pickupEnabled && !quoteEnabled && !notApplicableEnabled);
+        invalid || disabled || submitInProgress || (!shippingEnabled && !pickupEnabled && !quoteEnabled);
 
       const shippingLabel = intl.formatMessage({ id: 'EditListingDeliveryForm.shippingLabel' });
       const pickupLabel = intl.formatMessage({ id: 'EditListingDeliveryForm.pickupLabel' });
       const quoteLabel = intl.formatMessage({ id: 'EditListingDeliveryForm.quoteLabel' });
-      const notApplicableLabel = intl.formatMessage({ id: 'EditListingDeliveryForm.notApplicableLabel' });
 
       const pickupClasses = classNames({
         [css.deliveryOption]: displayMultipleDelivery,
@@ -300,19 +298,6 @@ export const EditListingDeliveryForm = props => (
           {quoteEnabled && (
             <p className={css.quoteInfoText}>
               <FormattedMessage id="EditListingDeliveryForm.quoteInfoText" />
-            </p>
-          )}
-
-          <FieldCheckbox
-            id={formId ? `${formId}.notApplicable` : 'notApplicable'}
-            className={css.deliveryCheckbox}
-            name="deliveryOptions"
-            label={notApplicableLabel}
-            value="notApplicable"
-          />
-          {notApplicableEnabled && (
-            <p className={css.notApplicableInfoText}>
-              <FormattedMessage id="EditListingDeliveryForm.notApplicableInfoText" />
             </p>
           )}
 

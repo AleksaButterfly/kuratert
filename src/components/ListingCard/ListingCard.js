@@ -63,11 +63,11 @@ const PriceMaybe = props => {
   const auctionEstimateLow = publicData?.auctionEstimateLow;
   const auctionEstimateHigh = publicData?.auctionEstimateHigh;
 
-  // Check if this is a contact for quote listing
-  const isContactForQuote = publicData?.isContactForQuote === true;
+  // Check if this is a service category listing (no fixed price)
+  const isServiceCategory = publicData?.kategori === 'relatertetjenester';
 
-  // For contact for quote listings, show contact message
-  if (isContactForQuote) {
+  // For service category listings, show contact message
+  if (isServiceCategory) {
     return (
       <div className={css.price}>
         <span className={css.contactForQuote}>

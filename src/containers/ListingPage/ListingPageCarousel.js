@@ -441,7 +441,8 @@ export const ListingPageComponent = props => {
   const isOwnListing =
     userAndListingAuthorAvailable && currentListing.author.id.uuid === currentUser.id.uuid;
 
-  const { listingType, transactionProcessAlias, unitType, frameOptions, shippingEnabled, pickupEnabled, quoteEnabled, shippingPriceInSubunitsOneItem, acceptingOffers, isAuction, auctionEstimateLow, auctionEstimateHigh, auctionLink, isReserved, isContactForQuote } = publicData;
+  const { listingType, transactionProcessAlias, unitType, frameOptions, shippingEnabled, pickupEnabled, quoteEnabled, shippingPriceInSubunitsOneItem, acceptingOffers, isAuction, auctionEstimateLow, auctionEstimateHigh, auctionLink, isReserved, kategori } = publicData;
+  const isServiceCategory = kategori === 'relatertetjenester';
   if (!(listingType && transactionProcessAlias && unitType)) {
     return (
       <ErrorPage topbar={topbar} scrollingDisabled={scrollingDisabled} intl={intl} invalidListing />
@@ -795,7 +796,7 @@ export const ListingPageComponent = props => {
                     <FormattedMessage id="ListingPage.reservedMessage" />
                   </p>
                 </>
-              ) : isContactForQuote ? (
+              ) : isServiceCategory ? (
                 <p className={css.contactForQuoteMessage}>
                   <FormattedMessage id="ListingPage.contactForQuoteMessage" />
                 </p>
@@ -968,7 +969,7 @@ export const ListingPageComponent = props => {
               ) : isReserved ? (
                 /* Reserved listing - only show contact seller */
                 null
-              ) : isContactForQuote ? (
+              ) : isServiceCategory ? (
                 /* Contact for quote listing - show contact for quote button */
                 <button
                   className={css.contactForQuoteButton}

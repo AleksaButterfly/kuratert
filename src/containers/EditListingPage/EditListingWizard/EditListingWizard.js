@@ -233,14 +233,14 @@ const tabCompleted = (tab, listing, config) => {
     cardStyle,
     isAuction,
     auctionEstimateLow,
-    isContactForQuote,
-    notApplicableEnabled,
+    kategori,
   } = publicData || {};
-  const deliveryOptionPicked = publicData && (shippingEnabled || pickupEnabled || notApplicableEnabled);
+  const deliveryOptionPicked = publicData && (shippingEnabled || pickupEnabled);
 
-  // For contact for quote listings, no price is required
+  // For service category (relatertetjenester), no price or delivery is required
+  const isServiceCategory = kategori === 'relatertetjenester';
   // For auction listings, check if auction estimate exists instead of regular price
-  const hasValidPricing = isContactForQuote ? true : (isAuction ? !!auctionEstimateLow : !!price);
+  const hasValidPricing = isServiceCategory ? true : (isAuction ? !!auctionEstimateLow : !!price);
 
   switch (tab) {
     case DETAILS:
@@ -257,7 +257,8 @@ const tabCompleted = (tab, listing, config) => {
     case PRICING_AND_STOCK:
       return hasValidPricing;
     case DELIVERY:
-      return !!deliveryOptionPicked;
+      // For service category, delivery is not required
+      return isServiceCategory ? true : !!deliveryOptionPicked;
     case LOCATION:
       return !!(geolocation && publicData?.location?.address);
     case AVAILABILITY:
@@ -539,11 +540,20 @@ class EditListingWizard extends Component {
     const hasListingTypeSelected =
       existingListingType || this.state.selectedListingType || validListingTypes.length === 1;
 
+    // Check if this is a service category (relatertetjenester) - hide pricing and delivery tabs
+    const currentCategory = currentListing?.attributes?.publicData?.kategori;
+    const isServiceCategory = currentCategory === 'relatertetjenester';
+
     // For oudated draft listing, we don't show other tabs but the "details"
-    const tabs =
+    const allTabs =
       isNewListingFlow && (invalidExistingListingType || !hasListingTypeSelected)
         ? TABS_DETAILS_ONLY
         : tabsForListingType(processName, listingTypeConfig);
+
+    // Filter out pricing and delivery tabs for service category
+    const tabs = isServiceCategory
+      ? allTabs.filter(tab => tab !== PRICING_AND_STOCK && tab !== DELIVERY)
+      : allTabs;
 
     // Check if wizard tab is active / linkable.
     // When creating a new listing, we don't allow users to access next tab until the current one is completed.
