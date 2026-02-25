@@ -998,6 +998,8 @@
   "OrderBreakdown.frame": "Frame",
   "OrderBreakdown.frameOption": "Frame ({frameLabel})",
   "OrderBreakdown.kunstavgift": "Art tax (5%)",
+  "OrderBreakdown.tax": "VAT",
+  "OrderBreakdown.taxWithRate": "VAT ({rate}%)",
   "OrderBreakdown.pickupFee": "Pickup",
   "OrderBreakdown.providerTotalDefault": "You'll earn",
   "OrderBreakdown.providerTotalReceived": "You earned",

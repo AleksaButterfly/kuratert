@@ -5,6 +5,7 @@ const {
   getProviderCommissionMaybe,
   getCustomerCommissionMaybe,
 } = require('./lineItemHelpers');
+const { calculateOrderTax, calculateManualTax, isTaxEnabled } = require('./stripeTax');
 const { types } = require('sharetribe-flex-sdk');
 const { Money } = types;
 
@@ -245,6 +246,9 @@ const getDateRangeQuantityAndLineItems = (orderData, code) => {
  * @param {Object} providerCommission
  * @param {Object} customerCommission
  * @param {Array} cartListings - Array of cart item listings for cart checkout
+ * @param {Object} taxInfo - Tax calculation result (optional)
+ * @param {number} taxInfo.taxAmount - Tax amount in subunits
+ * @param {number} taxInfo.taxRate - Tax rate percentage
  * @returns {Array} lineItems
  */
 exports.transactionLineItems = (
@@ -252,7 +256,8 @@ exports.transactionLineItems = (
   orderData,
   providerCommission,
   customerCommission,
-  cartListings = []
+  cartListings = [],
+  taxInfo = null
 ) => {
   const publicData = listing.attributes.publicData;
   // Note: the unitType needs to be one of the following:
@@ -427,6 +432,21 @@ exports.transactionLineItems = (
         ]
       : [];
 
+  // Tax line item (VAT) - applies to full order (items + shipping + frame)
+  // Tax is collected from buyer and flows to seller for remittance
+  const taxAmount = taxInfo?.taxAmount || 0;
+  const taxLineItem =
+    taxAmount > 0
+      ? [
+          {
+            code: 'line-item/tax',
+            unitPrice: new Money(taxAmount, currency),
+            quantity: 1,
+            includeFor: ['customer', 'provider'],
+          },
+        ]
+      : [];
+
   const orderForCommission = {
     ...mainListingLineItem,
     unitPrice: new Money(totalOrderAmount, currency),
@@ -435,13 +455,71 @@ exports.transactionLineItems = (
 
   // Let's keep the base price (order) as first line item and provider and customer commissions as last.
   // Note: the order matters only if OrderBreakdown component doesn't recognize line-item.
+  // Order: items -> shipping/frame -> kunstavgift -> tax -> commissions
   const lineItems = [
     ...orderLineItems,
     ...extraLineItems,
     ...kunstavgiftLineItem,
+    ...taxLineItem,
     ...getProviderCommissionMaybe(providerCommission, orderForCommission, currency),
     ...getCustomerCommissionMaybe(customerCommission, orderForCommission, currency),
   ];
 
   return lineItems;
+};
+
+/**
+ * Calculate the taxable base for an order.
+ * Taxable base includes: items + shipping + frame (per EU VAT rules).
+ *
+ * @param {Array} lineItems - Array of line items
+ * @returns {number} Total taxable amount in subunits
+ */
+exports.calculateTaxableBase = lineItems => {
+  return lineItems.reduce((sum, item) => {
+    // Include order items, shipping, and frame in taxable base
+    const isOrderItem = !item.code.includes('commission') && !item.code.includes('kunstavgift');
+    if (isOrderItem) {
+      const itemAmount = item.unitPrice?.amount || 0;
+      const quantity = item.quantity || 1;
+      return sum + (itemAmount * quantity);
+    }
+    return sum;
+  }, 0);
+};
+
+/**
+ * Calculate tax for an order given order data and shipping address.
+ * This is an async helper that wraps the Stripe Tax API.
+ *
+ * @param {Object} params - Parameters for tax calculation
+ * @param {number} params.orderTotal - Order items total in subunits
+ * @param {number} params.shippingTotal - Shipping total in subunits
+ * @param {number} params.frameTotal - Frame total in subunits
+ * @param {Object} params.shippingAddress - Shipping address
+ * @param {string} params.currency - Currency code
+ * @returns {Promise<Object>} Tax info with taxAmount and taxRate
+ */
+exports.calculateTaxInfo = async ({ orderTotal, shippingTotal, frameTotal, shippingAddress, currency }) => {
+  if (!isTaxEnabled()) {
+    return { taxAmount: 0, taxRate: 0 };
+  }
+
+  try {
+    const result = await calculateOrderTax(orderTotal, shippingTotal, frameTotal, shippingAddress, currency);
+    return {
+      taxAmount: result.taxAmount || 0,
+      taxRate: result.taxRate || 0,
+    };
+  } catch (error) {
+    console.error('Tax calculation error:', error);
+    // Fall back to manual calculation if Stripe Tax fails
+    const totalAmount = orderTotal + shippingTotal + frameTotal;
+    const manualResult = calculateManualTax(totalAmount, shippingAddress?.country);
+    return {
+      taxAmount: manualResult.taxAmount || 0,
+      taxRate: manualResult.taxRate || 0,
+      isManualCalculation: true,
+    };
+  }
 };

@@ -984,6 +984,8 @@
   "OrderBreakdown.frame": "Ramme",
   "OrderBreakdown.frameOption": "Ramme ({frameLabel})",
   "OrderBreakdown.kunstavgift": "Kunstavgift (5%)",
+  "OrderBreakdown.tax": "MVA",
+  "OrderBreakdown.taxWithRate": "MVA ({rate}%)",
   "OrderBreakdown.pickupFee": "Henting",
   "OrderBreakdown.providerTotalDefault": "Du vil tjene",
   "OrderBreakdown.providerTotalReceived": "Du tjente",

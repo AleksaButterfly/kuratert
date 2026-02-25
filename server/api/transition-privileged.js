@@ -1,5 +1,6 @@
 const sharetribeSdk = require('sharetribe-flex-sdk');
-const { transactionLineItems } = require('../api-util/lineItems');
+const { transactionLineItems, calculateTaxInfo } = require('../api-util/lineItems');
+const { calculateShippingFee } = require('../api-util/lineItemHelpers');
 const {
   addOfferToMetadata,
   getAmountFromPreviousOffer,
@@ -8,6 +9,7 @@ const {
   isIntentionToRevokeCounterOffer,
   throwErrorIfNegotiationOfferHasInvalidHistory,
 } = require('../api-util/negotiation');
+const { isTaxEnabled } = require('../api-util/stripeTax');
 const {
   getSdk,
   getTrustedSdk,
@@ -149,7 +151,7 @@ module.exports = (req, res) => {
   let metadataMaybe = {};
 
   Promise.all([transactionPromise(sdk, bodyParams?.id), fetchCommission(sdk)])
-    .then(responses => {
+    .then(async responses => {
       const [showTransactionResponse, fetchAssetsResponse] = responses;
       const transaction = showTransactionResponse.data.data;
       const listing = getListingRelationShip(showTransactionResponse.data);
@@ -166,14 +168,63 @@ module.exports = (req, res) => {
         transaction.attributes.payinTotal?.currency ||
         listing.attributes.price?.currency ||
         orderData.currency;
+      const publicData = listing.attributes?.publicData || {};
       const { providerCommission, customerCommission } =
         commissionAsset?.type === 'jsonAsset' ? commissionAsset.attributes.data : {};
+
+      // Calculate tax if enabled and shipping details are provided
+      let taxInfo = null;
+      const shippingDetails = bodyParams?.params?.protectedData?.shippingDetails ||
+        transaction?.attributes?.protectedData?.shippingDetails;
+      if (isTaxEnabled() && shippingDetails) {
+        const shippingAddress = {
+          country: shippingDetails.country,
+          postalCode: shippingDetails.postalCode,
+          city: shippingDetails.city,
+          line1: shippingDetails.streetAddress,
+        };
+
+        // Calculate order total from existing line items or listing price
+        const quantity = orderData?.quantity || 1;
+        const itemPrice = listing.attributes?.price?.amount || 0;
+        let orderTotal = itemPrice * quantity;
+
+        // Calculate shipping total
+        const deliveryMethod = orderData?.deliveryMethod ||
+          transaction?.attributes?.protectedData?.deliveryMethod;
+        let shippingTotal = 0;
+        if (deliveryMethod === 'shipping') {
+          const shippingFee = calculateShippingFee(
+            publicData.shippingPriceInSubunitsOneItem,
+            publicData.shippingPriceInSubunitsAdditionalItems,
+            currency,
+            quantity
+          );
+          shippingTotal = shippingFee?.amount || 0;
+        }
+
+        // Calculate frame total
+        const frameInfo = orderData?.frameInfo ||
+          transaction?.attributes?.protectedData?.mainListingFrameInfo;
+        const frameTotal = parseInt(frameInfo?.framePriceInSubunits, 10) || 0;
+
+        // Calculate tax
+        taxInfo = await calculateTaxInfo({
+          orderTotal,
+          shippingTotal,
+          frameTotal,
+          shippingAddress,
+          currency,
+        });
+      }
 
       lineItems = transactionLineItems(
         listing,
         getFullOrderData(orderData, bodyParams, currency, existingOffers, transaction),
         providerCommission,
-        customerCommission
+        customerCommission,
+        [], // cart listings (not needed for transitions)
+        taxInfo // Pass tax info for tax line item
       );
 
       metadataMaybe = getUpdatedMetadata(orderData, transitionName, existingMetadata);

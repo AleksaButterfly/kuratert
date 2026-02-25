@@ -1,6 +1,8 @@
 const sharetribeSdk = require('sharetribe-flex-sdk');
-const { transactionLineItems } = require('../api-util/lineItems');
+const { transactionLineItems, calculateTaxInfo } = require('../api-util/lineItems');
+const { calculateShippingFee } = require('../api-util/lineItemHelpers');
 const { isIntentionToMakeOffer } = require('../api-util/negotiation');
+const { isTaxEnabled } = require('../api-util/stripeTax');
 const {
   getSdk,
   getTrustedSdk,
@@ -48,7 +50,7 @@ const getMetadata = (orderData, transition) => {
     : {};
 };
 
-module.exports = (req, res) => {
+module.exports = async (req, res) => {
   const { isSpeculative, orderData, bodyParams, queryParams } = req.body;
   const transitionName = bodyParams.transition;
   const sdk = getSdk(req, res);
@@ -69,7 +71,7 @@ module.exports = (req, res) => {
     fetchCommission(sdk),
     cartListingsPromise
   ])
-    .then(results => {
+    .then(async results => {
       const showListingResponse = results[0];
       const fetchAssetsResponse = results[1];
       const cartListingsResponse = results[2];
@@ -79,8 +81,78 @@ module.exports = (req, res) => {
       const commissionAsset = fetchAssetsResponse.data.data[0];
 
       const currency = listing.attributes.price?.currency || orderData.currency;
+      const publicData = listing.attributes?.publicData || {};
       const { providerCommission, customerCommission } =
         commissionAsset?.type === 'jsonAsset' ? commissionAsset.attributes.data : {};
+
+      // Calculate tax if enabled and shipping details are provided
+      let taxInfo = null;
+      const shippingDetails = bodyParams?.params?.protectedData?.shippingDetails;
+      if (isTaxEnabled() && shippingDetails) {
+        const shippingAddress = {
+          country: shippingDetails.country,
+          postalCode: shippingDetails.postalCode,
+          city: shippingDetails.city,
+          line1: shippingDetails.streetAddress,
+        };
+
+        // Calculate order total
+        const quantity = orderData?.quantity || 1;
+        const itemPrice = listing.attributes?.price?.amount || 0;
+        let orderTotal = itemPrice * quantity;
+
+        // Add cart items to order total
+        if (cartItems.length > 0) {
+          cartItems.forEach(item => {
+            const cartItemPrice = item.price?.amount || 0;
+            const cartItemQty = item.quantity || 1;
+            orderTotal += cartItemPrice * cartItemQty;
+          });
+        }
+
+        // Calculate shipping total
+        const deliveryMethod = orderData?.deliveryMethod;
+        let shippingTotal = 0;
+        if (deliveryMethod === 'shipping') {
+          const shippingFee = calculateShippingFee(
+            publicData.shippingPriceInSubunitsOneItem,
+            publicData.shippingPriceInSubunitsAdditionalItems,
+            currency,
+            quantity
+          );
+          shippingTotal = shippingFee?.amount || 0;
+
+          // Add cart items shipping
+          if (cartListings.length > 0) {
+            cartItems.forEach(item => {
+              const cartListing = cartListings.find(l => l.id.uuid === item.id);
+              if (cartListing) {
+                const cartPubData = cartListing.attributes?.publicData || {};
+                const cartShipping = calculateShippingFee(
+                  cartPubData.shippingPriceInSubunitsOneItem,
+                  cartPubData.shippingPriceInSubunitsAdditionalItems,
+                  currency,
+                  item.quantity || 1
+                );
+                shippingTotal += cartShipping?.amount || 0;
+              }
+            });
+          }
+        }
+
+        // Calculate frame total
+        const frameInfo = orderData?.frameInfo;
+        const frameTotal = parseInt(frameInfo?.framePriceInSubunits, 10) || 0;
+
+        // Calculate tax
+        taxInfo = await calculateTaxInfo({
+          orderTotal,
+          shippingTotal,
+          frameTotal,
+          shippingAddress,
+          currency,
+        });
+      }
 
       // cartItems are already transformed on client-side with only essential data (id, title, price, imageUrl)
       lineItems = transactionLineItems(
@@ -88,7 +160,8 @@ module.exports = (req, res) => {
         getFullOrderData(orderData, bodyParams, currency),
         providerCommission,
         customerCommission,
-        cartListings // Pass cart listings for shipping calculation
+        cartListings, // Pass cart listings for shipping calculation
+        taxInfo // Pass tax info for tax line item
       );
       metadataMaybe = getMetadata(orderData, transitionName);
 
