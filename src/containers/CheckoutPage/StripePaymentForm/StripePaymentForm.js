@@ -217,6 +217,7 @@ const LocationOrShippingDetails = props => {
     locale,
     isFuzzyLocation,
     intl,
+    onShippingCountryChange,
   } = props;
 
   const locationDetails = listingLocation?.building
@@ -226,7 +227,7 @@ const LocationOrShippingDetails = props => {
     : intl.formatMessage({ id: 'StripePaymentForm.locationUnknown' });
 
   return askShippingDetails ? (
-    <ShippingDetails intl={intl} formApi={formApi} locale={locale} />
+    <ShippingDetails intl={intl} formApi={formApi} locale={locale} onShippingCountryChange={onShippingCountryChange} />
   ) : showPickUpLocation ? (
     <div className={css.locationWrapper}>
       <Heading as="h3" rootClassName={css.heading}>
@@ -443,6 +444,7 @@ const ExpressCheckout = props => {
  * @param {boolean} props.hasHandledCardPayment - Whether the card payment has been handled
  * @param {Object} props.defaultPaymentMethod - The default payment method
  * @param {boolean} props.askShippingDetails - Whether to ask for shipping details
+ * @param {Function} props.onShippingCountryChange - Callback when shipping country changes for tax recalculation
  * @param {boolean} props.showPickUpLocation - Whether to show the pickup location
  * @param {boolean} props.showLocation - Whether to show the location address
  * @param {string} props.totalPrice - The total price
@@ -757,6 +759,7 @@ class StripePaymentForm extends Component {
       defaultPaymentMethod,
       listingLocation,
       askShippingDetails,
+      onShippingCountryChange,
       showLocation,
       showPickUpLocation,
       totalPrice,
@@ -895,6 +898,7 @@ class StripePaymentForm extends Component {
             formApi={formApi}
             locale={locale}
             intl={intl}
+            onShippingCountryChange={onShippingCountryChange}
           />
         ) : null}
 

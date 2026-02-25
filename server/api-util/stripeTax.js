@@ -16,7 +16,9 @@ const ART_TAX_CODE = 'txcd_99999999';
  * @returns {boolean}
  */
 const isTaxEnabled = () => {
-  return process.env.REACT_APP_ENABLE_TAX === 'true';
+  const enabled = process.env.REACT_APP_ENABLE_TAX === 'true';
+  console.log('[Tax] isTaxEnabled:', enabled, '| REACT_APP_ENABLE_TAX:', process.env.REACT_APP_ENABLE_TAX);
+  return enabled;
 };
 
 /**

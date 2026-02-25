@@ -576,6 +576,7 @@ export const CheckoutPageWithPayment = props => {
     onSubmitCallback,
     onRetrievePaymentIntent,
     sessionStorageKey,
+    fetchSpeculatedTransaction,
   } = props;
 
   // Handle Klarna return from redirect
@@ -707,6 +708,92 @@ export const CheckoutPageWithPayment = props => {
       console.error('Failed to cancel Klarna payment:', err);
       setCancelKlarnaInProgress(false);
     }
+  };
+
+  // Handler for when shipping country changes - recalculate line items with tax
+  const handleShippingCountryChange = shippingAddress => {
+    if (!shippingAddress?.country || !pageData?.listing?.id) {
+      return;
+    }
+
+    const { listing, orderData: existingOrderData } = pageData;
+    const tx = pageData?.transaction || null;
+    const processAlias = listing.attributes.publicData?.transactionProcessAlias;
+    const process = processName ? getProcess(processName) : null;
+
+    if (!process) {
+      return;
+    }
+
+    // Build shipping details in the format expected by the server
+    const shippingDetails = {
+      shippingDetails: {
+        country: shippingAddress.country,
+        postalCode: shippingAddress.postalCode || '',
+        city: shippingAddress.city || '',
+        streetAddress: shippingAddress.line1 || '',
+      },
+    };
+
+    // Rebuild orderParams with shipping address for tax calculation
+    const quantity = existingOrderData?.quantity;
+    const quantityMaybe = quantity ? { quantity } : {};
+    const deliveryMethod = existingOrderData?.deliveryMethod;
+    const deliveryMethodMaybe = deliveryMethod ? { deliveryMethod } : {};
+    const frameInfo = existingOrderData?.frameInfo;
+    const frameInfoMaybe = frameInfo ? { frameInfo } : {};
+    const cartItemsMaybe = pageData.cartItems ? { cartItems: pageData.cartItems } : {};
+
+    const { listingType, unitType } = listing?.attributes?.publicData || {};
+
+    const protectedDataMaybe = {
+      protectedData: {
+        ...getTransactionTypeData(listingType, unitType, config),
+        ...deliveryMethodMaybe,
+        ...shippingDetails,
+        ...(frameInfo ? {
+          mainListingFrameInfo: {
+            selectedFrameId: frameInfo.selectedFrameId,
+            selectedFrameColor: frameInfo.selectedFrameColor,
+            selectedFrameLabel: frameInfo.selectedFrameLabel,
+            framePriceInSubunits: frameInfo.framePriceInSubunits,
+          },
+        } : {}),
+      },
+    };
+
+    const orderParams = {
+      listingId: listing?.id,
+      ...deliveryMethodMaybe,
+      ...quantityMaybe,
+      ...bookingDatesMaybe(existingOrderData?.bookingDates),
+      ...cartItemsMaybe,
+      ...frameInfoMaybe,
+      ...protectedDataMaybe,
+    };
+
+    const transactionId = tx ? tx.id : null;
+    const isInquiryInPaymentProcess = tx?.attributes?.lastTransition === process.transitions.INQUIRE;
+    const resolvedProcessName = resolveLatestProcessName(processName);
+    const isOfferPendingInNegotiationProcess =
+      resolvedProcessName === NEGOTIATION_PROCESS_NAME &&
+      tx?.attributes?.state === `state/${process.states.OFFER_PENDING}`;
+
+    const requestTransition = isInquiryInPaymentProcess
+      ? process.transitions.REQUEST_PAYMENT_AFTER_INQUIRY
+      : isOfferPendingInNegotiationProcess
+      ? process.transitions.REQUEST_PAYMENT_TO_ACCEPT_OFFER
+      : process.transitions.REQUEST_PAYMENT;
+    const isPrivileged = process.isPrivileged(requestTransition);
+
+    // Fetch speculated transaction with shipping address for tax calculation
+    fetchSpeculatedTransaction(
+      orderParams,
+      processAlias,
+      transactionId,
+      requestTransition,
+      isPrivileged
+    );
   };
 
   // Since the listing data is already given from the ListingPage
@@ -945,6 +1032,7 @@ export const CheckoutPageWithPayment = props => {
                   return onStripeInitialized(stripe, process, props);
                 }}
                 askShippingDetails={askShippingDetails}
+                onShippingCountryChange={handleShippingCountryChange}
                 showPickUpLocation={showPickUpLocation}
                 showLocation={showLocation}
                 listingLocation={listingLocation}

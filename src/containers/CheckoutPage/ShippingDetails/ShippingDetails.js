@@ -21,9 +21,10 @@ import css from './ShippingDetails.module.css';
  * @param {boolean} props.disabled - Whether the form is disabled
  * @param {Object} props.formApi - The form API from React Final Form
  * @param {string} props.fieldId - The field ID
+ * @param {Function} props.onShippingCountryChange - Callback when shipping country changes
  */
 const ShippingDetails = props => {
-  const { rootClassName, className, locale, intl, disabled, formApi, fieldId } = props;
+  const { rootClassName, className, locale, intl, disabled, formApi, fieldId, onShippingCountryChange } = props;
   const classes = classNames(rootClassName || css.root, className);
 
   const optionalText = intl.formatMessage({
@@ -126,6 +127,19 @@ const ShippingDetails = props => {
         validate={validators.required(
           intl.formatMessage({ id: 'ShippingDetails.countryRequired' })
         )}
+        onChange={e => {
+          const country = e.target.value;
+          if (country && onShippingCountryChange) {
+            // Get current form values and pass to callback
+            const values = formApi.getState().values;
+            onShippingCountryChange({
+              country,
+              postalCode: values.recipientPostal,
+              city: values.recipientCity,
+              line1: values.recipientAddressLine1,
+            });
+          }
+        }}
       >
         <option disabled value="">
           {intl.formatMessage({ id: 'ShippingDetails.countryPlaceholder' })}
