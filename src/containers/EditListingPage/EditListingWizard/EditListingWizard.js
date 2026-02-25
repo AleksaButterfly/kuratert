@@ -233,11 +233,14 @@ const tabCompleted = (tab, listing, config) => {
     cardStyle,
     isAuction,
     auctionEstimateLow,
+    isContactForQuote,
+    notApplicableEnabled,
   } = publicData || {};
-  const deliveryOptionPicked = publicData && (shippingEnabled || pickupEnabled);
+  const deliveryOptionPicked = publicData && (shippingEnabled || pickupEnabled || notApplicableEnabled);
 
+  // For contact for quote listings, no price is required
   // For auction listings, check if auction estimate exists instead of regular price
-  const hasValidPricing = isAuction ? !!auctionEstimateLow : !!price;
+  const hasValidPricing = isContactForQuote ? true : (isAuction ? !!auctionEstimateLow : !!price);
 
   switch (tab) {
     case DETAILS:

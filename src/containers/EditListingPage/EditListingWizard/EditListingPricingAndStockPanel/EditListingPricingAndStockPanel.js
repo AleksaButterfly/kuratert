@@ -39,7 +39,7 @@ const getInitialValues = (props, marketplaceCurrency) => {
   const currentStock = listing?.currentStock;
 
   const publicData = listing?.attributes?.publicData;
-  const { acceptingOffers, isAuction, auctionEstimateLow, auctionEstimateHigh, auctionLink, isReserved } = publicData || {};
+  const { acceptingOffers, isAuction, auctionEstimateLow, auctionEstimateHigh, auctionLink, isReserved, isContactForQuote } = publicData || {};
   const listingTypeConfig = getListingTypeConfig(publicData, listingTypes);
   const hasInfiniteStock = STOCK_INFINITE_ITEMS.includes(listingTypeConfig?.stockType);
 
@@ -81,6 +81,7 @@ const getInitialValues = (props, marketplaceCurrency) => {
   const acceptingOffersMaybe = acceptingOffers ? ['true'] : [];
   const isAuctionMaybe = isAuction ? ['true'] : [];
   const isReservedMaybe = isReserved ? ['true'] : [];
+  const isContactForQuoteMaybe = isContactForQuote ? ['true'] : [];
 
   // Convert auction estimate values from subunits to Money objects
   const auctionEstimateLowMoney = auctionEstimateLow ? new Money(auctionEstimateLow, currency) : null;
@@ -100,6 +101,7 @@ const getInitialValues = (props, marketplaceCurrency) => {
     auctionEstimateHigh: auctionEstimateHighMoney,
     auctionLink: auctionLink || '',
     isReserved: isReservedMaybe,
+    isContactForQuote: isContactForQuoteMaybe,
   };
 };
 
@@ -213,12 +215,14 @@ const EditListingPricingAndStockPanel = props => {
               auctionEstimateHigh,
               auctionLink,
               isReserved,
+              isContactForQuote,
             } = values;
 
             // Convert checkbox arrays to booleans (checked = ['true'] -> true, unchecked = [] -> false)
             const isAcceptingOffers = Array.isArray(acceptingOffers) && acceptingOffers.includes('true');
             const isAuctionListing = Array.isArray(isAuction) && isAuction.includes('true');
             const isListingReserved = Array.isArray(isReserved) && isReserved.includes('true');
+            const isContactForQuoteListing = Array.isArray(isContactForQuote) && isContactForQuote.includes('true');
 
             // Extract auction estimate values (convert Money to subunits)
             const auctionEstimateLowSubunits = auctionEstimateLow?.amount || null;
@@ -292,11 +296,13 @@ const EditListingPricingAndStockPanel = props => {
                 }
               : { frameOptions: { enabled: false, variants: [] } };
 
-            // For auction listings, we still need a price for the API, use low estimate as placeholder
-            // Fallback to a minimum price if auction estimate is not set yet
+            // For auction or contact-for-quote listings, we still need a price for the API
+            // Fallback to a minimum price if no price is set
             const fallbackPrice = new Money(100, marketplaceCurrency); // Minimum 1.00 in currency
             const listingPrice = isAuctionListing
               ? (auctionEstimateLow || fallbackPrice)
+              : isContactForQuoteListing
+              ? fallbackPrice
               : price;
 
             // New values for listing attributes
@@ -305,12 +311,13 @@ const EditListingPricingAndStockPanel = props => {
               ...stockUpdateMaybe,
               publicData: {
                 ...frameOptionsData,
-                acceptingOffers: isAuctionListing ? false : isAcceptingOffers,
+                acceptingOffers: isAuctionListing || isContactForQuoteListing ? false : isAcceptingOffers,
                 isAuction: isAuctionListing,
                 auctionEstimateLow: isAuctionListing ? auctionEstimateLowSubunits : null,
                 auctionEstimateHigh: isAuctionListing ? auctionEstimateHighSubunits : null,
                 auctionLink: isAuctionListing ? (auctionLink || null) : null,
                 isReserved: isListingReserved,
+                isContactForQuote: isContactForQuoteListing,
               },
             };
             // Save the initialValues to state
@@ -330,6 +337,7 @@ const EditListingPricingAndStockPanel = props => {
                 auctionEstimateHigh,
                 auctionLink,
                 isReserved,
+                isContactForQuote,
               },
             });
             onSubmit(updateValues);

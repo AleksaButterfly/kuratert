@@ -63,6 +63,20 @@ const PriceMaybe = props => {
   const auctionEstimateLow = publicData?.auctionEstimateLow;
   const auctionEstimateHigh = publicData?.auctionEstimateHigh;
 
+  // Check if this is a contact for quote listing
+  const isContactForQuote = publicData?.isContactForQuote === true;
+
+  // For contact for quote listings, show contact message
+  if (isContactForQuote) {
+    return (
+      <div className={css.price}>
+        <span className={css.contactForQuote}>
+          <FormattedMessage id="ListingCard.contactForQuote" />
+        </span>
+      </div>
+    );
+  }
+
   // For auction listings, show estimate range
   if (isAuction && auctionEstimateLow && auctionEstimateHigh) {
     const currency = price?.currency || config.currency;

@@ -190,6 +190,21 @@
   border-radius: 8px;
 }
 
+/* Contact for Quote styles */
+.contactForQuoteWrapper {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--colorGrey100);
+}
+
+.contactForQuoteInfo {
+  margin: 8px 0 0 0;
+  padding-left: 28px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--colorGrey500);
+}
+
 /* Reserved styles */
 .reservedWrapper {
   margin-top: 24px;

@@ -441,7 +441,7 @@ export const ListingPageComponent = props => {
   const isOwnListing =
     userAndListingAuthorAvailable && currentListing.author.id.uuid === currentUser.id.uuid;
 
-  const { listingType, transactionProcessAlias, unitType, frameOptions, shippingEnabled, pickupEnabled, quoteEnabled, shippingPriceInSubunitsOneItem, acceptingOffers, isAuction, auctionEstimateLow, auctionEstimateHigh, auctionLink, isReserved } = publicData;
+  const { listingType, transactionProcessAlias, unitType, frameOptions, shippingEnabled, pickupEnabled, quoteEnabled, shippingPriceInSubunitsOneItem, acceptingOffers, isAuction, auctionEstimateLow, auctionEstimateHigh, auctionLink, isReserved, isContactForQuote } = publicData;
   if (!(listingType && transactionProcessAlias && unitType)) {
     return (
       <ErrorPage topbar={topbar} scrollingDisabled={scrollingDisabled} intl={intl} invalidListing />
@@ -784,7 +784,7 @@ export const ListingPageComponent = props => {
               </div>
             </div>
 
-            {/* Price or Auction Estimate or Reserved Status */}
+            {/* Price or Auction Estimate or Reserved Status or Contact for Quote */}
             <div className={css.priceSection}>
               {isReserved ? (
                 <>
@@ -795,6 +795,10 @@ export const ListingPageComponent = props => {
                     <FormattedMessage id="ListingPage.reservedMessage" />
                   </p>
                 </>
+              ) : isContactForQuote ? (
+                <p className={css.contactForQuoteMessage}>
+                  <FormattedMessage id="ListingPage.contactForQuoteMessage" />
+                </p>
               ) : isAuction && formattedAuctionEstimateLow && formattedAuctionEstimateHigh ? (
                 <p className={css.auctionEstimate}>
                   <FormattedMessage
@@ -964,6 +968,22 @@ export const ListingPageComponent = props => {
               ) : isReserved ? (
                 /* Reserved listing - only show contact seller */
                 null
+              ) : isContactForQuote ? (
+                /* Contact for quote listing - show contact for quote button */
+                <button
+                  className={css.contactForQuoteButton}
+                  onClick={() => {
+                    if (isAuthenticated) {
+                      setInquiryModalOpen(true);
+                    } else {
+                      const state = { from: `${location.pathname}${location.search}${location.hash}` };
+                      history.push(pathByRouteName('SignupPage', routeConfiguration, {}), state);
+                    }
+                  }}
+                  disabled={isOwnListing}
+                >
+                  <FormattedMessage id="ListingPage.contactForQuoteButton" />
+                </button>
               ) : (
                 /* Regular listing - show purchase buttons */
                 <>

@@ -136,3 +136,19 @@
     line-height: 26px;
   }
 }
+
+/* Contact for quote */
+.contactForQuote {
+  font-family: var(--fontFamilyHeading);
+  font-size: 14px;
+  line-height: 22px;
+  font-weight: 400;
+  color: var(--colorGrey700);
+  letter-spacing: -0.025em;
+  margin: 0;
+
+  @media (--viewportMedium) {
+    font-size: 16px;
+    line-height: 26px;
+  }
+}

@@ -166,6 +166,8 @@ export const EditListingPricingAndStockForm = props => (
 
       // Check if auction mode is enabled
       const isAuctionEnabled = Array.isArray(values?.isAuction) && values.isAuction.includes('true');
+      // Check if contact for quote mode is enabled
+      const isContactForQuoteEnabled = Array.isArray(values?.isContactForQuote) && values.isContactForQuote.includes('true');
 
       const classes = classNames(rootClassName || css.root, className);
       const submitReady = (updated && pristine) || ready;
@@ -190,8 +192,8 @@ export const EditListingPricingAndStockForm = props => (
             </p>
           ) : null}
 
-          {/* Price - shown when auction is NOT enabled */}
-          {!isAuctionEnabled && (
+          {/* Price - shown when auction and contact for quote are NOT enabled */}
+          {!isAuctionEnabled && !isContactForQuoteEnabled && (
             <FieldCurrencyInput
               id={`${formId}.price`}
               name="price"
@@ -459,6 +461,21 @@ export const EditListingPricingAndStockForm = props => (
                 label={intl.formatMessage({ id: 'EditListingPricingForm.auctionLinkLabel' })}
                 placeholder={intl.formatMessage({ id: 'EditListingPricingForm.auctionLinkPlaceholder' })}
               />
+            </div>
+          )}
+
+          {/* Contact for Quote Toggle - only show when not auction */}
+          {!isAuctionEnabled && (
+            <div className={css.contactForQuoteWrapper}>
+              <FieldCheckbox
+                id={`${formId}.isContactForQuote`}
+                name="isContactForQuote"
+                label={intl.formatMessage({ id: 'EditListingPricingForm.isContactForQuoteLabel' })}
+                value="true"
+              />
+              <p className={css.contactForQuoteInfo}>
+                <FormattedMessage id="EditListingPricingForm.isContactForQuoteInfo" />
+              </p>
             </div>
           )}
 
