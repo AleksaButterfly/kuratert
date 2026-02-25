@@ -64,7 +64,7 @@ const PriceMaybe = props => {
   const auctionEstimateHigh = publicData?.auctionEstimateHigh;
 
   // Check if this is a service category listing (no fixed price)
-  const isServiceCategory = publicData?.kategori === 'relatertetjenester';
+  const isServiceCategory = publicData?.categoryLevel1 === 'relatertetjenester';
 
   // For service category listings, show contact message
   if (isServiceCategory) {

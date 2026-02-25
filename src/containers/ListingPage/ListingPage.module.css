@@ -1037,8 +1037,9 @@
   font-size: 16px;
   line-height: 25.6px;
   color: var(--colorGrey700);
-  margin-top: 16px;
+  margin-top: 0;
   margin-bottom: 0;
+  padding: 0;
   white-space: pre-line;
 }
 

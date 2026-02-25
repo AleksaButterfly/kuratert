@@ -441,8 +441,8 @@ export const ListingPageComponent = props => {
   const isOwnListing =
     userAndListingAuthorAvailable && currentListing.author.id.uuid === currentUser.id.uuid;
 
-  const { listingType, transactionProcessAlias, unitType, frameOptions, shippingEnabled, pickupEnabled, quoteEnabled, shippingPriceInSubunitsOneItem, acceptingOffers, isAuction, auctionEstimateLow, auctionEstimateHigh, auctionLink, isReserved, kategori } = publicData;
-  const isServiceCategory = kategori === 'relatertetjenester';
+  const { listingType, transactionProcessAlias, unitType, frameOptions, shippingEnabled, pickupEnabled, quoteEnabled, shippingPriceInSubunitsOneItem, acceptingOffers, isAuction, auctionEstimateLow, auctionEstimateHigh, auctionLink, isReserved, categoryLevel1 } = publicData;
+  const isServiceCategory = categoryLevel1 === 'relatertetjenester';
   if (!(listingType && transactionProcessAlias && unitType)) {
     return (
       <ErrorPage topbar={topbar} scrollingDisabled={scrollingDisabled} intl={intl} invalidListing />
@@ -1030,8 +1030,8 @@ export const ListingPageComponent = props => {
                   )}
                 </>
               )}
-              {/* Show digital viewing and contact buttons for all listing types except reserved */}
-              {!isReserved && (
+              {/* Show digital viewing and contact buttons for all listing types except reserved and service */}
+              {!isReserved && !isServiceCategory && (
                 <button
                   className={css.bookDigitalViewingButton}
                   onClick={() => {
@@ -1047,13 +1047,16 @@ export const ListingPageComponent = props => {
                   <FormattedMessage id="ListingPage.bookDigitalViewing" />
                 </button>
               )}
-              <button
-                className={css.contactSellerButton}
-                onClick={onContactUser}
-                disabled={isOwnListing}
-              >
-                <FormattedMessage id="ListingPage.contactSeller" />
-              </button>
+              {/* For service listings, contact seller is handled by the contactForQuoteButton above */}
+              {!isServiceCategory && (
+                <button
+                  className={css.contactSellerButton}
+                  onClick={onContactUser}
+                  disabled={isOwnListing}
+                >
+                  <FormattedMessage id="ListingPage.contactSeller" />
+                </button>
+              )}
             </div>
 
             {/* Author card */}
