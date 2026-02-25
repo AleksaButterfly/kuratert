@@ -1614,6 +1614,6 @@
 .contactForQuoteButton {
   composes: buttonPrimary from global;
   width: 100%;
-  margin-bottom: 12px;
+  margin: 0;
 }
 
