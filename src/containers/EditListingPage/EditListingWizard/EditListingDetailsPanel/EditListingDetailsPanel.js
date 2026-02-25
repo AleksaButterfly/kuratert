@@ -276,6 +276,7 @@ const EditListingDetailsPanel = props => {
     ready,
     onSubmit,
     onListingTypeChange,
+    onCategoryChange,
     submitButtonText,
     panelUpdated,
     updateInProgress,
@@ -400,6 +401,7 @@ const EditListingDetailsPanel = props => {
           }
           categoryPrefix={categoryKey}
           onListingTypeChange={onListingTypeChange}
+          onCategoryChange={onCategoryChange}
           listingFieldsConfig={listingFields}
           listingCurrency={listing?.attributes?.price?.currency}
           marketplaceCurrency={config.currency}

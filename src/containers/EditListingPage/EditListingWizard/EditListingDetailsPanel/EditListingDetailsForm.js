@@ -203,7 +203,7 @@ const FieldSelectCategory = props => {
     checkIfInitialValuesExist();
   }, []);
 
-  const { prefix, listingCategories, formApi, intl, setAllCategoriesChosen, values } = props;
+  const { prefix, listingCategories, formApi, intl, setAllCategoriesChosen, values, onCategoryChange } = props;
 
   // Counts the number of selected categories in the form values based on the given prefix.
   const countSelectedCategories = () => {
@@ -227,6 +227,11 @@ const FieldSelectCategory = props => {
     }
     const categoryConfig = findCategoryConfig(currentCategoryOptions, category).subcategories;
     setAllCategoriesChosen(!categoryConfig || categoryConfig.length === 0);
+
+    // Notify parent about category change (for level 1 categories)
+    if (level === 1 && onCategoryChange) {
+      onCategoryChange(category);
+    }
   };
 
   return (
@@ -315,6 +320,7 @@ const EditListingDetailsForm = props => (
         form: formApi,
         handleSubmit,
         onListingTypeChange,
+        onCategoryChange,
         invalid,
         pristine,
         marketplaceCurrency,
@@ -403,6 +409,7 @@ const EditListingDetailsForm = props => (
               intl={intl}
               allCategoriesChosen={allCategoriesChosen}
               setAllCategoriesChosen={setAllCategoriesChosen}
+              onCategoryChange={onCategoryChange}
             />
           )}
 

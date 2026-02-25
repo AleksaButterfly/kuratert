@@ -233,12 +233,13 @@ const tabCompleted = (tab, listing, config) => {
     cardStyle,
     isAuction,
     auctionEstimateLow,
-    kategori,
   } = publicData || {};
   const deliveryOptionPicked = publicData && (shippingEnabled || pickupEnabled);
 
   // For service category (relatertetjenester), no price or delivery is required
-  const isServiceCategory = kategori === 'relatertetjenester';
+  const categoryKey = config.categoryConfiguration?.key || 'categoryLevel';
+  const category = publicData?.[`${categoryKey}1`];
+  const isServiceCategory = category === 'relatertetjenester';
   // For auction listings, check if auction estimate exists instead of regular price
   const hasValidPricing = isServiceCategory ? true : (isAuction ? !!auctionEstimateLow : !!price);
 
@@ -415,6 +416,7 @@ class EditListingWizard extends Component {
       draftId: null,
       showPayoutDetails: false,
       selectedListingType: null,
+      selectedCategory: null,
       mounted: false,
     };
     this.handleCreateFlowTabScrolling = this.handleCreateFlowTabScrolling.bind(this);
@@ -541,7 +543,10 @@ class EditListingWizard extends Component {
       existingListingType || this.state.selectedListingType || validListingTypes.length === 1;
 
     // Check if this is a service category (relatertetjenester) - hide pricing and delivery tabs
-    const currentCategory = currentListing?.attributes?.publicData?.kategori;
+    // Use selected category from state (form value) first, fall back to saved publicData
+    const categoryKey = config.categoryConfiguration?.key || 'categoryLevel';
+    const savedCategory = currentListing?.attributes?.publicData?.[`${categoryKey}1`];
+    const currentCategory = this.state.selectedCategory || savedCategory;
     const isServiceCategory = currentCategory === 'relatertetjenester';
 
     // For oudated draft listing, we don't show other tabs but the "details"
@@ -698,6 +703,7 @@ class EditListingWizard extends Component {
                 handlePublishListing={this.handlePublishListing}
                 fetchInProgress={fetchInProgress}
                 onListingTypeChange={selectedListingType => this.setState({ selectedListingType })}
+                onCategoryChange={selectedCategory => this.setState({ selectedCategory })}
                 onManageDisableScrolling={onManageDisableScrolling}
                 config={config}
                 routeConfiguration={routeConfiguration}

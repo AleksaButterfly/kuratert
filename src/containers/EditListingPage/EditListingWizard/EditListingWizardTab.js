@@ -105,6 +105,7 @@ const EditListingWizardTab = props => {
     onImageUpload,
     onManageDisableScrolling,
     onListingTypeChange,
+    onCategoryChange,
     onRemoveImage,
     updatedTab,
     updateInProgress,
@@ -200,6 +201,7 @@ const EditListingWizardTab = props => {
         <EditListingDetailsPanel
           {...panelProps(DETAILS)}
           onListingTypeChange={onListingTypeChange}
+          onCategoryChange={onCategoryChange}
           config={config}
         />
       );
