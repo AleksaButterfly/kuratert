@@ -18,7 +18,7 @@ import {
 } from '../../util/types';
 import { timestampToDate } from '../../util/dates';
 import { createSlug } from '../../util/urlHelpers';
-import { requireListingImage } from '../../util/configHelpers';
+import { requireListingImage, displayPrice } from '../../util/configHelpers';
 
 import {
   INQUIRY_PROCESS_NAME,
@@ -503,6 +503,7 @@ export const TransactionPageComponent = props => {
   );
 
   const showListingImage = requireListingImage(foundListingTypeConfig);
+  const shouldDisplayPrice = displayPrice(foundListingTypeConfig);
 
   if (isDataAvailable && isProviderRole && !isOwnSale) {
     // If the user's user type does not have a provider role set, redirect
@@ -719,16 +720,41 @@ export const TransactionPageComponent = props => {
       config={config}
       {...orderBreakdownMaybe}
       orderPanel={
-        <OrderPanel
-          className={classNames(css.orderPanel, {
-            [css.orderPanelNextToTitle]: stateData.showDetailCardHeadings,
-          })}
-          titleClassName={css.orderTitle}
-          listing={listing}
-          isOwnListing={isOwnSale}
-          lineItemUnitType={lineItemUnitType}
-          title={listingTitle}
-          titleDesktop={
+        shouldDisplayPrice ? (
+          <OrderPanel
+            className={classNames(css.orderPanel, {
+              [css.orderPanelNextToTitle]: stateData.showDetailCardHeadings,
+            })}
+            titleClassName={css.orderTitle}
+            listing={listing}
+            isOwnListing={isOwnSale}
+            lineItemUnitType={lineItemUnitType}
+            title={listingTitle}
+            titleDesktop={
+              <H4 as="h2" className={css.orderPanelTitle}>
+                {listingDeleted ? (
+                  listingTitle
+                ) : (
+                  <NamedLink
+                    name="ListingPage"
+                    params={{ id: listing.id?.uuid, slug: createSlug(listingTitle) }}
+                  >
+                    {listingTitle}
+                  </NamedLink>
+                )}
+              </H4>
+            }
+            author={listing.author}
+            onSubmit={isNegotiationProcess ? onMakeOffer : handleSubmitOrderRequest}
+            onManageDisableScrolling={onManageDisableScrolling}
+            {...restOfProps}
+            validListingTypes={config.listing.listingTypes}
+            marketplaceCurrency={config.currency}
+            dayCountAvailableForBooking={config.stripe.dayCountAvailableForBooking}
+            marketplaceName={config.marketplaceName}
+          />
+        ) : (
+          <div className={css.serviceListingTitle}>
             <H4 as="h2" className={css.orderPanelTitle}>
               {listingDeleted ? (
                 listingTitle
@@ -741,16 +767,8 @@ export const TransactionPageComponent = props => {
                 </NamedLink>
               )}
             </H4>
-          }
-          author={listing.author}
-          onSubmit={isNegotiationProcess ? onMakeOffer : handleSubmitOrderRequest}
-          onManageDisableScrolling={onManageDisableScrolling}
-          {...restOfProps}
-          validListingTypes={config.listing.listingTypes}
-          marketplaceCurrency={config.currency}
-          dayCountAvailableForBooking={config.stripe.dayCountAvailableForBooking}
-          marketplaceName={config.marketplaceName}
-        />
+          </div>
+        )
       }
     />
   ) : (

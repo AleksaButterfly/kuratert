@@ -77,3 +77,8 @@
   margin-top: 0;
   margin-bottom: 0;
 }
+
+/* Service listing (no price) - just shows title */
+.serviceListingTitle {
+  margin: 16px 48px 48px 48px;
+}
