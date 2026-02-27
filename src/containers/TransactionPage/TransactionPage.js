@@ -503,7 +503,11 @@ export const TransactionPageComponent = props => {
   );
 
   const showListingImage = requireListingImage(foundListingTypeConfig);
-  const shouldDisplayPrice = displayPrice(foundListingTypeConfig);
+
+  // Check if this is a service category listing (no price)
+  const categoryLevel1 = listing?.attributes?.publicData?.categoryLevel1;
+  const isServiceCategory = categoryLevel1 === 'relatertetjenester';
+  const shouldDisplayPrice = !isServiceCategory && displayPrice(foundListingTypeConfig);
 
   if (isDataAvailable && isProviderRole && !isOwnSale) {
     // If the user's user type does not have a provider role set, redirect
