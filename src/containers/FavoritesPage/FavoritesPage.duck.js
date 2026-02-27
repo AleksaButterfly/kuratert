@@ -75,6 +75,7 @@ export const queryFavoriteListingsThunk = createAsyncThunk(
         'publicData.shippingEnabled',
         'publicData.priceVariationsEnabled',
         'publicData.priceVariants',
+        'publicData.tittel',
       ],
       'fields.user': ['profile.displayName', 'profile.abbreviatedName'],
       'fields.image': [

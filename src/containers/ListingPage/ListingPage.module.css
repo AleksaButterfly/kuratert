@@ -903,13 +903,30 @@
   line-height: 38px;
   font-weight: 400;
   color: var(--colorGrey900);
-  margin: 0 0 8px 0;
+  margin: 0 0 4px 0;
   letter-spacing: -0.64px;
 
   @media (--viewportMedium) {
     font-size: 48px;
     line-height: 52.8px;
     letter-spacing: -0.96px;
+  }
+}
+
+.artworkTitle {
+  font-family: var(--fontFamilyHeading);
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--colorGrey700);
+  margin: 0 0 8px 0;
+  letter-spacing: -0.4px;
+
+  @media (--viewportMedium) {
+    font-size: 28px;
+    line-height: 36px;
+    letter-spacing: -0.56px;
   }
 }
 

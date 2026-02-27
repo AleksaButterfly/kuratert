@@ -441,7 +441,7 @@ export const ListingPageComponent = props => {
   const isOwnListing =
     userAndListingAuthorAvailable && currentListing.author.id.uuid === currentUser.id.uuid;
 
-  const { listingType, transactionProcessAlias, unitType, frameOptions, shippingEnabled, pickupEnabled, quoteEnabled, shippingPriceInSubunitsOneItem, acceptingOffers, isAuction, auctionEstimateLow, auctionEstimateHigh, auctionLink, isReserved, categoryLevel1 } = publicData;
+  const { listingType, transactionProcessAlias, unitType, frameOptions, shippingEnabled, pickupEnabled, quoteEnabled, shippingPriceInSubunitsOneItem, acceptingOffers, isAuction, auctionEstimateLow, auctionEstimateHigh, auctionLink, isReserved, categoryLevel1, tittel: artworkTitle } = publicData;
   const isServiceCategory = categoryLevel1 === 'relatertetjenester';
   if (!(listingType && transactionProcessAlias && unitType)) {
     return (
@@ -754,6 +754,14 @@ export const ListingPageComponent = props => {
                   <p className={css.listingCategory}>{categoryLabel}</p>
                 )}
                 <h1 className={css.listingTitle}>{richTitle}</h1>
+                {artworkTitle && (
+                  <p className={css.artworkTitle}>
+                    {richText(artworkTitle, {
+                      longWordMinLength: MIN_LENGTH_FOR_LONG_WORDS_IN_TITLE,
+                      longWordClass: css.longWord,
+                    })}
+                  </p>
+                )}
                 <p className={css.listingAuthor}>
                   <FormattedMessage id="ListingPage.soldBy" />{' '}
                   <NamedLink

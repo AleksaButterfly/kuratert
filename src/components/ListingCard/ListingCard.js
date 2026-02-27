@@ -244,7 +244,7 @@ export const ListingCard = props => {
   const author = ensureUser(listing.author);
   const authorName = author.attributes.profile.displayName;
 
-  const { listingType, cardStyle } = publicData || {};
+  const { listingType, cardStyle, tittel: artworkTitle } = publicData || {};
   const validListingTypes = config.listing.listingTypes;
   const foundListingTypeConfig = validListingTypes.find(conf => conf.listingType === listingType);
   const showListingImage = requireListingImage(foundListingTypeConfig);
@@ -285,12 +285,22 @@ export const ListingCard = props => {
       <div className={css.info}>
         <div className={css.mainInfo}>
           {showListingImage && (
-            <div className={css.title}>
-              {richText(title, {
-                longWordMinLength: MIN_LENGTH_FOR_LONG_WORDS,
-                longWordClass: css.longWord,
-              })}
-            </div>
+            <>
+              <div className={css.title}>
+                {richText(title, {
+                  longWordMinLength: MIN_LENGTH_FOR_LONG_WORDS,
+                  longWordClass: css.longWord,
+                })}
+              </div>
+              {artworkTitle && (
+                <div className={css.artworkTitle}>
+                  {richText(artworkTitle, {
+                    longWordMinLength: MIN_LENGTH_FOR_LONG_WORDS,
+                    longWordClass: css.longWord,
+                  })}
+                </div>
+              )}
+            </>
           )}
           {showAuthorInfo ? (
             <div className={css.authorInfo}>

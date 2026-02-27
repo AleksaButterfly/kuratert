@@ -543,6 +543,7 @@ const fetchRelatedListingsPayloadCreator = (
         'publicData.color',
         'publicData.medium',
         'publicData.selger',
+        'publicData.tittel',
         'publicData.listingType',
         'publicData.transactionProcessAlias',
         'publicData.unitType',
