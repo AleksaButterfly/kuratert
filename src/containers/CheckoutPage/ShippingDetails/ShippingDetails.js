@@ -127,8 +127,7 @@ const ShippingDetails = props => {
         validate={validators.required(
           intl.formatMessage({ id: 'ShippingDetails.countryRequired' })
         )}
-        onChange={e => {
-          const country = e.target.value;
+        onChange={country => {
           if (country && onShippingCountryChange) {
             // Get current form values and pass to callback
             const values = formApi.getState().values;

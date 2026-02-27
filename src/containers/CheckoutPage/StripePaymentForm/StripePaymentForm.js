@@ -905,9 +905,6 @@ class StripePaymentForm extends Component {
         {/* Cancel Klarna payment UI - shown when stuck in Klarna pending state */}
         {showCancelKlarnaUI && (
           <div className={css.cancelKlarnaSection}>
-            <p className={css.cancelKlarnaMessage}>
-              <FormattedMessage id="StripePaymentForm.klarnaPaymentPending" />
-            </p>
             <PrimaryButton
               type="button"
               onClick={onCancelKlarnaPayment}

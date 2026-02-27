@@ -189,7 +189,7 @@ const EnhancedCheckoutPage = props => {
       showListingImage={showListingImage}
       {...props}
     />
-  ) : processName && !isInquiryProcess && !speculateTransactionInProgress ? (
+  ) : processName && !isInquiryProcess ? (
     <CheckoutPageWithPayment
       config={config}
       routeConfiguration={routeConfiguration}

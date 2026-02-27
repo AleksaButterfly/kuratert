@@ -88,8 +88,6 @@ module.exports = async (req, res) => {
       // Calculate tax if enabled and shipping details are provided
       let taxInfo = null;
       const shippingDetails = bodyParams?.params?.protectedData?.shippingDetails;
-      console.log('[Tax] initiate-privileged - shippingDetails:', shippingDetails);
-      console.log('[Tax] initiate-privileged - isTaxEnabled:', isTaxEnabled());
       if (isTaxEnabled() && shippingDetails) {
         const shippingAddress = {
           country: shippingDetails.country,
@@ -154,7 +152,6 @@ module.exports = async (req, res) => {
           shippingAddress,
           currency,
         });
-        console.log('[Tax] initiate-privileged - taxInfo result:', taxInfo);
       }
 
       // cartItems are already transformed on client-side with only essential data (id, title, price, imageUrl)
