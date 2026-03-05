@@ -306,6 +306,8 @@ const getSpecifications = (publicData, metadata, listingFieldConfigs, categoryCo
         ? filteredConfigs.concat({ key, value: getBooleanMessage(value), label })
         : schemaType === 'long'
         ? filteredConfigs.concat({ key, value, label })
+        : schemaType === 'text'
+        ? filteredConfigs.concat({ key, value, label })
         : filteredConfigs;
     }
     return filteredConfigs;
