@@ -103,7 +103,7 @@ const getFeaturedArticles = async (req, res) => {
 
     const articles = await client.fetch(query);
 
-    const formattedArticles = articles.map(article => ({
+    const formattedArticles = articles.map((article, index) => ({
       id: article._id,
       title: article.title,
       slug: article.slug,
@@ -111,7 +111,8 @@ const getFeaturedArticles = async (req, res) => {
       readTime: article.readTime,
       featuredPosition: article.featuredPosition,
       publishedAt: article.publishedAt,
-      image: buildImageUrl(article.image, 800),
+      // Main featured article needs higher resolution (1600px for retina), side articles use 1000px
+      image: buildImageUrl(article.image, article.featuredPosition === 1 || index === 0 ? 1600 : 1000),
       category: article.category?.name || 'Uncategorized',
       categorySlug: article.category?.slug,
     }));
@@ -167,7 +168,7 @@ const getAllArticles = async (req, res) => {
       excerpt: article.excerpt,
       readTime: article.readTime,
       publishedAt: article.publishedAt,
-      image: buildImageUrl(article.image, 600),
+      image: buildImageUrl(article.image, 1000),
       category: article.category?.name || 'Uncategorized',
       categorySlug: article.category?.slug,
     }));
