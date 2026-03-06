@@ -566,6 +566,9 @@ const fetchRelatedListingsPayloadCreator = (
         `variants.${variantPrefix}-2x`,
         `variants.${variantPrefix}-4x`,
         `variants.${variantPrefix}-6x`,
+        // Avatar variants for author profile images
+        'variants.square-small',
+        'variants.square-small2x',
       ],
       ...createImageVariantConfig(`${variantPrefix}`, 400, aspectRatio),
       ...createImageVariantConfig(`${variantPrefix}-2x`, 800, aspectRatio),
