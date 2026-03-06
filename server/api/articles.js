@@ -224,7 +224,7 @@ const getArticleBySlug = async (req, res) => {
       content: portableTextToHtml(article.content),
       readTime: article.readTime,
       publishedAt: article.publishedAt,
-      image: buildImageUrl(article.image, 1200),
+      image: buildImageUrl(article.image, 1600),
       category: article.category?.name || 'Uncategorized',
       categorySlug: article.category?.slug,
     };
