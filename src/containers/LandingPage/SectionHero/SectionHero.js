@@ -15,7 +15,7 @@ import HeroSearchForm from './HeroSearchForm/HeroSearchForm';
 import css from './SectionHero.module.css';
 
 // Auto-rotation interval in milliseconds
-const SLIDE_INTERVAL = 6000;
+const SLIDE_INTERVAL = 10000;
 
 const SectionHero = props => {
   const intl = useIntl();
