@@ -122,3 +122,58 @@
     transform: translateY(12px);
   }
 }
+
+/* Carousel styles */
+.hasCustomBackground {
+  background-image: none; /* Override default background when using Sanity images */
+}
+
+.isTransitioning {
+  /* Background transition is handled via inline style changes */
+}
+
+.fadeText {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.heroTitle,
+.heroSubtitle {
+  transition: opacity 0.3s ease;
+}
+
+/* Carousel dots */
+.carouselDots {
+  position: absolute;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  gap: 12px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.3s ease;
+
+  &:hover {
+    border-color: var(--colorWhite);
+    background: rgba(255, 255, 255, 0.3);
+  }
+}
+
+.dotActive {
+  border-color: var(--colorWhite);
+  background: var(--colorWhite);
+
+  &:hover {
+    background: var(--colorWhite);
+  }
+}

@@ -3,7 +3,7 @@ import { fetchPageAssets } from '../../ducks/hostedAssets.duck';
 import { addMarketplaceEntities } from '../../ducks/marketplaceData.duck';
 import { createImageVariantConfig } from '../../util/sdkLoader';
 import { storableError } from '../../util/errors';
-import { fetchFeaturedArticles as fetchFeaturedArticlesApi } from '../../util/api';
+import { fetchFeaturedArticles as fetchFeaturedArticlesApi, fetchHeroSlides as fetchHeroSlidesApi } from '../../util/api';
 
 export const ASSET_NAME = 'landing-page';
 
@@ -92,6 +92,25 @@ export const fetchFeaturedArticles = () => dispatch => {
   return dispatch(fetchFeaturedArticlesThunk());
 };
 
+// Hero slides thunk
+const fetchHeroSlidesPayloadCreator = async (_, { rejectWithValue }) => {
+  try {
+    const response = await fetchHeroSlidesApi();
+    return response.data;
+  } catch (e) {
+    return rejectWithValue(storableError(e));
+  }
+};
+
+export const fetchHeroSlidesThunk = createAsyncThunk(
+  'LandingPage/fetchHeroSlides',
+  fetchHeroSlidesPayloadCreator
+);
+
+export const fetchHeroSlides = () => dispatch => {
+  return dispatch(fetchHeroSlidesThunk());
+};
+
 const initialState = {
   listingRefs: [],
   queryListingsError: null,
@@ -100,6 +119,9 @@ const initialState = {
   featuredArticles: [],
   featuredArticlesError: null,
   featuredArticlesInProgress: false,
+  heroSlides: [],
+  heroSlidesError: null,
+  heroSlidesInProgress: false,
 };
 
 const landingPageSlice = createSlice({
@@ -133,6 +155,19 @@ const landingPageSlice = createSlice({
       .addCase(fetchFeaturedArticlesThunk.rejected, (state, action) => {
         state.featuredArticlesInProgress = false;
         state.featuredArticlesError = action.payload;
+      })
+      // Hero slides
+      .addCase(fetchHeroSlidesThunk.pending, state => {
+        state.heroSlidesInProgress = true;
+        state.heroSlidesError = null;
+      })
+      .addCase(fetchHeroSlidesThunk.fulfilled, (state, action) => {
+        state.heroSlidesInProgress = false;
+        state.heroSlides = action.payload;
+      })
+      .addCase(fetchHeroSlidesThunk.rejected, (state, action) => {
+        state.heroSlidesInProgress = false;
+        state.heroSlidesError = action.payload;
       });
   },
 });
@@ -142,17 +177,21 @@ export default landingPageSlice.reducer;
 export const loadData = (params, search, config) => dispatch => {
   // Always fetch featured articles for the editorial section
   const featuredArticlesPromise = dispatch(fetchFeaturedArticles());
+  // Fetch hero slides for the carousel
+  const heroSlidesPromise = dispatch(fetchHeroSlides());
 
   if (useHostedLandingPage) {
     const pageAsset = { landingPage: `content/pages/${ASSET_NAME}.json` };
     return Promise.all([
       dispatch(fetchPageAssets(pageAsset, true)),
       featuredArticlesPromise,
+      heroSlidesPromise,
     ]);
   }
 
   return Promise.all([
     dispatch(queryListings(config, RESULT_PAGE_SIZE)),
     featuredArticlesPromise,
+    heroSlidesPromise,
   ]);
 };

@@ -4,8 +4,10 @@
 //
 // import article from './article'
 // import category from './category'
+// import heroSlide from './heroSlide'
 //
-// export const schemaTypes = [article, category]
+// export const schemaTypes = [article, category, heroSlide]
 
 export { default as article } from './article';
 export { default as category } from './category';
+export { default as heroSlide } from './heroSlide';

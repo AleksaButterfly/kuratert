@@ -236,8 +236,42 @@ const getArticleBySlug = async (req, res) => {
   }
 };
 
+// Get hero slides for landing page carousel
+const getHeroSlides = async (req, res) => {
+  try {
+    const client = getSanityClient();
+
+    const query = `*[_type == "heroSlide" && isActive == true] | order(order asc) {
+      _id,
+      title,
+      subtitle,
+      image,
+      link,
+      order
+    }`;
+
+    const slides = await client.fetch(query);
+
+    const formattedSlides = slides.map(slide => ({
+      id: slide._id,
+      title: slide.title || null,
+      subtitle: slide.subtitle || null,
+      // High resolution for hero background (2400px for large screens/retina)
+      image: buildImageUrl(slide.image, 2400),
+      link: slide.link || null,
+      order: slide.order,
+    }));
+
+    res.status(200).json({ data: formattedSlides });
+  } catch (error) {
+    console.error('Error fetching hero slides:', error);
+    res.status(500).json({ error: 'Failed to fetch hero slides' });
+  }
+};
+
 module.exports = {
   getFeaturedArticles,
   getAllArticles,
   getArticleBySlug,
+  getHeroSlides,
 };

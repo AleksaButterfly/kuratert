@@ -20,7 +20,7 @@ const deleteAccount = require('./api/delete-account');
 const usersQuery = require('./api/users-query');
 const userStats = require('./api/user-stats');
 const sellersQuery = require('./api/sellers-query');
-const { getFeaturedArticles, getAllArticles, getArticleBySlug } = require('./api/articles');
+const { getFeaturedArticles, getAllArticles, getArticleBySlug, getHeroSlides } = require('./api/articles');
 const newsletterSignup = require('./api/newsletter-signup');
 
 const createUserWithIdp = require('./api/auth/createUserWithIdp');
@@ -71,6 +71,9 @@ router.get('/sellers-query', sellersQuery);
 router.get('/articles/featured', getFeaturedArticles);
 router.get('/articles', getAllArticles);
 router.get('/articles/:slug', getArticleBySlug);
+
+// Hero slides endpoint (Sanity CMS)
+router.get('/hero-slides', getHeroSlides);
 
 // Newsletter signup endpoint (Brevo)
 router.post('/newsletter-signup', newsletterSignup);

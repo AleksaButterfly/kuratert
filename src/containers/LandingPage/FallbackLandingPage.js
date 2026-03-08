@@ -31,6 +31,8 @@ const FallbackLandingPage = props => {
     totalItems,
     featuredArticles,
     featuredArticlesInProgress,
+    heroSlides,
+    heroSlidesInProgress,
   } = useSelector(state => state.LandingPage);
 
   const listings = useSelector(
@@ -72,7 +74,7 @@ const FallbackLandingPage = props => {
         footer={<FooterContainer />}
       >
         <div className={css.content}>
-          <SectionHero />
+          <SectionHero slides={heroSlides} isLoading={heroSlidesInProgress} />
           <SectionListings
             listings={listings}
             isLoading={queryListingsInProgress}

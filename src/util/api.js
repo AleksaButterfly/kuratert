@@ -204,6 +204,15 @@ export const fetchArticleBySlug = slug => {
   });
 };
 
+// ================ Hero Slides API (Sanity CMS) ================ //
+
+// Fetch hero slides for landing page carousel.
+export const fetchHeroSlides = () => {
+  return request('/api/hero-slides', {
+    method: methods.GET,
+  });
+};
+
 // ================ Newsletter API (Brevo) ================ //
 
 // Subscribe to newsletter via Brevo.
