@@ -112,16 +112,14 @@ const SectionHero = props => {
   const handleSlideClick = (e) => {
     if (!slideLink) return;
 
-    // Don't trigger if clicking on interactive elements or within forms
+    // Don't trigger if clicking on interactive elements
     const target = e.target;
-    const interactiveSelectors = 'button, a, input, textarea, select, form, [role="button"], label';
+    const interactiveSelectors = 'button, a, input, textarea, select, form, [role="button"], label, h1, p';
     const isInteractive = target.closest(interactiveSelectors);
-
-    // Also check if clicking within heroContent area (search form, etc.)
-    const isInHeroContent = target.closest(`.${css.heroContent}`);
     const isInCarouselDots = target.closest(`.${css.carouselDots}`);
+    const isInSearchForm = target.closest(`.${css.searchForm}`);
 
-    if (isInteractive || isInHeroContent || isInCarouselDots) return;
+    if (isInteractive || isInCarouselDots || isInSearchForm) return;
 
     window.open(slideLink, '_blank', 'noopener,noreferrer');
   };
