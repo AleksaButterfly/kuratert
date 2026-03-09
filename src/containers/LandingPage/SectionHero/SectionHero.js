@@ -108,25 +108,26 @@ const SectionHero = props => {
     [css.isTransitioning]: isTransitioning,
   });
 
-  // Handle slide link click
-  const handleSlideClick = () => {
-    if (slideLink) {
-      window.open(slideLink, '_blank', 'noopener,noreferrer');
-    }
+  // Handle slide link click - only if not clicking on interactive elements
+  const handleSlideClick = (e) => {
+    if (!slideLink) return;
+
+    // Don't trigger if clicking on interactive elements
+    const target = e.target;
+    const isInteractive = target.closest('button, a, input, textarea, select, [role="button"]');
+    if (isInteractive) return;
+
+    window.open(slideLink, '_blank', 'noopener,noreferrer');
   };
 
   return (
-    <div className={heroClasses} style={backgroundStyle}>
+    <div
+      className={heroClasses}
+      style={backgroundStyle}
+      onClick={handleSlideClick}
+      role={slideLink ? 'link' : undefined}
+    >
       <div className={css.overlay} />
-
-      {/* Clickable link overlay - only when slide has a link */}
-      {slideLink && (
-        <button
-          className={css.slideLinkOverlay}
-          onClick={handleSlideClick}
-          aria-label="Visit link"
-        />
-      )}
 
       <div className={css.heroContent}>
         <h1 className={classNames(css.heroTitle, { [css.fadeText]: isTransitioning })}>
