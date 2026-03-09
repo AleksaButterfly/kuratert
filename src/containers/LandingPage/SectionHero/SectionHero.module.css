@@ -177,3 +177,36 @@
     background: var(--colorWhite);
   }
 }
+
+/* Slide link overlay - clickable area behind content */
+.slideLinkOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* Copyright / Image credit */
+.copyright {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  z-index: 3;
+  font-family: var(--fontFamily);
+  font-size: 12px;
+  line-height: 16px;
+  color: rgba(255, 255, 255, 0.7);
+  transition: opacity 0.3s ease;
+
+  @media (--viewportMedium) {
+    bottom: 32px;
+    right: 32px;
+    font-size: 13px;
+  }
+}

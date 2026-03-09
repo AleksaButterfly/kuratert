@@ -247,6 +247,7 @@ const getHeroSlides = async (req, res) => {
       subtitle,
       image,
       link,
+      copyright,
       order
     }`;
 
@@ -259,6 +260,7 @@ const getHeroSlides = async (req, res) => {
       // High resolution for hero background (2400px for large screens/retina)
       image: buildImageUrl(slide.image, 2400),
       link: slide.link || null,
+      copyright: slide.copyright || null,
       order: slide.order,
     }));
 

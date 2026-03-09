@@ -41,6 +41,8 @@ const SectionHero = props => {
   // Use slide title/subtitle if available, otherwise use default intl messages
   const title = currentSlideData?.title || intl.formatMessage({ id: 'SectionHero.title' });
   const subtitle = currentSlideData?.subtitle || intl.formatMessage({ id: 'SectionHero.subtitle' });
+  const copyright = currentSlideData?.copyright || null;
+  const slideLink = currentSlideData?.link || null;
 
   // Go to next slide
   const goToNextSlide = useCallback(() => {
@@ -106,9 +108,26 @@ const SectionHero = props => {
     [css.isTransitioning]: isTransitioning,
   });
 
+  // Handle slide link click
+  const handleSlideClick = () => {
+    if (slideLink) {
+      window.open(slideLink, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   return (
     <div className={heroClasses} style={backgroundStyle}>
       <div className={css.overlay} />
+
+      {/* Clickable link overlay - only when slide has a link */}
+      {slideLink && (
+        <button
+          className={css.slideLinkOverlay}
+          onClick={handleSlideClick}
+          aria-label="Visit link"
+        />
+      )}
+
       <div className={css.heroContent}>
         <h1 className={classNames(css.heroTitle, { [css.fadeText]: isTransitioning })}>
           {title}
@@ -122,6 +141,13 @@ const SectionHero = props => {
           appConfig={config}
         />
       </div>
+
+      {/* Copyright / Image credit - bottom right */}
+      {copyright && (
+        <div className={classNames(css.copyright, { [css.fadeText]: isTransitioning })}>
+          {copyright}
+        </div>
+      )}
 
       {/* Carousel dots - only show if more than one slide */}
       {slideCount > 1 && (
