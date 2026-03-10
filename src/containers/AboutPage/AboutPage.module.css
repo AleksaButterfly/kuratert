@@ -35,18 +35,21 @@
   line-height: 36px;
   font-weight: 300;
   color: var(--colorGrey900);
-  margin: 0;
+  margin: 0 auto;
   letter-spacing: -0.02em;
   text-transform: uppercase;
+  max-width: 600px;
 
   @media (--viewportMedium) {
     font-size: 42px;
     line-height: 52px;
+    max-width: 800px;
   }
 
   @media (--viewportLarge) {
     font-size: 52px;
     line-height: 64px;
+    max-width: 900px;
   }
 }
 
