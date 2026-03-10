@@ -7,141 +7,51 @@
   width: 100%;
 }
 
-/* Section Vision */
-.sectionVision {
+/* Hero Section */
+.heroSection {
   width: 100%;
-  min-height: 60vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 80px 24px;
   background-color: var(--colorGrey50);
-  padding: 60px 24px;
 
   @media (--viewportMedium) {
-    min-height: 70vh;
-    padding: 80px 24px;
+    padding: 120px 24px;
   }
 
   @media (--viewportLarge) {
-    padding: 100px 24px;
+    padding: 160px 24px;
   }
 }
 
-.sectionContent {
+.heroContent {
   width: 100%;
   max-width: var(--contentMaxWidthPages);
   margin: 0 auto;
   text-align: center;
 }
 
-.visionTitle {
-  font-family: var(--fontFamilyHeading);
-  font-size: 36px;
-  line-height: 42px;
-  font-weight: 300;
-  color: var(--colorGrey900);
-  margin: 0 0 24px 0;
-  letter-spacing: -0.02em;
-
-  @media (--viewportMedium) {
-    font-size: 56px;
-    line-height: 64px;
-    margin: 0 0 32px 0;
-  }
-
-  @media (--viewportLarge) {
-    font-size: 72px;
-    line-height: 80px;
-  }
-}
-
-.visionSubtitle {
-  font-family: var(--fontFamily);
-  font-size: 18px;
-  line-height: 28px;
-  font-weight: 400;
-  color: var(--colorGrey700);
-  margin: 0 auto;
-  max-width: 800px;
-
-  @media (--viewportMedium) {
-    font-size: 20px;
-    line-height: 32px;
-  }
-}
-
-/* Section Book a Call */
-.sectionBookCall {
-  width: 100%;
-  padding: 60px 24px;
-  background-color: var(--colorWhite);
-
-  @media (--viewportMedium) {
-    padding: 80px 24px;
-  }
-
-  @media (--viewportLarge) {
-    padding: 100px 24px;
-  }
-}
-
-.bookCallTitle {
+.heroTitle {
   font-family: var(--fontFamilyHeading);
   font-size: 28px;
   line-height: 36px;
   font-weight: 300;
   color: var(--colorGrey900);
-  margin: 0 0 16px 0;
+  margin: 0;
   letter-spacing: -0.02em;
+  text-transform: uppercase;
 
   @media (--viewportMedium) {
-    font-size: 36px;
-    line-height: 44px;
-    margin: 0 0 20px 0;
+    font-size: 42px;
+    line-height: 52px;
+  }
+
+  @media (--viewportLarge) {
+    font-size: 52px;
+    line-height: 64px;
   }
 }
 
-.bookCallSubtitle {
-  font-family: var(--fontFamily);
-  font-size: 16px;
-  line-height: 26px;
-  font-weight: 400;
-  color: var(--colorGrey700);
-  margin: 0 auto 32px auto;
-  max-width: 600px;
-
-  @media (--viewportMedium) {
-    font-size: 18px;
-    line-height: 28px;
-    margin: 0 auto 40px auto;
-  }
-}
-
-.bookCallButton {
-  display: inline-block;
-  padding: 14px 32px;
-  background-color: var(--marketplaceColor);
-  color: var(--colorWhite);
-  font-family: var(--fontFamily);
-  font-size: 16px;
-  font-weight: 500;
-  text-decoration: none;
-  border-radius: 4px;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background-color: var(--marketplaceColorDark);
-    text-decoration: none;
-  }
-
-  @media (--viewportMedium) {
-    padding: 16px 40px;
-    font-size: 18px;
-  }
-}
-
-/* Section Who We Are */
-.sectionWhoWeAre {
+/* Main Content Section */
+.mainSection {
   width: 100%;
   padding: 60px 24px;
   background-color: var(--colorWhite);
@@ -155,112 +65,111 @@
   }
 }
 
-.whoWeAreTitle {
-  font-family: var(--fontFamilyHeading);
-  font-size: 32px;
-  line-height: 40px;
-  font-weight: 300;
-  color: var(--colorGrey900);
+.mainContent {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.paragraph {
+  font-family: var(--fontFamily);
+  font-size: 17px;
+  line-height: 28px;
+  font-weight: 400;
+  color: var(--colorGrey800);
   margin: 0 0 24px 0;
-  letter-spacing: -0.02em;
 
   @media (--viewportMedium) {
-    font-size: 48px;
-    line-height: 56px;
+    font-size: 18px;
+    line-height: 30px;
     margin: 0 0 32px 0;
   }
 }
 
-.whoWeAreSubtitle {
+.closingParagraph {
   font-family: var(--fontFamily);
-  font-size: 16px;
-  line-height: 26px;
-  font-weight: 400;
-  color: var(--colorGrey700);
-  margin: 0 auto 48px auto;
-  max-width: 800px;
-
-  @media (--viewportMedium) {
-    font-size: 18px;
-    line-height: 28px;
-    margin: 0 auto 64px auto;
-  }
-}
-
-/* Team Grid */
-.teamGrid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
-
-  @media (--viewportMedium) {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 32px;
-  }
-
-  @media (--viewportLarge) {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 40px;
-  }
-}
-
-.teamMember {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
-
-.teamImageWrapper {
-  width: 100%;
-  max-width: 200px;
-  aspect-ratio: 1 / 1;
-  overflow: hidden;
-  margin-bottom: 16px;
-  background-color: var(--colorGrey100);
-
-  @media (--viewportMedium) {
-    max-width: 240px;
-    margin-bottom: 20px;
-  }
-}
-
-.teamImage {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.teamImagePlaceholder {
-  width: 100%;
-  height: 100%;
-  background-color: var(--colorGrey100);
-}
-
-.teamName {
-  font-family: var(--fontFamilyHeading);
   font-size: 18px;
-  line-height: 24px;
-  font-weight: 400;
+  line-height: 28px;
+  font-weight: 500;
   color: var(--colorGrey900);
-  margin: 0 0 4px 0;
+  margin: 40px 0 0 0;
+  font-style: italic;
 
   @media (--viewportMedium) {
     font-size: 20px;
-    line-height: 28px;
+    line-height: 32px;
+    margin: 48px 0 0 0;
   }
 }
 
-.teamRole {
-  font-family: var(--fontFamily);
-  font-size: 14px;
-  line-height: 20px;
-  font-weight: 400;
-  color: var(--colorGrey600);
-  margin: 0;
+/* Partners Section */
+.partnersSection {
+  margin: 40px 0;
 
   @media (--viewportMedium) {
-    font-size: 16px;
-    line-height: 24px;
+    margin: 48px 0;
+  }
+}
+
+.partnersGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+
+  @media (--viewportMedium) {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+
+  @media (--viewportLarge) {
+    gap: 24px;
+  }
+}
+
+.servicePartnersGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  max-width: 500px;
+
+  @media (--viewportMedium) {
+    gap: 20px;
+  }
+}
+
+/* Logo Placeholder */
+.logoPlaceholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 16px;
+  background-color: var(--colorGrey50);
+  border: 1px solid var(--colorGrey100);
+  border-radius: 8px;
+  min-height: 80px;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+
+  @media (--viewportMedium) {
+    padding: 24px 20px;
+    min-height: 100px;
+  }
+
+  &:hover {
+    border-color: var(--colorGrey200);
+    background-color: var(--colorGrey100);
+  }
+}
+
+.logoText {
+  font-family: var(--fontFamily);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  color: var(--colorGrey700);
+  text-align: center;
+
+  @media (--viewportMedium) {
+    font-size: 13px;
+    line-height: 18px;
   }
 }
