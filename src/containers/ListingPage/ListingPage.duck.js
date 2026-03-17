@@ -536,7 +536,6 @@ const fetchRelatedListingsPayloadCreator = (
       include: ['author', 'author.profileImage', 'images', 'currentStock'],
       'fields.user': ['profile.displayName', 'profile.abbreviatedName', 'profile.bio', 'profile.publicData'],
       'fields.image': [
-        // Same variants as showListing to avoid overwriting with less data
         'variants.scaled-small',
         'variants.scaled-medium',
         'variants.scaled-large',
@@ -545,7 +544,8 @@ const fetchRelatedListingsPayloadCreator = (
         `variants.${variantPrefix}-2x`,
         `variants.${variantPrefix}-4x`,
         `variants.${variantPrefix}-6x`,
-        // Avatar variants for author profile images
+        'variants.facebook',
+        'variants.twitter',
         'variants.square-small',
         'variants.square-small2x',
       ],
