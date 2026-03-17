@@ -94,16 +94,13 @@
   grid-template-columns: 1fr;
   gap: 24px;
 
-  @media (--viewportSmall) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
   @media (--viewportMedium) {
+    grid-template-columns: repeat(3, 1fr);
     gap: 32px;
   }
 
   @media (--viewportLarge) {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
