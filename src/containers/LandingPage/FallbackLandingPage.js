@@ -13,7 +13,6 @@ import SectionHero from './SectionHero/SectionHero';
 import SectionListings from './SectionListings/SectionListings';
 import SectionCategories from './SectionCategories/SectionCategories';
 import SectionEditorial from './SectionEditorial/SectionEditorial';
-import SectionSeller from './SectionSeller/SectionSeller';
 import SectionBookCall from './SectionBookCall/SectionBookCall';
 import css from './FallbackLandingPage.module.css';
 
@@ -86,7 +85,6 @@ const FallbackLandingPage = props => {
             articles={featuredArticles}
             isLoading={featuredArticlesInProgress}
           />
-          <SectionSeller />
           <SectionBookCall />
         </div>
       </LayoutSingleColumn>

@@ -65,6 +65,21 @@
   }
 }
 
+.emailLink {
+  display: inline-block;
+  margin-top: 24px;
+  font-family: var(--fontFamily);
+  font-size: 18px;
+  line-height: 28px;
+  font-weight: 500;
+  color: var(--colorGrey900);
+  text-decoration: underline;
+
+  &:hover {
+    color: var(--colorGrey700);
+  }
+}
+
 /* Contact Cards Section */
 .contactSection {
   width: 100%;
