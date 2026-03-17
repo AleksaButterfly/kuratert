@@ -31,10 +31,6 @@ const CategoryCard = ({ category, intl }) => {
     { count: Math.floor(Math.random() * 2000) + 500 }
   );
 
-  if (!categoryImage) {
-    return null;
-  }
-
   return (
     <NamedLink
       name="SearchPage"
@@ -42,7 +38,11 @@ const CategoryCard = ({ category, intl }) => {
       className={css.categoryCard}
     >
       <div className={css.cardImageWrapper}>
-        <img src={categoryImage} alt={name} className={css.cardImage} />
+        {categoryImage ? (
+          <img src={categoryImage} alt={name} className={css.cardImage} />
+        ) : (
+          <div className={css.cardImagePlaceholder} />
+        )}
         <div className={css.cardOverlay} />
         <div className={css.cardContent}>
           <h3 className={css.cardTitle}>{name}</h3>
