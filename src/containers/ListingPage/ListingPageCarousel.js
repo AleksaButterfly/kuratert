@@ -247,7 +247,7 @@ const getSpecifications = (publicData, metadata, listingFieldConfigs, categoryCo
     const isTargetListingType = isFieldForListingType(listingType, config);
     const isTargetCategory = isFieldForSelectedCategories(config);
 
-    const { isDetail, label } = showConfig;
+    const { isDetail = true, label } = showConfig;
     const publicDataValue = publicData[key];
     const metadataValue = metadata?.[key];
     const value = publicDataValue != null ? publicDataValue : metadataValue;
