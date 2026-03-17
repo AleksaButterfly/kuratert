@@ -30,6 +30,7 @@ const SectionHero = props => {
   // Current slide index
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [textIsTransitioning, setTextIsTransitioning] = useState(false);
 
   // Use slides from Sanity or fall back to single default slide
   const hasSlides = slides.length > 0;
@@ -38,31 +39,50 @@ const SectionHero = props => {
   // Get current slide data
   const currentSlideData = hasSlides ? slides[currentSlide] : null;
 
+  const defaultTitle = intl.formatMessage({ id: 'SectionHero.title' });
+  const defaultSubtitle = intl.formatMessage({ id: 'SectionHero.subtitle' });
+
   // Use slide title/subtitle if available, otherwise use default intl messages
-  const title = currentSlideData?.title || intl.formatMessage({ id: 'SectionHero.title' });
-  const subtitle = currentSlideData?.subtitle || intl.formatMessage({ id: 'SectionHero.subtitle' });
+  const title = currentSlideData?.title || defaultTitle;
+  const subtitle = currentSlideData?.subtitle || defaultSubtitle;
   const copyright = currentSlideData?.copyright || null;
   const slideLink = currentSlideData?.link || null;
+
+  // Track displayed text separately so we only fade when content actually changes
+  const [displayedTitle, setDisplayedTitle] = useState(title);
+  const [displayedSubtitle, setDisplayedSubtitle] = useState(subtitle);
+
+  const transitionToSlide = useCallback((nextIndex) => {
+    const nextSlideData = hasSlides ? slides[nextIndex] : null;
+    const nextTitle = nextSlideData?.title || defaultTitle;
+    const nextSubtitle = nextSlideData?.subtitle || defaultSubtitle;
+    const contentChanged = nextTitle !== displayedTitle || nextSubtitle !== displayedSubtitle;
+
+    setIsTransitioning(true);
+    if (contentChanged) setTextIsTransitioning(true);
+
+    setTimeout(() => {
+      setCurrentSlide(nextIndex);
+      setIsTransitioning(false);
+      if (contentChanged) {
+        setDisplayedTitle(nextTitle);
+        setDisplayedSubtitle(nextSubtitle);
+        setTextIsTransitioning(false);
+      }
+    }, 300);
+  }, [hasSlides, slides, defaultTitle, defaultSubtitle, displayedTitle, displayedSubtitle]);
 
   // Go to next slide
   const goToNextSlide = useCallback(() => {
     if (slideCount <= 1) return;
-    setIsTransitioning(true);
-    setTimeout(() => {
-      setCurrentSlide(prev => (prev + 1) % slideCount);
-      setIsTransitioning(false);
-    }, 300);
-  }, [slideCount]);
+    transitionToSlide((currentSlide + 1) % slideCount);
+  }, [slideCount, currentSlide, transitionToSlide]);
 
   // Go to specific slide
   const goToSlide = useCallback((index) => {
     if (index === currentSlide) return;
-    setIsTransitioning(true);
-    setTimeout(() => {
-      setCurrentSlide(index);
-      setIsTransitioning(false);
-    }, 300);
-  }, [currentSlide]);
+    transitionToSlide(index);
+  }, [currentSlide, transitionToSlide]);
 
   // Auto-rotation effect
   useEffect(() => {
@@ -134,11 +154,11 @@ const SectionHero = props => {
       <div className={css.overlay} />
 
       <div className={css.heroContent}>
-        <h1 className={classNames(css.heroTitle, { [css.fadeText]: isTransitioning })}>
-          {title}
+        <h1 className={classNames(css.heroTitle, { [css.fadeText]: textIsTransitioning })}>
+          {displayedTitle}
         </h1>
-        <p className={classNames(css.heroSubtitle, { [css.fadeText]: isTransitioning })}>
-          {subtitle}
+        <p className={classNames(css.heroSubtitle, { [css.fadeText]: textIsTransitioning })}>
+          {displayedSubtitle}
         </p>
         <HeroSearchForm
           className={css.searchForm}
@@ -148,9 +168,9 @@ const SectionHero = props => {
       </div>
 
       {/* Copyright / Image credit - bottom right */}
-      {copyright && (
+      {currentSlideData?.copyright && (
         <div className={classNames(css.copyright, { [css.fadeText]: isTransitioning })}>
-          {copyright}
+          {currentSlideData.copyright}
         </div>
       )}
 
