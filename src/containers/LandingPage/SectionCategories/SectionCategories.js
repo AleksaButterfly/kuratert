@@ -22,14 +22,9 @@ const IconArrowRight = () => (
   </svg>
 );
 
-const CategoryCard = ({ category, intl }) => {
+const CategoryCard = ({ category }) => {
   const { id, name } = category;
   const categoryImage = getCategoryImage(id);
-
-  const piecesCount = intl.formatMessage(
-    { id: 'SectionCategories.piecesCount' },
-    { count: Math.floor(Math.random() * 2000) + 500 }
-  );
 
   return (
     <NamedLink
@@ -46,7 +41,6 @@ const CategoryCard = ({ category, intl }) => {
         <div className={css.cardOverlay} />
         <div className={css.cardContent}>
           <h3 className={css.cardTitle}>{name}</h3>
-          <p className={css.cardPieces}>{piecesCount}</p>
         </div>
       </div>
     </NamedLink>
@@ -86,7 +80,7 @@ const SectionCategories = props => {
 
         <div className={css.categoriesGrid}>
           {topLevelCategories.map(category => (
-            <CategoryCard key={category.id} category={category} intl={intl} />
+            <CategoryCard key={category.id} category={category} />
           ))}
         </div>
       </div>
