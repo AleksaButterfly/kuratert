@@ -680,29 +680,14 @@ export const CheckoutPageWithPayment = props => {
     setCancelKlarnaInProgress(true);
 
     try {
-      const process = processName ? getProcess(processName) : null;
-      const cancelTransition = process?.transitions?.CANCEL_PAYMENT_KLARNA;
+      // The cancel-payment-klarna transition has stripe-refund-payment which fails
+      // when the user abandoned Klarna before payment was captured (nothing to refund).
+      // Instead, clear session storage and reload — the transaction will expire
+      // automatically in 15 min via expire-payment-klarna, releasing stock.
+      const { orderData, listing, cartItems } = pageData;
+      storeData(orderData, listing, null, sessionStorageKey, cartItems);
 
-      if (cancelTransition) {
-        // Use onInitiateOrder with isPrivilegedTransition=true since cancel-payment-klarna
-        // has stripe-refund-payment action which requires server-side handling
-        const updatedTx = await onInitiateOrder({}, processName, existingTx.id, cancelTransition, true);
-
-        const { orderData, listing, cartItems } = pageData;
-        const isNegotiatedPurchase = processName === NEGOTIATED_PURCHASE_PROCESS_NAME;
-
-        if (isNegotiatedPurchase && updatedTx?.id) {
-          // For negotiated-purchase: cancel goes to 'accepted' state
-          // Keep the transaction so user can pay again on the same accepted offer
-          storeData(orderData, listing, updatedTx, sessionStorageKey, cartItems);
-        } else {
-          // For default-purchase: cancel goes to 'initial' state
-          // Clear transaction so user starts fresh
-          storeData(orderData, listing, null, sessionStorageKey, cartItems);
-        }
-      }
-
-      // Reload page
+      // Reload so user can pay with a different method
       window.location.reload();
     } catch (err) {
       console.error('Failed to cancel Klarna payment:', err);
