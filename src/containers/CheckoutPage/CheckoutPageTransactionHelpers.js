@@ -156,7 +156,10 @@ export const hasPaymentExpired = (existingTransaction, process, isClockInSync) =
  * @returns true if the transaction has passed that state
  */
 export const hasTransactionPassedPendingPayment = (tx, process) => {
-  return process.hasPassedState(process.states.PENDING_PAYMENT, tx);
+  // Also treat pending-payment-klarna as "passed" pending payment so speculation is skipped
+  const isKlarnaPending = process.states?.PENDING_PAYMENT_KLARNA &&
+    process.getState(tx) === process.states.PENDING_PAYMENT_KLARNA;
+  return isKlarnaPending || process.hasPassedState(process.states.PENDING_PAYMENT, tx);
 };
 
 /**
