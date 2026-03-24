@@ -15,22 +15,11 @@ const initiateOrderPayloadCreator = (
   { orderParams, processAlias, transactionId, transitionName, isPrivilegedTransition },
   { dispatch, extra: sdk, rejectWithValue }
 ) => {
-  // Special handling for cancel transitions - they don't need orderData
-  const isCancelTransition = transitionName === 'transition/cancel-payment-klarna' ||
-    transitionName === 'transition/operator-cancel-payment-klarna';
-
-  if (isCancelTransition && transactionId) {
-    const bodyParams = {
-      id: transactionId,
-      transition: transitionName,
-      params: {},
-    };
-    const queryParams = {
-      include: ['booking', 'provider'],
-      expand: true,
-    };
-
-    return transitionPrivileged({ isSpeculative: false, orderData: {}, bodyParams, queryParams })
+  // Special handling for cancel-payment-klarna — no stripe-refund-payment action,
+  // so it's a plain customer transition callable via regular SDK (not privileged).
+  if (transitionName === 'transition/cancel-payment-klarna' && transactionId) {
+    return sdk.transactions
+      .transition({ id: transactionId, transition: transitionName, params: {} }, { expand: true })
       .then(response => {
         const entities = denormalisedResponseEntities(response);
         return entities[0];

@@ -680,14 +680,19 @@ export const CheckoutPageWithPayment = props => {
     setCancelKlarnaInProgress(true);
 
     try {
-      // The cancel-payment-klarna transition has stripe-refund-payment which fails
-      // when the user abandoned Klarna before payment was captured (nothing to refund).
-      // Instead, clear session storage and reload — the transaction will expire
-      // automatically in 15 min via expire-payment-klarna, releasing stock.
+      const process = processName ? getProcess(processName) : null;
+      const cancelTransition = process?.transitions?.CANCEL_PAYMENT_KLARNA;
+
+      if (cancelTransition) {
+        // cancel-payment-klarna no longer has stripe-refund-payment, so it's a
+        // plain SDK transition that releases stock immediately
+        await onInitiateOrder({}, processName, existingTx.id, cancelTransition, false);
+      }
+
+      // Clear session so user gets a fresh checkout to pay with another method
       const { orderData, listing, cartItems } = pageData;
       storeData(orderData, listing, null, sessionStorageKey, cartItems);
 
-      // Reload so user can pay with a different method
       window.location.reload();
     } catch (err) {
       console.error('Failed to cancel Klarna payment:', err);
