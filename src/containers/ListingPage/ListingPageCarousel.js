@@ -966,16 +966,18 @@ export const ListingPageComponent = props => {
 
             {/* Action buttons */}
             <div className={css.actionsSection}>
-              {/* Auction listing - show View at Auction button */}
-              {isAuction && auctionLink ? (
-                <a
-                  href={auctionLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={css.viewAtAuctionButton}
-                >
-                  <FormattedMessage id="ListingPage.viewAtAuction" />
-                </a>
+              {/* Auction listing - show View at Auction button (never show purchase buttons) */}
+              {isAuction ? (
+                auctionLink ? (
+                  <a
+                    href={auctionLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={css.viewAtAuctionButton}
+                  >
+                    <FormattedMessage id="ListingPage.viewAtAuction" />
+                  </a>
+                ) : null
               ) : isReserved ? (
                 /* Reserved listing - only show contact seller */
                 null
