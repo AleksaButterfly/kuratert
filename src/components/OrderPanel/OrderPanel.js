@@ -305,6 +305,7 @@ const OrderPanel = props => {
     fetchLineItemsError,
     payoutDetailsWarning,
     showListingImage,
+    hideAuthor,
   } = props;
 
   const publicData = listing?.attributes?.publicData || {};
@@ -468,7 +469,7 @@ const OrderPanel = props => {
           marketplaceCurrency={marketplaceCurrency}
         />
 
-        <div className={css.author}>
+        <div className={css.author} style={hideAuthor ? { display: 'none' } : undefined}>
           <AvatarSmall user={author} className={css.providerAvatar} />
           <span className={css.providerNameLinked}>
             <FormattedMessage id="OrderPanel.author" values={{ name: authorLink }} />
