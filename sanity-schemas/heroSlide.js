@@ -34,13 +34,6 @@ export default {
       description: 'Optional URL to navigate to when clicking the slide.',
     },
     {
-      name: 'order',
-      title: 'Display Order',
-      type: 'number',
-      description: 'Order in which slides appear (lower numbers first).',
-      validation: Rule => Rule.required().integer().min(1),
-    },
-    {
       name: 'isActive',
       title: 'Active',
       type: 'boolean',
@@ -48,24 +41,16 @@ export default {
       initialValue: true,
     },
   ],
-  orderings: [
-    {
-      title: 'Display Order',
-      name: 'orderAsc',
-      by: [{ field: 'order', direction: 'asc' }],
-    },
-  ],
   preview: {
     select: {
       title: 'title',
-      order: 'order',
       media: 'image',
       isActive: 'isActive',
     },
-    prepare({ title, order, media, isActive }) {
+    prepare({ title, media, isActive }) {
       return {
-        title: title || `Slide ${order}`,
-        subtitle: `Order: ${order} ${isActive ? '(Active)' : '(Inactive)'}`,
+        title: title || 'Slide',
+        subtitle: isActive ? '(Active)' : '(Inactive)',
         media,
       };
     },
