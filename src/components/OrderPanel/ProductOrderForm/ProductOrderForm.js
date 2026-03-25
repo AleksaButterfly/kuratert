@@ -155,6 +155,7 @@ const renderForm = formRenderProps => {
     pickupEnabled,
     shippingEnabled,
     quoteEnabled,
+    isAuction,
   } = formRenderProps;
 
   // Note: don't add custom logic before useEffect
@@ -301,26 +302,30 @@ const renderForm = formRenderProps => {
 
       <FetchLineItemsError error={fetchLineItemsError} />
 
-      <div className={css.submitButton}>
-        <PrimaryButton type="submit" inProgress={submitInProgress} disabled={submitDisabled}>
-          {hasStock ? (
-            <FormattedMessage id="ProductOrderForm.ctaButton" />
-          ) : (
-            <FormattedMessage id="ProductOrderForm.ctaButtonNoStock" />
-          )}
-        </PrimaryButton>
-      </div>
-      <p className={css.finePrint}>
-        {payoutDetailsWarning ? (
-          payoutDetailsWarning
-        ) : hasStock && isOwnListing ? (
-          <FormattedMessage id="ProductOrderForm.ownListing" />
-        ) : hasStock ? (
-          <FormattedMessage id="ProductOrderForm.finePrint" />
-        ) : showContactUser ? (
-          <FormattedMessage id="ProductOrderForm.finePrintNoStock" values={{ contactSellerLink }} />
-        ) : null}
-      </p>
+      {!isAuction && (
+        <>
+          <div className={css.submitButton}>
+            <PrimaryButton type="submit" inProgress={submitInProgress} disabled={submitDisabled}>
+              {hasStock ? (
+                <FormattedMessage id="ProductOrderForm.ctaButton" />
+              ) : (
+                <FormattedMessage id="ProductOrderForm.ctaButtonNoStock" />
+              )}
+            </PrimaryButton>
+          </div>
+          <p className={css.finePrint}>
+            {payoutDetailsWarning ? (
+              payoutDetailsWarning
+            ) : hasStock && isOwnListing ? (
+              <FormattedMessage id="ProductOrderForm.ownListing" />
+            ) : hasStock ? (
+              <FormattedMessage id="ProductOrderForm.finePrint" />
+            ) : showContactUser ? (
+              <FormattedMessage id="ProductOrderForm.finePrintNoStock" values={{ contactSellerLink }} />
+            ) : null}
+          </p>
+        </>
+      )}
     </Form>
   );
 };

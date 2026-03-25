@@ -315,6 +315,7 @@ const OrderPanel = props => {
     priceVariants,
     startTimeInterval,
     acceptingOffers,
+    isAuction,
   } = publicData || {};
 
   const processName = resolveLatestProcessName(transactionProcessAlias.split('/')[0]);
@@ -536,6 +537,7 @@ const OrderPanel = props => {
             quoteEnabled={quoteEnabled && displayQuote}
             displayDeliveryMethod={displayPickup || displayShipping || displayQuote}
             onContactUser={onContactUser}
+            isAuction={isAuction}
             {...sharedProps}
           />
         ) : showInquiryForm ? (
