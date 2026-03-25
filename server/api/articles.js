@@ -241,14 +241,13 @@ const getHeroSlides = async (req, res) => {
   try {
     const client = getSanityClient();
 
-    const query = `*[_type == "heroSlide" && isActive == true] | order(order asc) {
+    const query = `*[_type == "heroSlide" && isActive == true] {
       _id,
       title,
       subtitle,
       image,
       link,
-      copyright,
-      order
+      copyright
     }`;
 
     const slides = await client.fetch(query);
@@ -261,8 +260,13 @@ const getHeroSlides = async (req, res) => {
       image: buildImageUrl(slide.image, 2400),
       link: slide.link || null,
       copyright: slide.copyright || null,
-      order: slide.order,
     }));
+
+    // Shuffle slides so order is random on each page load
+    for (let i = formattedSlides.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [formattedSlides[i], formattedSlides[j]] = [formattedSlides[j], formattedSlides[i]];
+    }
 
     res.status(200).json({ data: formattedSlides });
   } catch (error) {

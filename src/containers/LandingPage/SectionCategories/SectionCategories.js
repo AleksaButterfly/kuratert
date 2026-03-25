@@ -9,11 +9,15 @@ import { NamedLink } from '../../../components';
 import css from './SectionCategories.module.css';
 
 const getCategoryImage = categoryId => {
-  try {
-    return require(`./images/${categoryId}.avif`);
-  } catch (e) {
-    return null;
+  const extensions = ['webp', 'avif'];
+  for (const ext of extensions) {
+    try {
+      return require(`./images/${categoryId}.${ext}`);
+    } catch (e) {
+      // try next
+    }
   }
+  return null;
 };
 
 const IconArrowRight = () => (
