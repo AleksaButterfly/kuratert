@@ -316,6 +316,7 @@ const OrderPanel = props => {
     startTimeInterval,
     acceptingOffers,
     isAuction,
+    isReserved,
   } = publicData || {};
 
   const processName = resolveLatestProcessName(transactionProcessAlias.split('/')[0]);
@@ -354,8 +355,9 @@ const OrderPanel = props => {
 
   // Show form only when stock is fully loaded. This avoids "Out of stock" UI by
   // default before all data has been downloaded.
+  // Auction and reserved listings cannot be purchased directly.
   const showProductOrderForm =
-    mounted && shouldHavePurchase && !isClosed && typeof currentStock === 'number';
+    mounted && shouldHavePurchase && !isClosed && typeof currentStock === 'number' && !isAuction && !isReserved;
 
   const showInquiryForm = mounted && !isClosed && isInquiry;
   // if listing is a request, we show the negotiation form (reverse negotiation). User (provider) needs to make an offer first.
@@ -537,7 +539,6 @@ const OrderPanel = props => {
             quoteEnabled={quoteEnabled && displayQuote}
             displayDeliveryMethod={displayPickup || displayShipping || displayQuote}
             onContactUser={onContactUser}
-            isAuction={isAuction}
             {...sharedProps}
           />
         ) : showInquiryForm ? (
