@@ -28,34 +28,14 @@ import { MaintenanceMode } from './components';
 import routeConfiguration from './routing/routeConfiguration';
 import Routes from './routing/Routes';
 
-// Sharetribe Web Template uses English translations as default/fallback translations.
-import messagesEn from './translations/en.json';
-
-// Norwegian translations
-import messagesNo from './translations/no.json';
+// Norwegian translations as the primary locale (no English fallback)
+import defaultMessages from './translations/no.json';
+import messagesInLocale from './translations/no.json';
 
 // Import Norwegian locale for Moment library
 import 'moment/locale/nb';
 
-// Get the current locale - check localStorage directly for client-side
-// Norwegian (nb-NO) is always the default
-const getLocale = () => {
-  if (typeof window === 'undefined') return 'nb-NO';
-  const savedLocale = localStorage.getItem('locale');
-  if (savedLocale === 'en') return 'en';
-  return 'nb-NO';
-};
-
-const currentLocale = getLocale();
-const isNorwegian = currentLocale.startsWith('nb') || currentLocale === 'no';
-
-// Select messages based on locale
-// Norwegian: use Norwegian as primary with English fallback
-// English: use English as primary with Norwegian fallback
-const defaultMessages = messagesEn;
-const messagesInLocale = isNorwegian ? messagesNo : messagesEn;
-
-const hardCodedLocale = process.env.NODE_ENV === 'test' ? 'en' : isNorwegian ? 'nb' : 'en';
+const hardCodedLocale = process.env.NODE_ENV === 'test' ? 'en' : 'nb';
 
 // Note that there is also translations in './translations/countryCodes.js' file
 // This file contains ISO 3166-1 alpha-2 country codes, country names and their translations in our default languages
