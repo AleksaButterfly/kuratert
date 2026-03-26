@@ -34,14 +34,14 @@ const AboutPage = () => {
 
   // Gallery partners
   const galleryPartners = [
+    'OSL Contemporary',
+    'STANDARD (Oslo)',
+    'Galleri Riis',
+    'Galleri Opdahl',
+    'Høyersten Contemporary',
+    'QB Galleri',
     'Grev Wedels Plass Auksjoner',
     'Blomqvist Kunsthandel',
-    'QB Galleri',
-    'Galleri Riis',
-    'OSL Contemporary',
-    'Standard Oslo',
-    'Høyersten Contemporary',
-    'Galleri Opdahl',
   ];
 
   // Service partners
@@ -82,21 +82,16 @@ const AboutPage = () => {
             <div className={css.mainContent}>
               {/* Intro paragraph */}
               <p className={css.paragraph}>
-                Hva om det fantes ett sted å gå når du vil kjøpe kunst og faktisk vite at du gjør et godt valg? Det er akkurat det Kuratert er.
+                Kuratert er en digital markedsplass som samler Norges ledende gallerier, auksjonshus og kunstfaglige tjenesteleverandører på én plattform
               </p>
 
-              {/* About Cornelia */}
               <p className={css.paragraph}>
-                Bak plattformen står Cornelia Svedman: kunsthistoriker, tidligere ekspert hos Christie's i London, og en av Norges mest profilerte stemmer innen kunstmarkedet. Hun har tilbrakt 20 år i bransjen, rådgitt norske kjøpere og selgere i transaksjoner for titalls millioner dollar, og skrevet om kunst og investering for Dagens Næringsliv. Nå har hun samlet det hun vet om gode kunstkjøp på én lett tilgjengelig, digital plattform.
-              </p>
-
-              {/* About the platform */}
-              <p className={css.paragraph}>
-                Kuratert er ikke en åpen markedsplass der alle slipper til. Det er et nøye utvalgt univers, der hvert galleri og hvert verk er håndplukket med faglighet i bunn. Ved lansering er disse med:
+                Kuratert bringer sammen sentrale aktører i det norske kunstmarkedet, nøye utvalgt basert på kvalitet, integritet og relevans:
               </p>
 
               {/* Gallery Partners */}
               <div className={css.partnersSection}>
+                <p className={css.partnersLabel}>Gallerier og auksjonshus:</p>
                 <div className={css.partnersGrid}>
                   {galleryPartners.map((partner, index) => (
                     <LogoPlaceholder key={index} name={partner} />
@@ -104,13 +99,9 @@ const AboutPage = () => {
                 </div>
               </div>
 
-              {/* Service partners intro */}
-              <p className={css.paragraph}>
-                I tillegg samarbeider vi med ledende tjenesteleverandører innenfor rådgivning, taksering, forsikring, transport og oppheng:
-              </p>
-
               {/* Service Partners */}
               <div className={css.partnersSection}>
+                <p className={css.partnersLabel}>Tjenesteleverandører:</p>
                 <div className={css.servicePartnersGrid}>
                   {servicePartners.map((partner, index) => (
                     <LogoPlaceholder key={index} name={partner} />
@@ -118,13 +109,24 @@ const AboutPage = () => {
                 </div>
               </div>
 
-              {/* Final paragraphs */}
               <p className={css.paragraph}>
-                Enten du er erfaren samler eller skal kjøpe ditt første verk, tilbyr Kuratert gratis kunstrådgivning, digitale visninger og en enkel kjøpsprosess, fra første klikk til levering på døren.
+                Ved å samle disse aktørene digitalt, åpner Kuratert et marked som tradisjonelt har vært fragmentert og lite tilgjengelig.
               </p>
 
-              <p className={css.closingParagraph}>
-                Vi har allerede valgt ut det beste. Nå er det din tur.
+              {/* About Cornelia */}
+              <p className={css.paragraph}>
+                Bak Kuratert står kunstrådgiver og -historiker Cornelia Svedman, med 20 års erfaring fra det internasjonale kunstmarkedet. Som tidligere ekspert hos Christie's i London og profilert skribent for blant annet Dagens Næringsliv, er Svedman en av Norges mest respekterte stemmer innen kunst og investering.
+              </p>
+
+              {/* Quote */}
+              <blockquote className={css.quote}>
+                <p>Det finnes mye god kunst i Norge, men markedet kan oppleves lukket og uoversiktlig. Med Kuratert ønsket jeg å gjøre det enklere å navigere, uten å gå på kompromiss med faglighet eller kvalitet.</p>
+                <cite>– Cornelia Svedman, grunnlegger</cite>
+              </blockquote>
+
+              {/* Platform features */}
+              <p className={css.paragraph}>
+                Plattformen kombinerer klassisk kunstrådgivning med moderne teknologi, og gir både nye og erfarne kjøpere tilgang til et kuratert utvalg av kunst fra ledende aktører; kostnadsfri kunstrådgivning; digitale visninger; integrert bestilling av transport og ramme; og trygge og fleksible betalingsløsninger, inkludert Klarna og American Express.
               </p>
             </div>
           </section>

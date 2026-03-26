@@ -105,6 +105,38 @@
   }
 }
 
+.quote {
+  border-left: 3px solid var(--colorGrey300);
+  margin: 32px 0;
+  padding: 8px 24px;
+
+  p {
+    font-family: var(--fontFamily);
+    font-size: 16px;
+    line-height: 26px;
+    font-style: italic;
+    color: var(--colorGrey700);
+    margin: 0 0 8px 0;
+  }
+
+  cite {
+    font-family: var(--fontFamily);
+    font-size: 14px;
+    font-style: normal;
+    color: var(--colorGrey600);
+  }
+}
+
+.partnersLabel {
+  font-family: var(--fontFamily);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--colorGrey700);
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 /* Partners Section */
 .partnersSection {
   margin: 40px 0;

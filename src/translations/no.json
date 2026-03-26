@@ -92,7 +92,7 @@
   "CartPage.benefitPayment": "Sikker betalingsbehandling",
   "CartPage.benefitShipping": "Bistand med levering",
   "CartPage.browseListing": "Bla gjennom annonser",
-  "CartPage.checkoutWithSeller": "Betal til {sellerName}",
+  "CartPage.checkoutWithSeller": "Trygg betaling gjennom Kuratert/Stripe",
   "CartPage.continueShopping": "Fortsett å handle",
   "CartPage.deliveryMethodLabel": "Leveringsmetode",
   "CartPage.deliveryMethodRequired": "Vennligst velg leveringsmetode",
@@ -1511,7 +1511,7 @@
   "StripePaymentForm.locationDetailsTitle": "Oppføringssted",
   "StripePaymentForm.locationUnknown": "Ukjent sted",
   "StripePaymentForm.messageHeading": "Tilleggsinformasjon",
-  "StripePaymentForm.messageLabel": "Er det noe eieren av oppføringen bør vite? {messageOptionalText}",
+  "StripePaymentForm.messageLabel": "Har du noen spørsmål eller kommentarer til selger? I neste steg får du informasjon om transport. {messageOptionalText}",
   "StripePaymentForm.messageOptionalText": "(valgfritt)",
   "StripePaymentForm.messagePlaceholder": "Hei {name}! Du bør vite at…",
   "StripePaymentForm.missingStripeKey": "Den publiserbare API-nøkkelen fra Stripe er ikke konfigurert riktig i denne markedsplassen. Det er ikke mulig å booke denne oppføringen.",
@@ -1545,7 +1545,7 @@
   "StripePaymentForm.stripe.validation_error.invalid_swipe_data": "Kortets swipe-data er ugyldig.",
   "StripePaymentForm.stripe.validation_error.missing": "Det finnes ikke noe kort på kunden som blir belastet.",
   "StripePaymentForm.stripe.validation_error.processing_error": "Det oppstod en feil under behandling av kortet.",
-  "StripePaymentForm.submitConfirmPaymentFinePrint": "{isBooking, select, yes {Kortet ditt vil kun bli belastet når {name} godtar bookingforespørselen.} other {{name} mottar ikke penger før varen er levert.}}",
+  "StripePaymentForm.submitConfirmPaymentFinePrint": "{isBooking, select, yes {Kortet ditt vil kun bli belastet når {name} godtar bookingforespørselen.} other {Kuratert/Stripe holder på betalingen inntil kunstverket er levert.}}",
   "StripePaymentForm.submitConfirmPaymentInfo": "Fortsett",
   "StripePaymentForm.submitPaymentInfo": "{isBooking, select, yes {Bekreft bookingforespørsel} other {Bekreft og betal {totalPrice}}}",
   "StripePaymentForm.walletPaymentError": "Betalingen mislyktes. Prøv igjen eller bruk kort.",
@@ -1984,5 +1984,5 @@
   "ViewInSpaceModal.useCameraHint": "Se kunstverket live i rommet ditt",
   "ViewInSpaceModal.zoomIn": "Zoom inn",
   "ViewInSpaceModal.zoomOut": "Zoom ut",
-  "StripePaymentForm.submitConfirmPaymentFine": "{isBooking, select, yes {Kortet ditt vil kun bli belastet når {name} godtar bookingforespørselen.} other {{name} mottar ikke penger før varen er levert.}}"
+  "StripePaymentForm.submitConfirmPaymentFine": "{isBooking, select, yes {Kortet ditt vil kun bli belastet når {name} godtar bookingforespørselen.} other {Kuratert/Stripe holder på betalingen inntil kunstverket er levert.}}"
 }

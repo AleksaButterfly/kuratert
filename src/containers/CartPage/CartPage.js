@@ -725,12 +725,6 @@ export const CartPageComponent = props => {
                                 <FormattedMessage id="CartPage.benefitPayment" />
                               </span>
                             </div>
-                            <div className={css.benefitItem}>
-                              <span className={css.benefitDot} />
-                              <span className={css.benefitText}>
-                                <FormattedMessage id="CartPage.benefitAuthenticity" />
-                              </span>
-                            </div>
                           </div>
                         </div>
                       </div>
