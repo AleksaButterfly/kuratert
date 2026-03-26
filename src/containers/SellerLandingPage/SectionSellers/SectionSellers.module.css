@@ -26,14 +26,6 @@
   gap: 8px;
 }
 
-.label {
-  font-family: var(--fontFamily);
-  font-size: 16px;
-  line-height: 26px;
-  color: var(--colorGrey900);
-  margin: 0;
-}
-
 .title {
   font-family: var(--fontFamilyHeading);
   font-size: 24px;
@@ -49,67 +41,55 @@
   }
 }
 
+.subtitle {
+  font-family: var(--fontFamily);
+  font-size: 16px;
+  line-height: 26px;
+  color: var(--colorGrey600);
+  margin: 0;
+  max-width: 560px;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 32px;
+  gap: 24px;
 
   @media (--viewportMedium) {
     grid-template-columns: repeat(3, 1fr);
   }
 
   @media (--viewportLarge) {
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(5, 1fr);
   }
 }
 
-.card {
+.logoPlaceholder {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  text-decoration: none;
-  transition: opacity 0.2s ease;
-
-  &:hover {
-    opacity: 0.8;
-    text-decoration: none;
-  }
+  border: 1px solid var(--colorGrey100);
+  border-radius: 4px;
+  padding: 20px 16px;
+  min-height: 72px;
+  background-color: var(--colorWhite);
 }
 
-.avatar {
-  width: 80px;
-  height: 80px;
-}
-
-.cardContent {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-
-.sellerName {
-  font-family: var(--fontFamilyHeading);
-  font-size: 20px;
-  line-height: 28px;
-  font-weight: 400;
-  color: var(--colorGrey900);
-  margin: 0;
-  text-align: center;
-
-  @media (--viewportMedium) {
-    font-size: 24px;
-    line-height: 32px;
-  }
-}
-
-.sellerType {
+.logoText {
   font-family: var(--fontFamily);
-  font-size: 10px;
-  line-height: 16px;
-  color: var(--colorGrey900);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--colorGrey700);
+  text-align: center;
+}
+
+.footerText {
+  font-family: var(--fontFamily);
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--colorGrey600);
   margin: 0;
   text-align: center;
+  max-width: 640px;
+  align-self: center;
 }
