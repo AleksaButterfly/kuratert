@@ -144,17 +144,6 @@
     {:name :action/cancel-stock-reservation}],
    :from :state/purchased,
    :to :state/canceled}
-  {:name :transition/auto-cancel,
-   :at
-   {:fn/plus
-    [{:fn/timepoint [:time/first-entered-state :state/purchased]}
-     {:fn/period ["P14D"]}]},
-   :actions
-   [{:name :action/calculate-full-refund}
-    {:name :action/stripe-refund-payment}
-    {:name :action/cancel-stock-reservation}],
-   :from :state/purchased,
-   :to :state/canceled}
   {:name :transition/cancel-from-disputed,
    :actor :actor.role/operator,
    :actions
@@ -250,14 +239,6 @@
    :on :transition/mark-received,
    :to :actor.role/provider,
    :template :purchase-order-marked-as-received}
-  {:name :notification/shipping-time-expired,
-   :on :transition/auto-cancel,
-   :to :actor.role/customer,
-   :template :purchase-shipping-time-expired-customer}
-  {:name :notification/order-shipping-time-expired,
-   :on :transition/auto-cancel,
-   :to :actor.role/provider,
-   :template :purchase-shipping-time-expired-provider}
   {:name :notification/purchase-canceled,
    :on :transition/cancel,
    :to :actor.role/customer,
