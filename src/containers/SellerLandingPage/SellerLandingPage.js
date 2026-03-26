@@ -1,5 +1,5 @@
 import React from 'react';
-import { bool } from 'prop-types';
+import { array, bool } from 'prop-types';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 
@@ -11,12 +11,17 @@ import { Page, LayoutSingleColumn } from '../../components';
 import TopbarContainer from '../../containers/TopbarContainer/TopbarContainer';
 import FooterContainer from '../../containers/FooterContainer/FooterContainer';
 
+import SectionHero from './SectionHero/SectionHero';
+import SectionAbout from './SectionAbout/SectionAbout';
 import SectionSellers from './SectionSellers/SectionSellers';
+import SectionHowItWorks from './SectionHowItWorks/SectionHowItWorks';
+import SectionPricing from './SectionPricing/SectionPricing';
+import SectionSell from './SectionSell/SectionSell';
 
 import css from './SellerLandingPage.module.css';
 
 const SellerLandingPageComponent = props => {
-  const { scrollingDisabled } = props;
+  const { sellers, querySellersInProgress, scrollingDisabled } = props;
   const intl = useIntl();
   const config = useConfiguration();
 
@@ -29,6 +34,9 @@ const SellerLandingPageComponent = props => {
     { id: 'SellerLandingPage.schemaDescription' },
     { marketplaceName }
   );
+
+  // Only show sellers section if we have sellers
+  const hasSellers = sellers && sellers.length > 0;
 
   return (
     <Page
@@ -48,7 +56,14 @@ const SellerLandingPageComponent = props => {
         footer={<FooterContainer />}
       >
         <div className={css.content}>
-          <SectionSellers />
+          <SectionHero />
+          <SectionAbout />
+          {hasSellers && !querySellersInProgress ? (
+            <SectionSellers sellers={sellers} />
+          ) : null}
+          <SectionHowItWorks />
+          <SectionPricing />
+          <SectionSell />
         </div>
       </LayoutSingleColumn>
     </Page>
@@ -56,12 +71,21 @@ const SellerLandingPageComponent = props => {
 };
 
 SellerLandingPageComponent.propTypes = {
+  sellers: array,
+  querySellersInProgress: bool,
   scrollingDisabled: bool.isRequired,
 };
 
-const mapStateToProps = state => ({
-  scrollingDisabled: isScrollingDisabled(state),
-});
+const mapStateToProps = state => {
+  const { sellers, querySellersInProgress, querySellersError } = state.SellerLandingPage;
+
+  return {
+    sellers,
+    querySellersInProgress,
+    querySellersError,
+    scrollingDisabled: isScrollingDisabled(state),
+  };
+};
 
 const SellerLandingPage = compose(connect(mapStateToProps))(SellerLandingPageComponent);
 

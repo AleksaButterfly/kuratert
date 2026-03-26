@@ -1,53 +1,71 @@
 import React from 'react';
-import { string } from 'prop-types';
+import { array, string } from 'prop-types';
 import classNames from 'classnames';
 
 import { FormattedMessage } from '../../../util/reactIntl';
+import { Avatar, NamedLink } from '../../../components';
 
 import css from './SectionSellers.module.css';
 
-const LogoPlaceholder = ({ name }) => (
-  <div className={css.logoPlaceholder}>
-    <span className={css.logoText}>{name}</span>
-  </div>
-);
-
-const partners = [
-  'OSL Contemporary',
-  'STANDARD (Oslo)',
-  'Galleri Riis',
-  'Galleri Opdahl',
-  'Høyersten Contemporary',
-  'QB Galleri',
-  'Grev Wedels Plass Auksjoner',
-  'Blomqvist Kunsthandel',
-  'Mie Mortensen/Abstrakt AS',
-  'Cornelia Svedman Art Advisory',
-];
-
 const SectionSellers = props => {
-  const { rootClassName, className } = props;
+  const { rootClassName, className, sellers } = props;
   const classes = classNames(rootClassName || css.root, className);
+
+  if (!sellers || sellers.length === 0) {
+    return null;
+  }
 
   return (
     <section className={classes}>
       <div className={css.container}>
         <div className={css.header}>
-          <h2 className={css.title}>
+          <p className={css.label}>
             <FormattedMessage id="SellerLandingPage.SectionSellers.label" />
-          </h2>
-          <p className={css.subtitle}>
-            <FormattedMessage id="SellerLandingPage.SectionSellers.title" />
           </p>
+          <h2 className={css.title}>
+            <FormattedMessage id="SellerLandingPage.SectionSellers.title" />
+          </h2>
         </div>
         <div className={css.grid}>
-          {partners.map((partner, index) => (
-            <LogoPlaceholder key={index} name={partner} />
-          ))}
+          {sellers.map((seller, index) => {
+            const { id, attributes, profileImage } = seller;
+            const { profile } = attributes || {};
+            const { displayName, abbreviatedName, publicData } = profile || {};
+            const { userType } = publicData || {};
+
+            // Create a user-like object for Avatar component
+            const userForAvatar = {
+              id,
+              type: 'user',
+              attributes: {
+                profile: {
+                  displayName,
+                  abbreviatedName: abbreviatedName || displayName?.charAt(0) || '?',
+                },
+              },
+              profileImage,
+            };
+
+            return (
+              <NamedLink
+                key={id?.uuid || index}
+                name="ProfilePage"
+                params={{ id: id?.uuid }}
+                className={css.card}
+              >
+                <Avatar
+                  className={css.avatar}
+                  user={userForAvatar}
+                  disableProfileLink
+                />
+                <div className={css.cardContent}>
+                  <h3 className={css.sellerName}>{displayName || 'Seller'}</h3>
+                  <p className={css.sellerType}>Gallery</p>
+                </div>
+              </NamedLink>
+            );
+          })}
         </div>
-        <p className={css.footerText}>
-          <FormattedMessage id="SellerLandingPage.SectionSellers.footerText" />
-        </p>
       </div>
     </section>
   );
@@ -56,6 +74,7 @@ const SectionSellers = props => {
 SectionSellers.propTypes = {
   rootClassName: string,
   className: string,
+  sellers: array,
 };
 
 export default SectionSellers;
