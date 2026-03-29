@@ -51,8 +51,8 @@ const ContactPage = () => {
               <p className={css.heroSubtitle}>
                 {intl.formatMessage({ id: 'ContactPage.heroSubtitle' })}
               </p>
-              <a href="mailto:info@kuratert.no" className={css.emailLink}>
-                info@kuratert.no
+              <a href="mailto:kontakt@kuratert.no" className={css.emailLink}>
+                kontakt@kuratert.no
               </a>
             </div>
           </section>

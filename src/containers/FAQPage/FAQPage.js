@@ -52,6 +52,10 @@ const faqItems = [
     questionId: 'FAQPage.question7',
     answerId: 'FAQPage.answer7',
   },
+  {
+    questionId: 'FAQPage.question8',
+    answerId: 'FAQPage.answer8',
+  },
 ];
 
 const FAQItem = ({ questionId, answerId, isOpen, onToggle, intl }) => {
