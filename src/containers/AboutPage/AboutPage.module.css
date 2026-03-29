@@ -74,6 +74,23 @@
   margin: 0 auto;
 }
 
+.sectionHeading {
+  font-family: var(--fontFamily);
+  font-size: 18px;
+  line-height: 26px;
+  font-weight: 600;
+  color: var(--colorGrey900);
+  margin: 48px 0 16px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+
+  @media (--viewportMedium) {
+    font-size: 20px;
+    line-height: 28px;
+    margin: 56px 0 20px 0;
+  }
+}
+
 .paragraph {
   font-family: var(--fontFamily);
   font-size: 17px;
@@ -172,8 +189,8 @@
   }
 }
 
-/* Logo Placeholder */
-.logoPlaceholder {
+/* Logo Card */
+.logoCard {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -192,6 +209,16 @@
   &:hover {
     border-color: var(--colorGrey200);
     background-color: var(--colorGrey100);
+  }
+}
+
+.logoImage {
+  max-width: 100%;
+  max-height: 48px;
+  object-fit: contain;
+
+  @media (--viewportMedium) {
+    max-height: 56px;
   }
 }
 

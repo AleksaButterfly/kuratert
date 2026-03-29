@@ -10,12 +10,17 @@ import FooterContainer from '../../containers/FooterContainer/FooterContainer';
 
 import css from './AboutPage.module.css';
 
-// Placeholder logo component
-const LogoPlaceholder = ({ name }) => (
-  <div className={css.logoPlaceholder}>
-    <span className={css.logoText}>{name}</span>
-  </div>
-);
+// Partner logos
+import logoOslContemporary from './images/osl-contemporary.avif';
+import logoGalleriRiis from './images/galleri-riis.avif';
+import logoGalleriOpdahl from './images/galleri-opdahl.avif';
+import logoQbGallery from './images/qb-gallery.avif';
+import logoGrevWedels from './images/grev-wedels-plass.avif';
+import logoStandardOslo from './images/standard-oslo.avif';
+import logoHoyersten from './images/hoyersten-contemporary.avif';
+import logoBlomqvist from './images/blomqvist.avif';
+import logoMieMortensen from './images/mie-mortensen-abstrakt.avif';
+import logoCornelia from './images/cornelia-svedman.avif';
 
 const AboutPage = () => {
   const intl = useIntl();
@@ -34,20 +39,20 @@ const AboutPage = () => {
 
   // Gallery partners
   const galleryPartners = [
-    'OSL Contemporary',
-    'STANDARD (Oslo)',
-    'Galleri Riis',
-    'Galleri Opdahl',
-    'Høyersten Contemporary',
-    'QB Galleri',
-    'Grev Wedels Plass Auksjoner',
-    'Blomqvist Kunsthandel',
+    { name: 'OSL Contemporary', logo: logoOslContemporary },
+    { name: 'STANDARD (Oslo)', logo: logoStandardOslo },
+    { name: 'Galleri Riis', logo: logoGalleriRiis },
+    { name: 'Galleri Opdahl', logo: logoGalleriOpdahl },
+    { name: 'Høyersten Contemporary', logo: logoHoyersten },
+    { name: 'QB Galleri', logo: logoQbGallery },
+    { name: 'Grev Wedels Plass Auksjoner', logo: logoGrevWedels },
+    { name: 'Blomqvist Kunsthandel', logo: logoBlomqvist },
   ];
 
   // Service partners
   const servicePartners = [
-    'Mie Mortensen/Abstrakt AS',
-    'Cornelia Svedman Art Advisory',
+    { name: 'Mie Mortensen/Abstrakt AS', logo: logoMieMortensen },
+    { name: 'Cornelia Svedman Art Advisory', logo: logoCornelia },
   ];
 
   return (
@@ -81,11 +86,16 @@ const AboutPage = () => {
           <section className={css.mainSection}>
             <div className={css.mainContent}>
               <p className={css.paragraph}>
-                <FormattedMessage id="AboutPage.intro1" />
+                <FormattedMessage id="AboutPage.dateline" />
               </p>
 
+              {/* Et samlet kunstmarked */}
+              <h2 className={css.sectionHeading}>
+                <FormattedMessage id="AboutPage.samletHeading" />
+              </h2>
+
               <p className={css.paragraph}>
-                <FormattedMessage id="AboutPage.intro2" />
+                <FormattedMessage id="AboutPage.samletIntro" />
               </p>
 
               {/* Gallery Partners */}
@@ -95,7 +105,13 @@ const AboutPage = () => {
                 </p>
                 <div className={css.partnersGrid}>
                   {galleryPartners.map((partner, index) => (
-                    <LogoPlaceholder key={index} name={partner} />
+                    <div key={index} className={css.logoCard}>
+                      {partner.logo ? (
+                        <img src={partner.logo} alt={partner.name} className={css.logoImage} />
+                      ) : (
+                        <span className={css.logoText}>{partner.name}</span>
+                      )}
+                    </div>
                   ))}
                 </div>
               </div>
@@ -107,27 +123,53 @@ const AboutPage = () => {
                 </p>
                 <div className={css.servicePartnersGrid}>
                   {servicePartners.map((partner, index) => (
-                    <LogoPlaceholder key={index} name={partner} />
+                    <div key={index} className={css.logoCard}>
+                      {partner.logo ? (
+                        <img src={partner.logo} alt={partner.name} className={css.logoImage} />
+                      ) : (
+                        <span className={css.logoText}>{partner.name}</span>
+                      )}
+                    </div>
                   ))}
                 </div>
               </div>
 
               <p className={css.paragraph}>
-                <FormattedMessage id="AboutPage.digitalParagraph" />
+                <FormattedMessage id="AboutPage.samletOutro" />
               </p>
+
+              {/* Blomqvist Quote */}
+              <blockquote className={css.quote}>
+                <p><FormattedMessage id="AboutPage.blomqvistQuoteText" /></p>
+                <cite><FormattedMessage id="AboutPage.blomqvistQuoteCite" /></cite>
+              </blockquote>
+
+              {/* Gjør gode kunstkjøp enklere */}
+              <h2 className={css.sectionHeading}>
+                <FormattedMessage id="AboutPage.enklereHeading" />
+              </h2>
 
               <p className={css.paragraph}>
                 <FormattedMessage id="AboutPage.corneliaBio" />
               </p>
 
-              {/* Quote */}
+              {/* Cornelia Quote */}
               <blockquote className={css.quote}>
-                <p><FormattedMessage id="AboutPage.quoteText" /></p>
-                <cite><FormattedMessage id="AboutPage.quoteCite" /></cite>
+                <p><FormattedMessage id="AboutPage.corneliaQuoteText" /></p>
+                <cite><FormattedMessage id="AboutPage.corneliaQuoteCite" /></cite>
               </blockquote>
 
               <p className={css.paragraph}>
                 <FormattedMessage id="AboutPage.platformFeatures" />
+              </p>
+
+              {/* Om Kuratert */}
+              <h2 className={css.sectionHeading}>
+                <FormattedMessage id="AboutPage.omHeading" />
+              </h2>
+
+              <p className={css.paragraph}>
+                <FormattedMessage id="AboutPage.omText" />
               </p>
             </div>
           </section>
