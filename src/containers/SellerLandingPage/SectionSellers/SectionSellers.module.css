@@ -74,16 +74,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--colorGrey100);
-  border-radius: 4px;
   padding: 20px 12px;
   min-height: 72px;
-  background-color: var(--colorWhite);
-  transition: border-color 0.2s ease;
-
-  &:hover {
-    border-color: var(--colorGrey200);
-  }
 }
 
 .logoImage {
