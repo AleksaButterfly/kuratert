@@ -119,7 +119,17 @@ const ListingCardHorizontal = props => {
                   }}
                 />
               ) : (
-                <span className={css.priceValue}>{formattedPrice}</span>
+                <FormattedMessage
+                  id="ListingCard.price"
+                  values={{
+                    priceValue: <span className={css.priceValue}>{formattedPrice}</span>,
+                    pricePerUnit: isBookable ? (
+                      <span className={css.perUnit}>
+                        <FormattedMessage id="ListingCard.perUnit" values={{ unitType: publicData?.unitType }} />
+                      </span>
+                    ) : ''
+                  }}
+                />
               )}
             </span>
           </div>
