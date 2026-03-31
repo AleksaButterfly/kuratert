@@ -93,6 +93,7 @@
   flex-shrink: 0;
   margin: 0;
   padding: 0;
+  color: var(--colorGrey500);
 }
 
 .priceValue {
