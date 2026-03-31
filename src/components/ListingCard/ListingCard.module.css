@@ -114,15 +114,6 @@
   margin: 0;
 }
 
-.kunstavgift {
-  font-family: var(--fontFamily);
-  font-size: 12px;
-  line-height: 16px;
-  font-weight: 400;
-  color: var(--colorGrey500);
-  margin-left: 4px;
-}
-
 .longWord {
   word-break: break-all;
   word-break: break-word;

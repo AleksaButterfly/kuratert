@@ -122,7 +122,6 @@ const PriceMaybe = props => {
       ) : (
         <FormattedMessage id="ListingCard.price" values={{ priceValue, pricePerUnit }} />
       )}
-      <span className={css.kunstavgift}>+Kunstavgift</span>
     </div>
   );
 };
