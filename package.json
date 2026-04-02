@@ -4,6 +4,9 @@
   "private": true,
   "license": "Apache-2.0",
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@loadable/component": "^5.16.4",
     "@loadable/server": "^5.16.5",
     "@mapbox/polyline": "^1.2.1",
@@ -59,10 +62,10 @@
     "sharetribe-flex-integration-sdk": "^1.11.0",
     "sharetribe-flex-sdk": "^1.22.0",
     "sharetribe-scripts": "7.0.0",
-    "stripe": "^14.0.0",
     "sitemap": "^8.0.0",
     "smoothscroll-polyfill": "^0.4.0",
     "source-map-support": "^0.5.21",
+    "stripe": "^14.0.0",
     "unified": "^9.2.2"
   },
   "devDependencies": {

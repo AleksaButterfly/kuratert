@@ -5,6 +5,8 @@ import arrayMutators from 'final-form-arrays';
 import { FieldArray } from 'react-final-form-arrays';
 import isEqual from 'lodash/isEqual';
 import classNames from 'classnames';
+import { DndContext, closestCenter, PointerSensor, KeyboardSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
 
 // Import configs and util modules
 import { FormattedMessage, useIntl } from '../../../../util/reactIntl';
@@ -17,6 +19,7 @@ import { Button, Form, AspectRatioWrapper } from '../../../../components';
 
 // Import modules from this directory
 import ListingImage from './ListingImage';
+import SortableListingImage from './SortableListingImage';
 import css from './EditListingPhotosForm.module.css';
 
 const ACCEPT_IMAGES = 'image/*';
@@ -154,6 +157,10 @@ export const EditListingPhotosForm = props => {
     }
   };
   const intl = useIntl();
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor)
+  );
 
   return (
     <FinalForm
@@ -226,22 +233,47 @@ export const EditListingPhotosForm = props => {
                   )
                 )}
               >
-                {({ fields }) =>
-                  fields.map((name, index) => (
-                    <FieldListingImage
-                      key={name}
-                      name={name}
-                      onRemoveImage={imageId => {
-                        fields.remove(index);
-                        onRemoveImage(imageId);
-                      }}
-                      intl={intl}
-                      aspectWidth={aspectWidth}
-                      aspectHeight={aspectHeight}
-                      variantPrefix={variantPrefix}
-                    />
-                  ))
-                }
+                {({ fields }) => {
+                  const imageItems = fields.value || [];
+                  const itemIds = imageItems.map(
+                    img => img?.imageId?.uuid || img?.id?.uuid || img?.id
+                  );
+
+                  const handleDragEnd = event => {
+                    const { active, over } = event;
+                    if (active.id !== over?.id) {
+                      const oldIndex = itemIds.indexOf(active.id);
+                      const newIndex = itemIds.indexOf(over.id);
+                      fields.move(oldIndex, newIndex);
+                    }
+                  };
+
+                  return (
+                    <DndContext
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragEnd={handleDragEnd}
+                    >
+                      <SortableContext items={itemIds} strategy={rectSortingStrategy}>
+                        {fields.map((name, index) => (
+                          <SortableListingImage
+                            key={itemIds[index]}
+                            id={itemIds[index]}
+                            name={name}
+                            onRemoveImage={imageId => {
+                              fields.remove(index);
+                              onRemoveImage(imageId);
+                            }}
+                            intl={intl}
+                            aspectWidth={aspectWidth}
+                            aspectHeight={aspectHeight}
+                            variantPrefix={variantPrefix}
+                          />
+                        ))}
+                      </SortableContext>
+                    </DndContext>
+                  );
+                }}
               </FieldArray>
 
               <FieldAddImage
