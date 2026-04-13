@@ -474,3 +474,13 @@
 .incompatibleCurrency {
   margin-top: 20px;
 }
+
+.currencyNotice {
+  background-color: var(--colorGrey50);
+  border: 1px solid var(--colorGrey100);
+  border-radius: 4px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: var(--colorGrey700);
+}

@@ -20,7 +20,7 @@ import {
   displayDeliveryShipping,
 } from '../../util/configHelpers';
 import { types as sdkTypes } from '../../util/sdkLoader';
-import { formatMoney } from '../../util/currency';
+import { formatMoney, getDisplayPrice } from '../../util/currency';
 import {
   LISTING_PAGE_DRAFT_VARIANT,
   LISTING_PAGE_PENDING_APPROVAL_VARIANT,
@@ -479,14 +479,20 @@ export const ListingPageComponent = props => {
   const ensuredAuthor = ensureUser(currentAuthor);
   const authorDisplayName = userDisplayNameAsString(ensuredAuthor, '');
 
-  const { formattedPrice } = priceData(price, config.currency, intl);
+  // Use display price (seller's chosen currency) if available
+  const displayPriceData = getDisplayPrice(intl, publicData, config.currency);
+  const { formattedPrice } = displayPriceData
+    ? { formattedPrice: displayPriceData.formattedPrice }
+    : priceData(price, config.currency, intl);
 
   // Format auction estimates if this is an auction listing
+  // Auction estimates are stored in the seller's chosen currency
+  const auctionCurrency = publicData?.listingCurrency || price?.currency || config.currency;
   const formattedAuctionEstimateLow = isAuction && auctionEstimateLow
-    ? formatMoney(intl, new sdkTypes.Money(auctionEstimateLow, price?.currency || config.currency))
+    ? formatMoney(intl, new sdkTypes.Money(auctionEstimateLow, auctionCurrency))
     : null;
   const formattedAuctionEstimateHigh = isAuction && auctionEstimateHigh
-    ? formatMoney(intl, new sdkTypes.Money(auctionEstimateHigh, price?.currency || config.currency))
+    ? formatMoney(intl, new sdkTypes.Money(auctionEstimateHigh, auctionCurrency))
     : null;
 
   // Calculate Kunstavgift (5% Art Tax)

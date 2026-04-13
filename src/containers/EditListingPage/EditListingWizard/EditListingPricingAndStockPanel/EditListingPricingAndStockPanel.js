@@ -57,10 +57,13 @@ const getInitialValues = (props, marketplaceCurrency) => {
       : 1;
   const stockTypeInfinity = [];
 
+  // Listing currency - what the seller chose to price in
+  const listingCurrency = publicData?.listingCurrency || marketplaceCurrency;
+
   // Frame options - convert from publicData format to form format
   const frameOptions = publicData?.frameOptions;
   const frameEnabled = frameOptions?.enabled || false;
-  const currency = marketplaceCurrency || price?.currency || 'EUR';
+  const currency = listingCurrency || marketplaceCurrency || price?.currency || 'EUR';
 
   // Find recommended frame (has isRecommended: true flag)
   const recommendedFrame = frameOptions?.variants?.find(v => v.isRecommended);
@@ -86,10 +89,18 @@ const getInitialValues = (props, marketplaceCurrency) => {
   const auctionEstimateLowMoney = auctionEstimateLow ? new Money(auctionEstimateLow, currency) : null;
   const auctionEstimateHighMoney = auctionEstimateHigh ? new Money(auctionEstimateHigh, currency) : null;
 
+  // If listing has a display price (seller's chosen currency), show that in the form
+  // Otherwise fall back to the listing price (which is in marketplace currency)
+  const displayPrice = publicData?.displayPrice;
+  const formPrice = displayPrice
+    ? new Money(displayPrice, listingCurrency)
+    : price;
+
   return {
-    price,
+    price: formPrice,
     stock,
     stockTypeInfinity,
+    listingCurrency,
     frameEnabled,
     frameVariants,
     recommendedFrameLabel,
@@ -158,18 +169,16 @@ const EditListingPricingAndStockPanel = props => {
 
   const isPublished = listing?.id && listing?.attributes?.state !== LISTING_STATE_DRAFT;
 
-  // Don't render the form if the assigned currency is different from the marketplace currency
-  // or if transaction process is incompatible with selected currency
+  // Check if transaction process is compatible with Stripe for the marketplace currency
   const isStripeCompatibleCurrency = isValidCurrencyForTransactionProcess(
     transactionProcessAlias,
     marketplaceCurrency,
     'stripe'
   );
-  const priceCurrencyValid = !isStripeCompatibleCurrency
-    ? false
-    : marketplaceCurrency && initialValues.price instanceof Money
-    ? initialValues.price?.currency === marketplaceCurrency
-    : !!marketplaceCurrency;
+  // With multi-currency support, the form price may be in a different currency (seller's chosen currency).
+  // We only need to validate that the marketplace currency itself is Stripe-compatible,
+  // since all actual charges go through in marketplace currency (NOK).
+  const priceCurrencyValid = !!isStripeCompatibleCurrency && !!marketplaceCurrency;
 
   const panelHeadingProps = isPublished
     ? {
@@ -198,11 +207,12 @@ const EditListingPricingAndStockPanel = props => {
         <EditListingPricingAndStockForm
           className={css.form}
           initialValues={initialValues}
-          onSubmit={values => {
+          onSubmit={async values => {
             const {
               price,
               stock,
               stockTypeInfinity,
+              listingCurrency,
               frameEnabled,
               frameVariants,
               recommendedFrameLabel,
@@ -214,6 +224,8 @@ const EditListingPricingAndStockPanel = props => {
               auctionLink,
               isReserved,
             } = values;
+
+            const sellerCurrency = listingCurrency || marketplaceCurrency;
 
             // Convert checkbox arrays to booleans (checked = ['true'] -> true, unchecked = [] -> false)
             const isAcceptingOffers = Array.isArray(acceptingOffers) && acceptingOffers.includes('true');
@@ -295,9 +307,30 @@ const EditListingPricingAndStockPanel = props => {
             // For auction listings, we still need a price for the API
             // Use the low estimate as the price, or fallback to a minimum price
             const fallbackPrice = new Money(100, marketplaceCurrency); // Minimum 1.00 in currency
-            const listingPrice = isAuctionListing
+            const sellerPrice = isAuctionListing
               ? (auctionEstimateLow || fallbackPrice)
               : price;
+
+            // Convert seller's price to marketplace currency (NOK) if needed
+            let listingPrice = sellerPrice;
+            let displayPriceSubunits = sellerPrice?.amount || null;
+            let exchangeRateValue = null;
+
+            if (sellerCurrency !== marketplaceCurrency && sellerPrice?.amount) {
+              try {
+                const rateRes = await fetch(`/api/exchange-rate?from=${sellerCurrency}&to=${marketplaceCurrency}`);
+                const rateData = await rateRes.json();
+                if (rateData.rate) {
+                  exchangeRateValue = rateData.rate;
+                  const convertedAmount = Math.round(sellerPrice.amount * rateData.rate);
+                  listingPrice = new Money(convertedAmount, marketplaceCurrency);
+                }
+              } catch (e) {
+                console.error('Exchange rate fetch failed, saving in seller currency:', e);
+                // Fall back to saving in marketplace currency with same amount
+                listingPrice = new Money(sellerPrice.amount, marketplaceCurrency);
+              }
+            }
 
             // New values for listing attributes
             const updateValues = {
@@ -305,6 +338,9 @@ const EditListingPricingAndStockPanel = props => {
               ...stockUpdateMaybe,
               publicData: {
                 ...frameOptionsData,
+                listingCurrency: sellerCurrency,
+                displayPrice: displayPriceSubunits,
+                exchangeRate: exchangeRateValue,
                 acceptingOffers: isAuctionListing ? false : isAcceptingOffers,
                 isAuction: isAuctionListing,
                 auctionEstimateLow: isAuctionListing ? auctionEstimateLowSubunits : null,
@@ -317,9 +353,10 @@ const EditListingPricingAndStockPanel = props => {
             // Otherwise, re-rendering would overwrite the values during XHR call.
             setState({
               initialValues: {
-                price: listingPrice,
+                price: sellerPrice,
                 stock: stockUpdateMaybe?.stockUpdate?.newTotal || stock,
                 stockTypeInfinity,
+                listingCurrency: sellerCurrency,
                 frameEnabled,
                 frameVariants,
                 recommendedFrameLabel,

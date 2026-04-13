@@ -270,6 +270,30 @@ export const formatMoney = (intl, value) => {
  *
  * @return {String} formatted money value
  */
+/**
+ * Format a display price from publicData (seller's chosen currency).
+ * Returns the formatted price string if listing has a display currency different from marketplace,
+ * otherwise returns null.
+ *
+ * @param {Object} intl - react-intl intl object
+ * @param {Object} publicData - listing's publicData
+ * @param {string} marketplaceCurrency - the marketplace default currency
+ * @returns {Object|null} { formattedPrice, displayCurrency } or null
+ */
+export const getDisplayPrice = (intl, publicData, marketplaceCurrency) => {
+  const { listingCurrency, displayPrice } = publicData || {};
+  if (!listingCurrency || !displayPrice || listingCurrency === marketplaceCurrency) {
+    return null;
+  }
+  try {
+    const displayMoney = new Money(displayPrice, listingCurrency);
+    const formattedPrice = formatMoney(intl, displayMoney);
+    return { formattedPrice, displayCurrency: listingCurrency };
+  } catch (e) {
+    return null;
+  }
+};
+
 export const formatCurrencyMajorUnit = (intl, currency, valueWithoutSubunits) => {
   const valueAsNumber = new Decimal(valueWithoutSubunits).toNumber();
 

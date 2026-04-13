@@ -11,6 +11,7 @@ import { useRouteConfiguration } from '../../context/routeConfigurationContext';
 import { FormattedMessage, useIntl } from '../../util/reactIntl';
 import { LISTING_STATE_PENDING_APPROVAL, LISTING_STATE_CLOSED, propTypes } from '../../util/types';
 import { types as sdkTypes } from '../../util/sdkLoader';
+import { getDisplayPrice } from '../../util/currency';
 import {
   LISTING_PAGE_DRAFT_VARIANT,
   LISTING_PAGE_PENDING_APPROVAL_VARIANT,
@@ -251,7 +252,11 @@ export const ListingPageComponent = props => {
   // banned or deleted display names for the function
   const authorDisplayName = userDisplayNameAsString(ensuredAuthor, '');
 
-  const { formattedPrice } = priceData(price, config.currency, intl);
+  // Use display price (seller's chosen currency) if available
+  const displayPriceResult = getDisplayPrice(intl, publicData, config.currency);
+  const { formattedPrice } = displayPriceResult
+    ? { formattedPrice: displayPriceResult.formattedPrice }
+    : priceData(price, config.currency, intl);
 
   const commonParams = { params, history, routes: routeConfiguration };
   const onContactUser = handleContactUser({

@@ -23,7 +23,7 @@ import {
   STOCK_INFINITE_MULTIPLE_ITEMS,
   LISTING_STATE_PUBLISHED,
 } from '../../util/types';
-import { formatMoney } from '../../util/currency';
+import { formatMoney, getDisplayPrice } from '../../util/currency';
 import { createSlug, parse, stringify } from '../../util/urlHelpers';
 import { userDisplayNameAsString } from '../../util/data';
 import {
@@ -155,10 +155,15 @@ const PriceMaybe = props => {
     return null;
   }
 
-  // Get formatted price or currency code if the currency does not match with marketplace currency
-  const { formattedPrice, priceTitle } = priceData(price, marketplaceCurrency, intl);
+  // Use display price (seller's chosen currency) if available, otherwise fall back to listing price
+  const displayPriceData = getDisplayPrice(intl, publicData, marketplaceCurrency);
+  const { formattedPrice, priceTitle } = displayPriceData
+    ? { formattedPrice: displayPriceData.formattedPrice, priceTitle: displayPriceData.formattedPrice }
+    : priceData(price, marketplaceCurrency, intl);
   const priceValue = (
-    <span className={css.priceValue}>{formatMoneyIfSupportedCurrency(price, intl)}</span>
+    <span className={css.priceValue}>
+      {displayPriceData ? displayPriceData.formattedPrice : formatMoneyIfSupportedCurrency(price, intl)}
+    </span>
   );
   const pricePerUnit = (
     <span className={css.perUnit}>
@@ -331,8 +336,9 @@ const OrderPanel = props => {
   const isPaymentProcess = isBooking || isPurchase || isNegotiation;
 
   const showPriceMissing = isPaymentProcess && !isNegotiation && !price;
-  const showInvalidCurrency =
-    isPaymentProcess && !isNegotiation && price?.currency !== marketplaceCurrency;
+  // Currency mismatch is no longer invalid — we support multi-currency display
+  // The actual listing price is always in marketplace currency (NOK)
+  const showInvalidCurrency = false;
 
   const timeZone = listing?.attributes?.availabilityPlan?.timezone;
   const isClosed = listing?.attributes?.state === LISTING_STATE_CLOSED;

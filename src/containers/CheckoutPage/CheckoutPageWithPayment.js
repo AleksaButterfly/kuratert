@@ -974,6 +974,15 @@ export const CheckoutPageWithPayment = props => {
               <FormattedMessage id="CheckoutPage.listingTitle" values={{ listingTitle }} />
             </H4>
           </div>
+          {listing?.attributes?.publicData?.listingCurrency &&
+           listing.attributes.publicData.listingCurrency !== config.currency && (
+            <p className={css.currencyNotice}>
+              <FormattedMessage
+                id="CheckoutPage.currencyNotice"
+                values={{ listingCurrency: listing.attributes.publicData.listingCurrency, marketplaceCurrency: config.currency }}
+              />
+            </p>
+          )}
           <MobileOrderBreakdown
             speculateTransactionErrorMessage={errorMessages.speculateTransactionErrorMessage}
             breakdown={breakdown}

@@ -5,7 +5,7 @@ import { useConfiguration } from '../../../context/configurationContext';
 import { FormattedMessage } from '../../../util/reactIntl';
 import { displayPrice, isPriceVariationsEnabled } from '../../../util/configHelpers';
 import { lazyLoadWithDimensions } from '../../../util/uiHelpers';
-import { formatMoney } from '../../../util/currency';
+import { formatMoney, getDisplayPrice } from '../../../util/currency';
 import { ensureListing, ensureUser } from '../../../util/data';
 import { richText } from '../../../util/richText';
 import { createSlug } from '../../../util/urlHelpers';
@@ -60,7 +60,12 @@ const ListingCardHorizontal = props => {
   const isPriceVariationsInUse = isPriceVariationsEnabled(publicData, listingTypeConfig);
   const hasMultiplePriceVariants = isPriceVariationsInUse && publicData?.priceVariants?.length > 1;
   const isBookable = isBookingProcessAlias(publicData?.transactionProcessAlias);
-  const { formattedPrice, priceTitle } = priceData(price, config.currency, intl);
+
+  // Use display price (seller's chosen currency) if available
+  const displayPriceData = getDisplayPrice(intl, publicData, config.currency);
+  const { formattedPrice, priceTitle } = displayPriceData
+    ? { formattedPrice: displayPriceData.formattedPrice, priceTitle: displayPriceData.formattedPrice }
+    : priceData(price, config.currency, intl);
 
   const firstImage =
     currentListing.images && currentListing.images.length > 0 ? currentListing.images[0] : null;
