@@ -151,6 +151,7 @@ const EditListingPricingAndStockPanel = props => {
     errors,
     updatePageTitle: UpdatePageTitle,
     intl,
+    onFetchExchangeRate,
   } = props;
 
   // State is needed since re-rendering would overwrite the values during XHR call.
@@ -318,8 +319,7 @@ const EditListingPricingAndStockPanel = props => {
 
             if (sellerCurrency !== marketplaceCurrency && sellerPrice?.amount) {
               try {
-                const rateRes = await fetch(`/api/exchange-rate?from=${sellerCurrency}&to=${marketplaceCurrency}`);
-                const rateData = await rateRes.json();
+                const rateData = await onFetchExchangeRate(sellerCurrency, marketplaceCurrency);
                 if (rateData.rate) {
                   exchangeRateValue = rateData.rate;
                   const convertedAmount = Math.round(sellerPrice.amount * rateData.rate);

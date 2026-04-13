@@ -18,6 +18,7 @@ import { parse } from '../../util/urlHelpers';
 import { isUserAuthorized } from '../../util/userHelpers';
 import { isBookingProcessAlias } from '../../transactions/transaction';
 
+import { fetchExchangeRate as fetchExchangeRateApi } from '../../util/api';
 import { addMarketplaceEntities } from '../../ducks/marketplaceData.duck';
 import {
   createStripeAccount,
@@ -470,6 +471,28 @@ export const savePayoutDetails = (values, isUpdateCall) => dispatch => {
   return dispatch(savePayoutDetailsThunk({ values, isUpdateCall })).unwrap();
 };
 
+/////////////////////////
+// Fetch Exchange Rate //
+/////////////////////////
+const fetchExchangeRatePayloadCreator = ({ from, to }, { rejectWithValue }) => {
+  return fetchExchangeRateApi(from, to)
+    .then(response => {
+      return { rate: response.rate, from, to };
+    })
+    .catch(e => {
+      return rejectWithValue(storableError(e));
+    });
+};
+
+export const fetchExchangeRateThunk = createAsyncThunk(
+  'EditListingPage/fetchExchangeRate',
+  fetchExchangeRatePayloadCreator
+);
+// Backward compatible wrapper for the thunk
+export const requestFetchExchangeRate = (from, to) => dispatch => {
+  return dispatch(fetchExchangeRateThunk({ from, to })).unwrap();
+};
+
 ////////////////////////////////
 // Fetch Load Data Exceptions //
 ////////////////////////////////
@@ -596,6 +619,9 @@ const initialState = {
   updateInProgress: false,
   payoutDetailsSaveInProgress: false,
   payoutDetailsSaved: false,
+  exchangeRate: null,
+  exchangeRateInProgress: false,
+  exchangeRateError: null,
 };
 
 const editListingPageSlice = createSlice({
@@ -853,6 +879,19 @@ const editListingPageSlice = createSlice({
       })
       .addCase(savePayoutDetailsThunk.rejected, state => {
         state.payoutDetailsSaveInProgress = false;
+      })
+      // fetchExchangeRate cases
+      .addCase(fetchExchangeRateThunk.pending, state => {
+        state.exchangeRateInProgress = true;
+        state.exchangeRateError = null;
+      })
+      .addCase(fetchExchangeRateThunk.fulfilled, (state, action) => {
+        state.exchangeRateInProgress = false;
+        state.exchangeRate = action.payload.rate;
+      })
+      .addCase(fetchExchangeRateThunk.rejected, (state, action) => {
+        state.exchangeRateInProgress = false;
+        state.exchangeRateError = action.payload;
       });
   },
 });

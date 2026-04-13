@@ -34,16 +34,11 @@
 }
 
 .icon {
-  height: 28px;
+  height: 36px;
   width: auto;
-  opacity: 0.55;
-  transition: opacity 0.2s ease;
+}
 
-  &:hover {
-    opacity: 0.85;
-  }
-
-  @media (--viewportMedium) {
-    height: 32px;
-  }
+.iconKlarna {
+  composes: icon;
+  height: 32px;
 }

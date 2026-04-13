@@ -213,6 +213,15 @@ export const fetchHeroSlides = () => {
   });
 };
 
+// ================ Exchange Rate API ================ //
+
+// Fetch exchange rate between two currencies.
+export const fetchExchangeRate = (from, to) => {
+  return request(`/api/exchange-rate?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`, {
+    method: methods.GET,
+  });
+};
+
 // ================ Newsletter API (Brevo) ================ //
 
 // Subscribe to newsletter via Brevo.

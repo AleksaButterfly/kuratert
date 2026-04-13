@@ -44,6 +44,7 @@ import {
   requestImageUpload,
   removeListingImage,
   savePayoutDetails,
+  requestFetchExchangeRate,
 } from './EditListingPage.duck';
 import EditListingWizard from './EditListingWizard/EditListingWizard';
 import css from './EditListingPage.module.css';
@@ -386,6 +387,7 @@ const mapDispatchToProps = dispatch => ({
     dispatch(savePayoutDetails(values, isUpdateCall)),
   onGetStripeConnectAccountLink: params => dispatch(getStripeConnectAccountLink(params)),
   onRemoveListingImage: imageId => dispatch(removeListingImage(imageId)),
+  onFetchExchangeRate: (from, to) => dispatch(requestFetchExchangeRate(from, to)),
 });
 
 // Note: it is important that the withRouter HOC is **outside** the
