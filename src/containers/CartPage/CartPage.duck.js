@@ -61,6 +61,8 @@ const queryCartListingsPayloadCreator = (config, thunkAPI) => {
       'publicData.location',
       'publicData.stockType',
       'publicData.frameOptions',
+      'publicData.listingCurrency',
+      'publicData.displayPrice',
     ],
     'fields.user': ['profile.displayName', 'profile.abbreviatedName', 'profile.publicData'],
     'fields.image': [

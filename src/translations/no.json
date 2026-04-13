@@ -100,6 +100,7 @@
   "ButtonFavorite.addToFavorites": "Legg til i favoritter",
   "ButtonFavorite.removeFromFavorites": "Fjern fra favoritter",
   "CartPage.basePrice": "Grunnpris",
+  "CartPage.originalPrice": "Opprinnelig pris: {price}",
   "CartPage.benefitAuthenticity": "Ekthetssertifikat",
   "CartPage.benefitPayment": "Sikker betalingsbehandling",
   "CartPage.benefitShipping": "Bistand med levering",

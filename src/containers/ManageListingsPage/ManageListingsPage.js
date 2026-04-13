@@ -21,7 +21,7 @@ import {
 import { propTypes } from '../../util/types';
 import { isErrorNoPermissionToPostListings } from '../../util/errors';
 import { isScrollingDisabled, manageDisableScrolling } from '../../ducks/ui.duck';
-import { formatMoney } from '../../util/currency';
+import { formatMoney, getDisplayPrice } from '../../util/currency';
 import { types as sdkTypes } from '../../util/sdkLoader';
 
 import {
@@ -482,7 +482,7 @@ export const ManageListingsPageComponent = props => {
                   </thead>
                   <tbody>
                     {filteredListings.map(listing => {
-                      const { title, price, state } = listing.attributes;
+                      const { title, price, state, publicData } = listing.attributes;
                       const firstImage = listing.images?.[0];
                       const listingId = listing.id.uuid;
                       const isDraft = state === 'draft';
@@ -514,7 +514,10 @@ export const ManageListingsPageComponent = props => {
                           </td>
                           <td className={css.categoryCell}>{getCategoryLabel(listing, config)}</td>
                           <td className={css.priceCell}>
-                            {price ? formatMoney(intl, price) : '-'}
+                            {(() => {
+                              const dp = getDisplayPrice(intl, publicData, config.currency);
+                              return dp ? dp.formattedPrice : price ? formatMoney(intl, price) : '-';
+                            })()}
                           </td>
                           <td>
                             <span

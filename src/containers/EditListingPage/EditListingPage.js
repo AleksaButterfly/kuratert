@@ -151,6 +151,7 @@ export const EditListingPageComponent = props => {
     onPayoutDetailsSubmit,
     onPayoutDetailsChange,
     onGetStripeConnectAccountLink,
+    onFetchExchangeRate,
     page,
     params,
     location,
@@ -312,6 +313,7 @@ export const EditListingPageComponent = props => {
           stripeAccountLinkError={getAccountLinkError}
           authScopes={authScopes}
           titleId={titleId}
+          onFetchExchangeRate={onFetchExchangeRate}
         />
       </Page>
     );

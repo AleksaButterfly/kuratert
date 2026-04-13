@@ -7,15 +7,15 @@ const CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
 const fetchRates = () => {
   return new Promise((resolve, reject) => {
-    // Using the free exchangerate.host API (no key required)
-    const url = 'https://api.exchangerate.host/latest?base=NOK';
+    // Using the free open.er-api.com (no key required)
+    const url = 'https://open.er-api.com/v6/latest/NOK';
     https.get(url, res => {
       let data = '';
       res.on('data', chunk => { data += chunk; });
       res.on('end', () => {
         try {
           const parsed = JSON.parse(data);
-          if (parsed.success !== false && parsed.rates) {
+          if (parsed.result === 'success' && parsed.rates) {
             resolve(parsed.rates);
           } else {
             reject(new Error('Failed to fetch exchange rates'));

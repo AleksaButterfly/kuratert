@@ -55,13 +55,20 @@ class CurrencyInputComponent extends Component {
     const { currencyConfig, defaultValue, input, intl } = props;
     const initialValueIsMoney = input.value instanceof Money;
 
-    if (initialValueIsMoney && input.value.currency !== currencyConfig.currency) {
-      const e = new Error('Value currency different from marketplace currency');
-      log.error(e, 'currency-input-invalid-currency', { currencyConfig, inputValue: input.value });
-      throw e;
+    // If the value's currency doesn't match the configured currency,
+    // treat it as if there's no initial value (e.g. seller changed listing currency)
+    const currencyMismatch = initialValueIsMoney && input.value.currency !== currencyConfig.currency;
+    if (currencyMismatch) {
+      log.error(
+        new Error('Value currency different from currencyConfig currency'),
+        'currency-input-currency-mismatch',
+        { currencyConfig, inputValue: input.value }
+      );
     }
 
-    const initialValue = initialValueIsMoney ? convertMoneyToNumber(input.value) : defaultValue;
+    const initialValue = initialValueIsMoney && !currencyMismatch
+      ? convertMoneyToNumber(input.value)
+      : defaultValue;
     const hasInitialValue = typeof initialValue === 'number' && !isNaN(initialValue);
 
     // We need to handle number format - some locales use dots and some commas as decimal separator

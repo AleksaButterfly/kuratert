@@ -17,7 +17,7 @@ import {
   propTypes,
   STOCK_MULTIPLE_ITEMS,
 } from '../../../util/types';
-import { formatMoney } from '../../../util/currency';
+import { formatMoney, getDisplayPrice } from '../../../util/currency';
 import { ensureOwnListing } from '../../../util/data';
 import {
   LISTING_PAGE_PENDING_APPROVAL_VARIANT,
@@ -352,7 +352,10 @@ const PriceMaybe = props => {
   const hasMultiplePriceVariants = isPriceVariationsInUse && publicData?.priceVariants?.length > 1;
 
   const isBookable = isBookingProcessAlias(publicData?.transactionProcessAlias);
-  const { formattedPrice, priceTitle } = priceData(price, config.currency, intl);
+  const displayPriceData = getDisplayPrice(intl, publicData, config.currency);
+  const { formattedPrice, priceTitle } = displayPriceData
+    ? { formattedPrice: displayPriceData.formattedPrice, priceTitle: displayPriceData.formattedPrice }
+    : priceData(price, config.currency, intl);
 
   const priceValue = <span className={css.priceValue}>{formattedPrice}</span>;
   const pricePerUnit = isBookable ? (

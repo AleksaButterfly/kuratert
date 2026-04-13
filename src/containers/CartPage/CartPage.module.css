@@ -390,6 +390,14 @@
   color: var(--colorGrey700);
 }
 
+.originalCurrencyNote {
+  display: block;
+  font-size: 12px;
+  color: var(--colorGrey500);
+  margin-top: 2px;
+  text-align: right;
+}
+
 .itemTotalPrice {
   font-family: var(--fontFamily);
   font-size: 18px;

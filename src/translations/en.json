@@ -88,6 +88,7 @@
   "ButtonFavorite.addToFavorites": "Add to favorites",
   "ButtonFavorite.removeFromFavorites": "Remove from favorites",
   "CartPage.basePrice": "Base price",
+  "CartPage.originalPrice": "Original price: {price}",
   "CartPage.benefitAuthenticity": "Certificate of authenticity",
   "CartPage.benefitPayment": "Secure payment processing",
   "CartPage.benefitShipping": "Free shipping included",

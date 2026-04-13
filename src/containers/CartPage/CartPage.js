@@ -14,7 +14,7 @@ import { isScrollingDisabled } from '../../ducks/ui.duck';
 import { getListingsById } from '../../ducks/marketplaceData.duck';
 import { removeListingFromCart, updateCartItemQuantity } from '../../ducks/user.duck';
 import { getCartItems } from '../../util/userHelpers';
-import { formatMoney } from '../../util/currency';
+import { formatMoney, getDisplayPrice } from '../../util/currency';
 import { types as sdkTypes } from '../../util/sdkLoader';
 import { createResourceLocatorString, findRouteByRouteName } from '../../util/routes';
 import { createSlug } from '../../util/urlHelpers';
@@ -477,6 +477,9 @@ export const CartPageComponent = props => {
                                 ? formatMoney(intl, new Money(framePriceAmount, price.currency))
                                 : null;
 
+                              // Show original seller currency if different from marketplace
+                              const displayPriceInfo = getDisplayPrice(intl, publicData, config.currency);
+
                               const firstImage = listing?.images?.[0];
                               // Use scaled variants (non-cropped) for object-fit: contain display
                               const variants = firstImage
@@ -586,6 +589,14 @@ export const CartPageComponent = props => {
                                           </>
                                         ) : (
                                           <span className={css.itemPrice}>{formattedTotalPrice}</span>
+                                        )}
+                                        {displayPriceInfo && (
+                                          <span className={css.originalCurrencyNote}>
+                                            <FormattedMessage
+                                              id="CartPage.originalPrice"
+                                              values={{ price: displayPriceInfo.formattedPrice }}
+                                            />
+                                          </span>
                                         )}
                                       </div>
                                     </div>
