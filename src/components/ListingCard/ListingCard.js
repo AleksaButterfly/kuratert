@@ -10,7 +10,7 @@ import {
   requireListingImage,
 } from '../../util/configHelpers';
 import { lazyLoadWithDimensions } from '../../util/uiHelpers';
-import { formatMoney, getDisplayPrice } from '../../util/currency';
+import { formatMoney } from '../../util/currency';
 import { types as sdkTypes } from '../../util/sdkLoader';
 import { ensureListing, ensureUser } from '../../util/data';
 import { richText } from '../../util/richText';
@@ -79,8 +79,7 @@ const PriceMaybe = props => {
 
   // For auction listings, show estimate range
   if (isAuction && auctionEstimateLow && auctionEstimateHigh) {
-    // Auction estimates are stored in the seller's chosen currency
-    const currency = publicData?.listingCurrency || price?.currency || config.currency;
+    const currency = price?.currency || config.currency;
     const lowEstimateMoney = new Money(auctionEstimateLow, currency);
     const highEstimateMoney = new Money(auctionEstimateHigh, currency);
     const formattedLow = formatMoney(intl, lowEstimateMoney);
@@ -102,12 +101,7 @@ const PriceMaybe = props => {
   const hasMultiplePriceVariants = isPriceVariationsInUse && publicData?.priceVariants?.length > 1;
 
   const isBookable = isBookingProcessAlias(publicData?.transactionProcessAlias);
-
-  // Use display price (seller's chosen currency) if available, otherwise fall back to listing price
-  const displayPriceData = getDisplayPrice(intl, publicData, config.currency);
-  const { formattedPrice, priceTitle } = displayPriceData
-    ? { formattedPrice: displayPriceData.formattedPrice, priceTitle: displayPriceData.formattedPrice }
-    : priceData(price, config.currency, intl);
+  const { formattedPrice, priceTitle } = priceData(price, config.currency, intl);
 
   const priceValue = <span className={css.priceValue}>{formattedPrice}</span>;
   const pricePerUnit = isBookable ? (

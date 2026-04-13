@@ -33,17 +33,6 @@ import css from './EditListingPricingAndStockForm.module.css';
 const { Money } = sdkTypes;
 const MILLION = 1000000;
 
-// Currencies available for sellers to list in
-const SUPPORTED_LISTING_CURRENCIES = [
-  { code: 'NOK', label: 'NOK – Norske kroner' },
-  { code: 'EUR', label: 'EUR – Euro' },
-  { code: 'USD', label: 'USD – US Dollar' },
-  { code: 'GBP', label: 'GBP – British Pound' },
-  { code: 'SEK', label: 'SEK – Svenska kronor' },
-  { code: 'DKK', label: 'DKK – Danske kroner' },
-  { code: 'CHF', label: 'CHF – Swiss Franc' },
-];
-
 const getPriceValidators = (listingMinimumPriceSubUnits, marketplaceCurrency, intl) => {
   const priceRequiredMsgId = { id: 'EditListingPricingAndStockForm.priceRequired' };
   const priceRequiredMsg = intl.formatMessage(priceRequiredMsgId);
@@ -146,7 +135,6 @@ export const EditListingPricingAndStockForm = props => (
         disabled,
         ready,
         handleSubmit,
-        form,
         invalid,
         pristine,
         marketplaceCurrency,
@@ -161,26 +149,9 @@ export const EditListingPricingAndStockForm = props => (
       } = formRenderProps;
 
       const intl = useIntl();
-
-      // Use the selected listing currency for formatting, default to marketplace currency
-      const selectedCurrency = values?.listingCurrency || marketplaceCurrency;
-
-      // Track previous currency to clear price when currency changes
-      const prevCurrencyRef = React.useRef(selectedCurrency);
-      React.useEffect(() => {
-        if (prevCurrencyRef.current !== selectedCurrency) {
-          // Currency changed — clear price fields so FieldCurrencyInput re-mounts with new currency
-          form.change('price', null);
-          form.change('auctionEstimateLow', null);
-          form.change('auctionEstimateHigh', null);
-          form.change('recommendedFramePrice', null);
-          prevCurrencyRef.current = selectedCurrency;
-        }
-      }, [selectedCurrency, form]);
-
       const priceValidators = getPriceValidators(
         listingMinimumPriceSubUnits,
-        selectedCurrency,
+        marketplaceCurrency,
         intl
       );
       // Note: outdated listings don't have listingType!
@@ -219,26 +190,9 @@ export const EditListingPricingAndStockForm = props => (
             </p>
           ) : null}
 
-          {/* Currency Selector */}
-          <FieldSelect
-            id={`${formId}.listingCurrency`}
-            name="listingCurrency"
-            className={css.input}
-            label={intl.formatMessage({
-              id: 'EditListingPricingAndStockForm.listingCurrencyLabel',
-            })}
-          >
-            {SUPPORTED_LISTING_CURRENCIES.map(c => (
-              <option key={c.code} value={c.code}>
-                {c.label}
-              </option>
-            ))}
-          </FieldSelect>
-
           {/* Price - shown when auction is NOT enabled */}
           {!isAuctionEnabled && (
             <FieldCurrencyInput
-              key={`price-${selectedCurrency}`}
               id={`${formId}.price`}
               name="price"
               className={css.input}
@@ -250,7 +204,7 @@ export const EditListingPricingAndStockForm = props => (
               placeholder={intl.formatMessage({
                 id: 'EditListingPricingAndStockForm.priceInputPlaceholder',
               })}
-              currencyConfig={appSettings.getCurrencyFormatting(selectedCurrency)}
+              currencyConfig={appSettings.getCurrencyFormatting(marketplaceCurrency)}
               validate={priceValidators}
             />
           )}
@@ -329,7 +283,6 @@ export const EditListingPricingAndStockForm = props => (
                       })}
                     />
                     <FieldCurrencyInput
-                      key={`recommendedFramePrice-${selectedCurrency}`}
                       id={`${formId}.recommendedFramePrice`}
                       name="recommendedFramePrice"
                       className={css.framePriceInput}
@@ -339,7 +292,7 @@ export const EditListingPricingAndStockForm = props => (
                       placeholder={intl.formatMessage({
                         id: 'EditListingPricingAndStockForm.framePricePlaceholder',
                       })}
-                      currencyConfig={appSettings.getCurrencyFormatting(selectedCurrency)}
+                      currencyConfig={appSettings.getCurrencyFormatting(marketplaceCurrency)}
                     />
                   </div>
                 </div>
@@ -391,7 +344,6 @@ export const EditListingPricingAndStockForm = props => (
                                 </FieldSelect>
 
                                 <FieldCurrencyInput
-                                  key={`${name}.price-${selectedCurrency}`}
                                   id={`${formId}.${name}.price`}
                                   name={`${name}.price`}
                                   className={css.framePriceInput}
@@ -401,7 +353,7 @@ export const EditListingPricingAndStockForm = props => (
                                   placeholder={intl.formatMessage({
                                     id: 'EditListingPricingAndStockForm.framePricePlaceholder',
                                   })}
-                                  currencyConfig={appSettings.getCurrencyFormatting(selectedCurrency)}
+                                  currencyConfig={appSettings.getCurrencyFormatting(marketplaceCurrency)}
                                   validate={validators.composeValidators(
                                     validators.required(
                                       intl.formatMessage({
@@ -482,23 +434,21 @@ export const EditListingPricingAndStockForm = props => (
           {isAuctionEnabled && (
             <div className={css.auctionFieldsWrapper}>
               <FieldCurrencyInput
-                key={`auctionEstimateLow-${selectedCurrency}`}
                 id={`${formId}.auctionEstimateLow`}
                 name="auctionEstimateLow"
                 className={css.input}
                 label={intl.formatMessage({ id: 'EditListingPricingForm.auctionEstimateLowLabel' })}
                 placeholder={intl.formatMessage({ id: 'EditListingPricingAndStockForm.priceInputPlaceholder' })}
-                currencyConfig={appSettings.getCurrencyFormatting(selectedCurrency)}
+                currencyConfig={appSettings.getCurrencyFormatting(marketplaceCurrency)}
                 validate={priceValidators}
               />
               <FieldCurrencyInput
-                key={`auctionEstimateHigh-${selectedCurrency}`}
                 id={`${formId}.auctionEstimateHigh`}
                 name="auctionEstimateHigh"
                 className={css.input}
                 label={intl.formatMessage({ id: 'EditListingPricingForm.auctionEstimateHighLabel' })}
                 placeholder={intl.formatMessage({ id: 'EditListingPricingAndStockForm.priceInputPlaceholder' })}
-                currencyConfig={appSettings.getCurrencyFormatting(selectedCurrency)}
+                currencyConfig={appSettings.getCurrencyFormatting(marketplaceCurrency)}
                 validate={priceValidators}
               />
               <FieldTextInput
