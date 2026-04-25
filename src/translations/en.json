@@ -751,6 +751,7 @@
   "ListingCard.perUnit": "{unitType, select, day {per day} night {per night} hour {per hour} other {}}",
   "ListingCard.price": "{priceValue} {pricePerUnit}",
   "ListingCard.priceStartingFrom": "From {priceValue} {pricePerUnit}",
+  "ListingCard.originalPrice": "Listed at {price}",
   "ListingCard.unsupportedPrice": "({currency})",
   "ListingCard.unsupportedPriceTitle": "Unsupported currency ({currency})",
   "ListingCard.auctionEstimate": "Est. {lowEstimate} - {highEstimate}",

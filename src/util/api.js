@@ -222,6 +222,11 @@ export const fetchExchangeRate = (from, to) => {
   });
 };
 
+// Fetch all exchange rates with NOK as the base.
+export const fetchExchangeRates = () => {
+  return request('/api/exchange-rates', { method: methods.GET });
+};
+
 // ================ Newsletter API (Brevo) ================ //
 
 // Subscribe to newsletter via Brevo.

@@ -996,6 +996,14 @@
   margin: 0;
 }
 
+.originalCurrencyNote {
+  font-family: var(--fontFamily);
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--colorGrey500);
+  margin: 0;
+}
+
 .originalPrice {
   font-family: var(--fontFamily);
   font-size: 16px;

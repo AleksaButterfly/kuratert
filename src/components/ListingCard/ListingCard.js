@@ -11,6 +11,7 @@ import {
 } from '../../util/configHelpers';
 import { lazyLoadWithDimensions } from '../../util/uiHelpers';
 import { formatMoney, getDisplayPrice } from '../../util/currency';
+import { useLivePrice } from '../../util/useLivePrice';
 import { types as sdkTypes } from '../../util/sdkLoader';
 import { ensureListing, ensureUser } from '../../util/data';
 import { richText } from '../../util/richText';
@@ -52,11 +53,15 @@ const priceData = (price, currency, intl) => {
 const LazyImage = lazyLoadWithDimensions(ResponsiveImage, { loadAfterInitialRendering: 3000 });
 
 const PriceMaybe = props => {
-  const { price, publicData, config, intl, listingTypeConfig } = props;
+  const { listing, price, publicData, config, intl, listingTypeConfig } = props;
   const showPrice = displayPrice(listingTypeConfig);
   if (!showPrice && price) {
     return null;
   }
+
+  // Live NOK price using current exchange rate, falls back to listing.price
+  // when no override is needed or rates aren't ready yet.
+  const livePrice = useLivePrice(listing, config.currency);
 
   // Check if this is an auction listing
   const isAuction = publicData?.isAuction === true;
@@ -103,11 +108,10 @@ const PriceMaybe = props => {
 
   const isBookable = isBookingProcessAlias(publicData?.transactionProcessAlias);
 
-  // Use display price (seller's chosen currency) if available, otherwise fall back to listing price
-  const displayPriceData = getDisplayPrice(intl, publicData, config.currency);
-  const { formattedPrice, priceTitle } = displayPriceData
-    ? { formattedPrice: displayPriceData.formattedPrice, priceTitle: displayPriceData.formattedPrice }
-    : priceData(price, config.currency, intl);
+  // Show NOK (marketplace currency) price using live exchange rate. Display
+  // the seller's original currency as a small note when it differs.
+  const { formattedPrice, priceTitle } = priceData(livePrice, config.currency, intl);
+  const originalDisplayPrice = getDisplayPrice(intl, publicData, config.currency);
 
   const priceValue = <span className={css.priceValue}>{formattedPrice}</span>;
   const pricePerUnit = isBookable ? (
@@ -128,6 +132,14 @@ const PriceMaybe = props => {
       ) : (
         <FormattedMessage id="ListingCard.price" values={{ priceValue, pricePerUnit }} />
       )}
+      {originalDisplayPrice ? (
+        <span className={css.originalCurrencyNote}>
+          <FormattedMessage
+            id="ListingCard.originalPrice"
+            values={{ price: originalDisplayPrice.formattedPrice }}
+          />
+        </span>
+      ) : null}
     </div>
   );
 };
@@ -315,6 +327,7 @@ export const ListingCard = props => {
           ) : null}
         </div>
         <PriceMaybe
+          listing={currentListing}
           price={price}
           publicData={publicData}
           config={config}

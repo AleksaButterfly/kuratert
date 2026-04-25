@@ -10,6 +10,7 @@ const {
   throwErrorIfNegotiationOfferHasInvalidHistory,
 } = require('../api-util/negotiation');
 const { isTaxEnabled } = require('../api-util/stripeTax');
+const { overrideListingPriceWithLiveRate } = require('../api-util/listingPriceOverride');
 const {
   getSdk,
   getTrustedSdk,
@@ -154,7 +155,9 @@ module.exports = (req, res) => {
     .then(async responses => {
       const [showTransactionResponse, fetchAssetsResponse] = responses;
       const transaction = showTransactionResponse.data.data;
-      const listing = getListingRelationShip(showTransactionResponse.data);
+      const rawListing = getListingRelationShip(showTransactionResponse.data);
+      // Apply live exchange rate when seller's currency differs from marketplace.
+      const listing = await overrideListingPriceWithLiveRate(rawListing);
       const commissionAsset = fetchAssetsResponse.data.data[0];
 
       const existingMetadata = transaction?.attributes?.metadata;

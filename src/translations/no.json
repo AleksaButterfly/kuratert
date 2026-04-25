@@ -763,6 +763,7 @@
   "ListingCard.perUnit": "{unitType, select, day {per dag} night {per natt} hour {per time} other {}}",
   "ListingCard.price": "{priceValue} {pricePerUnit} +Kunstavgift",
   "ListingCard.priceStartingFrom": "Fra {priceValue} {pricePerUnit} +Kunstavgift",
+  "ListingCard.originalPrice": "Oppført til {price}",
   "ListingCard.unsupportedPrice": "({currency})",
   "ListingCard.unsupportedPriceTitle": "Valutaen støttes ikke ({currency})",
   "ListingCard.auctionEstimate": "Est. {lowEstimate} - {highEstimate}",

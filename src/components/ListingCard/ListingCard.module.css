@@ -89,6 +89,7 @@
 .price {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   justify-content: flex-start;
   flex-shrink: 0;
   margin: 0;
@@ -114,6 +115,14 @@
   font-weight: 400;
   color: var(--colorGrey900);
   margin: 0;
+}
+
+.originalCurrencyNote {
+  display: block;
+  flex-basis: 100%;
+  font-size: 12px;
+  color: var(--colorGrey500);
+  margin-top: 2px;
 }
 
 .longWord {

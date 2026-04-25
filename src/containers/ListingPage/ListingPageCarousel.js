@@ -21,6 +21,7 @@ import {
 } from '../../util/configHelpers';
 import { types as sdkTypes } from '../../util/sdkLoader';
 import { formatMoney, getDisplayPrice } from '../../util/currency';
+import { useLivePrice } from '../../util/useLivePrice';
 import {
   LISTING_PAGE_DRAFT_VARIANT,
   LISTING_PAGE_PENDING_APPROVAL_VARIANT,
@@ -479,11 +480,10 @@ export const ListingPageComponent = props => {
   const ensuredAuthor = ensureUser(currentAuthor);
   const authorDisplayName = userDisplayNameAsString(ensuredAuthor, '');
 
-  // Use display price (seller's chosen currency) if available
-  const displayPriceData = getDisplayPrice(intl, publicData, config.currency);
-  const { formattedPrice } = displayPriceData
-    ? { formattedPrice: displayPriceData.formattedPrice }
-    : priceData(price, config.currency, intl);
+  // Buyer-facing price in marketplace currency at the current live rate.
+  const livePrice = useLivePrice(currentListing, config.currency);
+  const { formattedPrice } = priceData(livePrice, config.currency, intl);
+  const originalDisplayPrice = getDisplayPrice(intl, publicData, config.currency);
 
   // Format auction estimates if this is an auction listing
   // Auction estimates are stored in the seller's chosen currency
@@ -495,12 +495,13 @@ export const ListingPageComponent = props => {
     ? formatMoney(intl, new sdkTypes.Money(auctionEstimateHigh, auctionCurrency))
     : null;
 
-  // Calculate Kunstavgift (5% Art Tax)
-  const kunstavgiftAmount = price?.amount ? Math.round(price.amount * 0.05) : 0;
+  // Calculate Kunstavgift (5% Art Tax) on the live marketplace-currency price
+  // so the tax matches what's actually charged at checkout.
+  const kunstavgiftAmount = livePrice?.amount ? Math.round(livePrice.amount * 0.05) : 0;
   const formattedKunstavgift = kunstavgiftAmount > 0
     ? intl.formatNumber(kunstavgiftAmount / 100, {
         style: 'currency',
-        currency: price?.currency || 'NOK',
+        currency: livePrice?.currency || 'NOK',
       })
     : null;
 
@@ -834,6 +835,14 @@ export const ListingPageComponent = props => {
                       <FormattedMessage
                         id="ListingPage.kunstavgiftNote"
                         values={{ amount: formattedKunstavgift }}
+                      />
+                    </p>
+                  )}
+                  {originalDisplayPrice && (
+                    <p className={css.originalCurrencyNote}>
+                      <FormattedMessage
+                        id="ListingCard.originalPrice"
+                        values={{ price: originalDisplayPrice.formattedPrice }}
                       />
                     </p>
                   )}

@@ -24,6 +24,7 @@ import {
   LISTING_STATE_PUBLISHED,
 } from '../../util/types';
 import { formatMoney, getDisplayPrice } from '../../util/currency';
+import { useLivePrice } from '../../util/useLivePrice';
 import { createSlug, parse, stringify } from '../../util/urlHelpers';
 import { userDisplayNameAsString } from '../../util/data';
 import {
@@ -137,6 +138,7 @@ const dateFormattingOptions = { month: 'short', day: 'numeric', weekday: 'short'
 
 const PriceMaybe = props => {
   const {
+    listing,
     price,
     publicData,
     validListingTypes,
@@ -151,19 +153,17 @@ const PriceMaybe = props => {
   const isPriceVariationsInUse = !!publicData?.priceVariationsEnabled;
   const hasMultiplePriceVariants = publicData?.priceVariants?.length > 1;
 
+  // Live NOK price using current exchange rate.
+  const livePrice = useLivePrice(listing, marketplaceCurrency);
+
   if (!showPrice || !price || (isPriceVariationsInUse && hasMultiplePriceVariants)) {
     return null;
   }
 
-  // Use display price (seller's chosen currency) if available, otherwise fall back to listing price
-  const displayPriceData = getDisplayPrice(intl, publicData, marketplaceCurrency);
-  const { formattedPrice, priceTitle } = displayPriceData
-    ? { formattedPrice: displayPriceData.formattedPrice, priceTitle: displayPriceData.formattedPrice }
-    : priceData(price, marketplaceCurrency, intl);
+  const { formattedPrice, priceTitle } = priceData(livePrice, marketplaceCurrency, intl);
+  const originalDisplayPrice = getDisplayPrice(intl, publicData, marketplaceCurrency);
   const priceValue = (
-    <span className={css.priceValue}>
-      {displayPriceData ? displayPriceData.formattedPrice : formatMoneyIfSupportedCurrency(price, intl)}
-    </span>
+    <span className={css.priceValue}>{formatMoneyIfSupportedCurrency(livePrice, intl)}</span>
   );
   const pricePerUnit = (
     <span className={css.perUnit}>
@@ -190,6 +190,14 @@ const PriceMaybe = props => {
       <p className={css.price}>
         <FormattedMessage id="OrderPanel.price" values={{ priceValue, pricePerUnit }} />
       </p>
+      {originalDisplayPrice ? (
+        <span className={css.originalCurrencyNote}>
+          <FormattedMessage
+            id="ListingCard.originalPrice"
+            values={{ price: originalDisplayPrice.formattedPrice }}
+          />
+        </span>
+      ) : null}
     </div>
   );
 };
@@ -468,6 +476,7 @@ const OrderPanel = props => {
         )}
 
         <PriceMaybe
+          listing={listing}
           price={price}
           publicData={publicData}
           validListingTypes={validListingTypes}
@@ -579,6 +588,7 @@ const OrderPanel = props => {
       </ModalInMobile>
       <div className={css.openOrderForm}>
         <PriceMaybe
+          listing={listing}
           price={price}
           publicData={publicData}
           validListingTypes={validListingTypes}

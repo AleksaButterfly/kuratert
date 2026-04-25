@@ -294,6 +294,37 @@ export const getDisplayPrice = (intl, publicData, marketplaceCurrency) => {
   }
 };
 
+/**
+ * Compute a listing's live price in marketplace currency from the seller's
+ * displayPrice + listingCurrency, using current exchange rates (NOK-based).
+ *
+ * Returns null when no override is needed (same currency, missing data, or
+ * rates not yet loaded). Callers should fall back to listing.price in that case.
+ *
+ * @param {Object} publicData - listing's publicData
+ * @param {string} marketplaceCurrency - marketplace's base currency (e.g. NOK)
+ * @param {Object|null} rates - rates keyed by currency, with NOK as base; rates[X] = X per 1 NOK
+ * @returns {Money|null}
+ */
+export const getLivePriceInMarketplaceCurrency = (publicData, marketplaceCurrency, rates) => {
+  const { listingCurrency, displayPrice } = publicData || {};
+  if (
+    !listingCurrency ||
+    !Number.isFinite(displayPrice) ||
+    listingCurrency === marketplaceCurrency
+  ) {
+    return null;
+  }
+  if (!rates || !rates[listingCurrency]) {
+    return null;
+  }
+  const fromRate = rates[listingCurrency];
+  const toRate = marketplaceCurrency === 'NOK' ? 1 : rates[marketplaceCurrency];
+  if (!toRate) return null;
+  const convertedAmount = Math.round((displayPrice * toRate) / fromRate);
+  return new Money(convertedAmount, marketplaceCurrency);
+};
+
 export const formatCurrencyMajorUnit = (intl, currency, valueWithoutSubunits) => {
   const valueAsNumber = new Decimal(valueWithoutSubunits).toNumber();
 

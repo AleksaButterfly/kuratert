@@ -15,6 +15,7 @@ import { getListingsById } from '../../ducks/marketplaceData.duck';
 import { removeListingFromCart, updateCartItemQuantity } from '../../ducks/user.duck';
 import { getCartItems } from '../../util/userHelpers';
 import { formatMoney, getDisplayPrice } from '../../util/currency';
+import { useListingsWithLivePrice } from '../../util/useLivePrice';
 import { types as sdkTypes } from '../../util/sdkLoader';
 import { createResourceLocatorString, findRouteByRouteName } from '../../util/routes';
 import { createSlug } from '../../util/urlHelpers';
@@ -140,7 +141,12 @@ export const CartPageComponent = props => {
     return <NotFoundPage />;
   }
 
-  const hasListings = cartListings && cartListings.length > 0;
+  // Promote each listing to one whose price is in marketplace currency at the
+  // current live rate. Subtotal/shipping/kunstavgift calculations downstream
+  // can then operate on the same currency without per-listing conversion.
+  const livePricedCartListings = useListingsWithLivePrice(cartListings, config.currency);
+
+  const hasListings = livePricedCartListings && livePricedCartListings.length > 0;
   const isLoading = queryInProgress;
   const totalItemCount = cartItems?.reduce((sum, item) => sum + (item.quantity || 1), 0) || 0;
 
@@ -153,7 +159,7 @@ export const CartPageComponent = props => {
 
   // Group listings by seller
   const listingsBySeller = hasListings
-    ? cartListings.reduce((groups, listing) => {
+    ? livePricedCartListings.reduce((groups, listing) => {
         const authorId = listing?.author?.id?.uuid;
         if (!authorId) return groups;
 

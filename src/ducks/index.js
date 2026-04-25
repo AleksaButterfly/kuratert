@@ -6,6 +6,7 @@
 
 import auth from './auth.duck';
 import emailVerification from './emailVerification.duck';
+import exchangeRates from './exchangeRates.duck';
 import routing from './routing.duck';
 import ui from './ui.duck';
 import hostedAssets from './hostedAssets.duck';
@@ -18,6 +19,7 @@ import user from './user.duck';
 export {
   auth,
   emailVerification,
+  exchangeRates,
   routing,
   ui,
   hostedAssets,

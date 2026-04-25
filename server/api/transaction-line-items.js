@@ -2,6 +2,10 @@ const { transactionLineItems, calculateTaxInfo } = require('../api-util/lineItem
 const { getSdk, handleError, serialize, fetchCommission } = require('../api-util/sdk');
 const { constructValidLineItems, calculateShippingFee } = require('../api-util/lineItemHelpers');
 const { isTaxEnabled } = require('../api-util/stripeTax');
+const {
+  overrideListingPriceWithLiveRate,
+  overrideCartListingsPriceWithLiveRate,
+} = require('../api-util/listingPriceOverride');
 const { types } = require('sharetribe-flex-sdk');
 const { Money } = types;
 
@@ -35,8 +39,13 @@ module.exports = async (req, res) => {
       fetchCommission(sdk),
     ]);
 
-    const listing = showListingResponse.data.data;
-    const additionalListings = additionalListingsResponse.data.data || [];
+    const rawListing = showListingResponse.data.data;
+    const rawAdditionalListings = additionalListingsResponse.data.data || [];
+    // Apply live exchange rate override before computing line items.
+    const [listing, additionalListings] = await Promise.all([
+      overrideListingPriceWithLiveRate(rawListing),
+      overrideCartListingsPriceWithLiveRate(rawAdditionalListings),
+    ]);
     const commissionAsset = fetchAssetsResponse.data.data[0];
 
     const { providerCommission, customerCommission } =

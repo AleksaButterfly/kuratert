@@ -4,6 +4,10 @@ const { calculateShippingFee } = require('../api-util/lineItemHelpers');
 const { isIntentionToMakeOffer } = require('../api-util/negotiation');
 const { isTaxEnabled } = require('../api-util/stripeTax');
 const {
+  overrideListingPriceWithLiveRate,
+  overrideCartListingsPriceWithLiveRate,
+} = require('../api-util/listingPriceOverride');
+const {
   getSdk,
   getTrustedSdk,
   handleError,
@@ -76,9 +80,16 @@ module.exports = async (req, res) => {
       const fetchAssetsResponse = results[1];
       const cartListingsResponse = results[2];
 
-      const listing = showListingResponse.data.data;
-      const cartListings = cartListingsResponse.data.data || [];
+      const rawListing = showListingResponse.data.data;
+      const rawCartListings = cartListingsResponse.data.data || [];
       const commissionAsset = fetchAssetsResponse.data.data[0];
+
+      // Apply live exchange rate to any listing whose seller chose a non-marketplace currency.
+      // Source of truth is publicData.displayPrice + publicData.listingCurrency.
+      const [listing, cartListings] = await Promise.all([
+        overrideListingPriceWithLiveRate(rawListing),
+        overrideCartListingsPriceWithLiveRate(rawCartListings),
+      ]);
 
       const currency = listing.attributes.price?.currency || orderData.currency;
       const publicData = listing.attributes?.publicData || {};
